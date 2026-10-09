@@ -1,15 +1,17 @@
 import "server-only";
 
 /**
- * Lightweight file-backed data store.
+ * Postgres-backed data store.
  *
- * Every record is written to disk with PII fields encrypted (see lib/protection)
- * and decrypted on read. Swap this module for a real database by keeping the
- * exported surface identical.
+ * Every record is stored with PII fields encrypted (see lib/protection) and
+ * decrypted on read. Built for serverless deployments (Vercel), where the
+ * previous file-backed store could not write to its filesystem.
+ *
+ * All SQL lives in `lib/db-queries.ts` so it can be executed against a real
+ * Postgres engine by `scripts/verify-db.mjs`.
  */
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import { neon } from "@neondatabase/serverless";
 import type {
   ContactMessage,
   ExhibitorEnquiry,
@@ -18,6 +20,20 @@ import type {
 } from "@/types/exhibitor";
 import type { ExpoEvent } from "@/types/event";
 import { encryptPii, decryptPii } from "@/lib/protection";
+import {
+  DELETE_BY_ID,
+  INSERT,
+  SELECT_ALL,
+  SELECT_BY_ID,
+  SELECT_BY_SLUG,
+  UPDATE_BY_ID,
+  insertParams,
+  rowToRecord,
+  rowsToRecords,
+  toColumns,
+  updateParams,
+  type SqlExecutor,
+} from "@/lib/db-queries";
 
 export type Collection =
   | "exhibitorEnquiries"
@@ -34,40 +50,21 @@ export interface StoredRecord {
   [key: string]: unknown;
 }
 
-const DATA_DIR = path.join(process.cwd(), ".data");
+let cached: SqlExecutor | null = null;
 
-async function ensureDir() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-}
-
-function fileFor(collection: Collection) {
-  return path.join(DATA_DIR, `${collection}.json`);
-}
-
-async function readCollection<T extends StoredRecord>(
-  collection: Collection,
-): Promise<T[]> {
-  try {
-    const raw = await fs.readFile(fileFor(collection), "utf8");
-    const parsed = JSON.parse(raw) as T[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw error;
+function sql(): SqlExecutor {
+  if (cached) return cached;
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error(
+      "Missing required environment variable DATABASE_URL. See .env.example.",
+    );
   }
+  cached = neon(url) as unknown as SqlExecutor;
+  return cached;
 }
 
-async function writeCollection<T extends StoredRecord>(
-  collection: Collection,
-  records: T[],
-): Promise<void> {
-  await ensureDir();
-  const tmp = `${fileFor(collection)}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(records, null, 2), "utf8");
-  await fs.rename(tmp, fileFor(collection));
-}
-
-function decryptRecord<T extends StoredRecord>(record: T): T {
+function decryptRecord<T>(record: T): T {
   return decryptPii(record as unknown as Record<string, unknown>) as T;
 }
 
@@ -78,31 +75,30 @@ function decryptRecord<T extends StoredRecord>(record: T): T {
 export async function listRecords<T extends StoredRecord>(
   collection: Collection,
 ): Promise<T[]> {
-  const records = await readCollection<T>(collection);
-  return records.map(decryptRecord<T>);
+  const rows = await sql().query(SELECT_ALL, [collection]);
+  return rowsToRecords<T>(rows).map(decryptRecord<T>);
 }
 
 export async function getRecordById<T extends StoredRecord>(
   collection: Collection,
   id: string,
 ): Promise<T | null> {
-  const records = await readCollection<T>(collection);
-  const found = records.find((record) => record.id === id);
-  return found ? decryptRecord(found) : null;
+  const rows = await sql().query(SELECT_BY_ID, [collection, id]);
+  const record = rowToRecord<T>(rows[0]);
+  return record ? decryptRecord<T>(record) : null;
 }
 
 export async function createRecord<T extends StoredRecord>(
   collection: Collection,
   record: T,
 ): Promise<T> {
-  const records = await readCollection<T>(collection);
-  const stamped: T = {
+  const stamped = {
     ...record,
     createdAt: record.createdAt ?? new Date().toISOString(),
-    stage: record.stage ?? "new",
+    stage: record.stage ?? ("new" as LeadStage),
   };
-  records.push(encryptPii(stamped as unknown as Record<string, unknown>) as T);
-  await writeCollection(collection, records);
+  const encrypted = encryptPii(stamped as unknown as Record<string, unknown>);
+  await sql().query(INSERT, insertParams(toColumns(collection, encrypted)));
   return stamped;
 }
 
@@ -111,19 +107,22 @@ export async function updateRecord<T extends StoredRecord>(
   id: string,
   patch: Partial<T>,
 ): Promise<T | null> {
-  const records = await readCollection<T>(collection);
-  const index = records.findIndex((record) => record.id === id);
-  if (index === -1) return null;
+  const rows = await sql().query(SELECT_BY_ID, [collection, id]);
+  const existing = rowToRecord<T>(rows[0]);
+  if (!existing) return null;
 
   // Merge onto the DECRYPTED record so untouched PII stays single-encrypted
   // and any plaintext in the patch gets encrypted exactly once on write.
-  const merged: T = {
-    ...decryptRecord(records[index]),
+  const merged = {
+    ...decryptRecord<T>(existing),
     ...patch,
     updatedAt: new Date().toISOString(),
   };
-  records[index] = encryptPii(merged as unknown as Record<string, unknown>) as T;
-  await writeCollection(collection, records);
+  const encrypted = encryptPii(merged as unknown as Record<string, unknown>);
+  await sql().query(
+    UPDATE_BY_ID,
+    updateParams(toColumns(collection, encrypted), id),
+  );
   return merged;
 }
 
@@ -131,11 +130,8 @@ export async function deleteRecord(
   collection: Collection,
   id: string,
 ): Promise<boolean> {
-  const records = await readCollection<StoredRecord>(collection);
-  const next = records.filter((record) => record.id !== id);
-  if (next.length === records.length) return false;
-  await writeCollection(collection, next);
-  return true;
+  const rows = await sql().query(DELETE_BY_ID, [collection, id]);
+  return rows.length > 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -238,32 +234,42 @@ export async function listEventOverrides(): Promise<EventOverride[]> {
 export async function upsertEventOverride(
   input: Omit<EventOverride, "id" | "createdAt"> & { id?: string },
 ): Promise<EventOverride> {
-  const records = await readCollection<EventOverride>("events");
-  const existingIndex = input.id
-    ? records.findIndex((record) => record.id === input.id)
-    : records.findIndex((record) => record.slug === input.slug);
+  const existing = input.id
+    ? await getRecordById<EventOverride>("events", input.id)
+    : await findEventOverrideBySlug(String(input.slug));
 
   const stamp = new Date().toISOString();
-  if (existingIndex >= 0) {
+
+  if (existing) {
     const merged = {
-      ...records[existingIndex],
+      ...existing,
       ...input,
-      id: records[existingIndex].id,
+      id: existing.id,
       updatedAt: stamp,
     } as EventOverride;
-    records[existingIndex] = merged;
-    await writeCollection("events", records);
+    const encrypted = encryptPii(merged as unknown as Record<string, unknown>);
+    await sql().query(
+      UPDATE_BY_ID,
+      updateParams(toColumns("events", encrypted), existing.id),
+    );
     return merged;
   }
 
-  const created: EventOverride = {
+  const created = {
     ...input,
     id: input.id ?? `evt-${Date.now().toString(36)}`,
     createdAt: stamp,
   } as EventOverride;
-  records.push(created);
-  await writeCollection("events", records);
+  await createRecord<EventOverride>("events", created);
   return created;
+}
+
+async function findEventOverrideBySlug(
+  slug: string,
+): Promise<EventOverride | null> {
+  const rows = await sql().query(SELECT_BY_SLUG, ["events", slug]);
+  const record = rowToRecord<EventOverride>(rows[0]);
+  return record ? decryptRecord<EventOverride>(record) : null;
 }
 
 /** Merges admin-managed overrides on top of the versioned static event data. */
