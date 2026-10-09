@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 76" width="360" height="76" role="img">
+  <rect x="3.5" y="11.5" width="53" height="53" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <path d="M16 56 V26 h8 v10 h10 V26 h8 v30 h-8 V44 H24 v12 z" fill="#ffffff"/>
+  <text x="74" y="46" font-family="'Arial Narrow',Arial,sans-serif" font-weight="bold" font-size="34" fill="#ffffff" letter-spacing="2.5">INDTEC</text>
+  <text x="240" y="46" font-family="'Arial Narrow',Arial,sans-serif" font-weight="bold" font-size="34" fill="#ffffff" letter-spacing="6">EXPO</text>
+  <text x="75" y="66" font-family="Arial,sans-serif" font-size="11.5" fill="#ffffff" fill-opacity="0.72" letter-spacing="3.4">MACHINE TOOLS · ENGINEERING · TECHNOLOGY</text>
+</svg>

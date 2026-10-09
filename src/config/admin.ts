@@ -1,0 +1,28 @@
+export const adminConfig = {
+  basePath: "/admin",
+  loginPath: "/admin/login",
+  defaultEmail: "admin@indtcexpo.com",
+  sections: [
+    { id: "dashboard", label: "Dashboard", href: "/admin", icon: "grid" },
+    { id: "events", label: "Events", href: "/admin/events", icon: "calendar" },
+    { id: "exhibitors", label: "Exhibitors", href: "/admin/exhibitors", icon: "building" },
+    { id: "bookings", label: "Stall Bookings", href: "/admin/stall-bookings", icon: "stall" },
+    { id: "visitors", label: "Visitor Registrations", href: "/admin/visitors", icon: "users" },
+    { id: "enquiries", label: "Enquiries", href: "/admin/enquiries", icon: "inbox" },
+    { id: "sponsors", label: "Sponsors", href: "/admin/sponsors", icon: "award" },
+    { id: "gallery", label: "Gallery", href: "/admin/gallery", icon: "image" },
+    { id: "floor-plans", label: "Floor Plans", href: "/admin/floor-plans", icon: "map" },
+    { id: "media", label: "Media", href: "/admin/media", icon: "news" },
+    { id: "blog", label: "Blog", href: "/admin/blog", icon: "pen" },
+    { id: "messages", label: "Contact Messages", href: "/admin/contact-messages", icon: "mail" },
+    { id: "settings", label: "Settings", href: "/admin/settings", icon: "settings" },
+  ],
+  kanbanColumns: [
+    { id: "new", label: "New", color: "#1470DC" },
+    { id: "contacted", label: "Contacted", color: "#7C3AED" },
+    { id: "qualified", label: "Qualified", color: "#F5B301" },
+    { id: "proposal", label: "Proposal Sent", color: "#E2711D" },
+    { id: "won", label: "Won", color: "#0F9D58" },
+    { id: "lost", label: "Lost", color: "#D9232E" },
+  ],
+} as const;

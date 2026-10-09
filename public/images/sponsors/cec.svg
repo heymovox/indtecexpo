@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" role="img">
+  <defs><linearGradient id="sp19jl3ip" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#f5b301"/><stop offset="100%" stop-color="#0f2b4d"/>
+  </linearGradient></defs>
+  <rect width="320" height="120" fill="#ffffff"/>
+  <rect x="0" y="0" width="320" height="120" fill="none" stroke="#dce3eb" stroke-width="1"/>
+  <rect x="24" y="30" width="60" height="60" rx="3" fill="url(#sp19jl3ip)"/>
+  <text x="54" y="70" font-family="'Arial Narrow',Arial,sans-serif" font-size="30" font-weight="bold" fill="#fff" text-anchor="middle">CE</text>
+  <text x="100" y="58" font-family="'Arial Narrow',Arial,sans-serif" font-size="21" font-weight="bold" fill="#0a1e38" letter-spacing="0.6">Coimbatore Engineerin…</text>
+  <text x="101" y="78" font-family="Arial,sans-serif" font-size="10.5" fill="#64748b" letter-spacing="2.4">PARTNER · INDTEC EXPO</text>
+</svg>
