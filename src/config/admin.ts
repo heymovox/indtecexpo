@@ -1,7 +1,7 @@
 export const adminConfig = {
   basePath: "/admin",
   loginPath: "/admin/login",
-  defaultEmail: "admin@indtcexpo.com",
+  defaultEmail: "admin@heymovox.com",
   sections: [
     { id: "dashboard", label: "Dashboard", href: "/admin", icon: "grid" },
     { id: "events", label: "Events", href: "/admin/events", icon: "calendar" },
