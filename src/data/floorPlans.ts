@@ -219,9 +219,97 @@ export const coimbatoreStallPlan: StallPlan = {
   prefixOf: (code) => (code.match(/^[A-Z]+/)?.[0] ?? code),
 };
 
+const HOSUR_TYPES: Record<string, StallTypeSpec> = {
+  T: {
+    code: "T",
+    name: "Title Sponsor",
+    dimensions: "6 m × 12 m",
+    area: 72,
+    sponsorship: "Title Sponsor",
+    sponsorshipPrice: "₹15 lakh",
+    tone: "sponsor",
+  },
+  C: {
+    code: "C",
+    name: "Co Sponsor",
+    dimensions: "6 m × 9 m",
+    area: 54,
+    sponsorship: "Co Sponsor",
+    sponsorshipPrice: "₹10 lakh",
+    tone: "royal",
+  },
+  R: {
+    code: "R",
+    name: "Royal Sponsor",
+    dimensions: "9 m × 3 m",
+    area: 27,
+    sponsorship: "Royal Sponsor",
+    sponsorshipPrice: "₹6 lakh",
+    tone: "royal",
+  },
+  V: {
+    code: "V",
+    name: "Large Exhibition Stall",
+    dimensions: "6 m × 6 m",
+    area: 36,
+    tone: "premium",
+  },
+  H: {
+    code: "H",
+    name: "Standard Exhibition Stall",
+    dimensions: "3 m × 6 m",
+    area: 18,
+    tone: "premium",
+  },
+  Y: {
+    code: "Y",
+    name: "Compact Exhibition Stall",
+    dimensions: "3 m × 3 m",
+    area: 9,
+    tone: "standard",
+  },
+};
+
+/**
+ * Machine-generated from the organiser's document, then checked cell-by-cell
+ * against it. Note Y166 is absent from the source (Y165 is followed by Y167).
+ */
+const HOSUR_ROWS: string[][] = [
+  ["R6", "", "Y142", "Y143", "Y144", "Y145", "Y146", "Y147", "Y148", "Y149", "Y150", "Y151", "Y152", "Y153", "Y154", "Y155", "Y156", "Y157", "Y158", "Y159", "Y160", "Y161", "Y162", "Y163", "Y164", "Y165", "Y167", "Y168", "R5", ""],
+  ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+  ["Y141", "", "H30", "", "Y140", "Y139", "Y138", "Y137", "Y136", "Y135", "Y134", "Y133", "Y132", "Y131", "Y130", "Y129", "Y128", "Y127", "Y126", "Y125", "Y124", "Y123", "Y122", "Y121", "Y120", "Y119", "H29", "", "", "Y118"],
+  ["Y93", "", "H27", "", "Y94", "Y95", "Y96", "Y97", "Y98", "Y99", "Y100", "Y101", "Y102", "Y103", "Y104", "Y105", "Y106", "Y107", "Y108", "Y109", "Y110", "Y111", "Y112", "Y113", "Y114", "Y115", "H28", "", "", "Y117"],
+  ["Y92", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "Y116"],
+  ["Y91", "", "H26", "", "Y90", "Y89", "Y88", "Y87", "Y86", "Y85", "Y84", "Y83", "Y82", "Y81", "Y80", "Y79", "Y78", "Y77", "Y76", "Y75", "Y74", "Y73", "Y72", "Y71", "Y70", "Y69", "H25", "", "", "H24"],
+  ["H21", "", "H22", "", "Y47", "Y48", "Y49", "Y50", "Y51", "Y52", "Y53", "Y54", "Y55", "Y56", "Y57", "Y58", "Y59", "Y60", "Y61", "Y62", "Y63", "Y64", "Y65", "Y66", "Y67", "Y68", "H23", "", "", ""],
+  ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+  ["", "", "H20", "", "Y46", "Y45", "Y44", "Y43", "Y42", "Y41", "Y40", "Y39", "Y38", "Y37", "Y36", "Y35", "Y34", "Y33", "Y32", "Y31", "Y30", "Y29", "Y28", "Y27", "Y26", "Y25", "H19", "", "", ""],
+  ["H15", "", "H16", "", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "Y9", "Y10", "Y11", "Y12", "Y13", "Y14", "Y15", "Y16", "Y17", "Y18", "Y19", "Y20", "Y21", "Y22", "Y23", "Y24", "H17", "", "", "H18"],
+  ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+  ["H14", "", "H13", "", "Y2", "H12", "", "H11", "", "V4", "", "V3", "", "V2", "", "V1", "", "C3", "", "", "C2", "", "", "C1", "", "", "T", "", "", ""],
+  ["", "", "H8", "", "Y1", "H9", "", "H10", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+  ["H7", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+  ["", "EXIT", "", "H6", "", "H5", "", "H4", "", "H3", "", "H2", "", "H1", "", "R4", "", "", "R3", "", "", "R2", "", "", "R1", "", "", "ENTRY", "", ""],
+];
+
+export const hosurStallPlan: StallPlan = {
+  slug: "hosur",
+  venue: "Hills Exhibition Center",
+  address: "Hosur, Tamil Nadu",
+  dates: "12–15 March 2027",
+  rows: HOSUR_ROWS,
+  types: HOSUR_TYPES,
+  schemes: [
+    { name: "Shell Space Scheme", pricePerSqM: 8000 },
+    { name: "Bare Space Scheme", pricePerSqM: 7000 },
+  ],
+  prefixOf: (code) => (code.match(/^[A-Z]+/)?.[0] ?? code),
+};
+
 export const stallPlans: Record<string, StallPlan> = {
   bengaluru: bengaluruStallPlan,
   coimbatore: coimbatoreStallPlan,
+  hosur: hosurStallPlan,
 };
 
 export function getStallPlan(slug: string): StallPlan | null {
@@ -235,9 +323,16 @@ export function getStallType(
   return plan.types[plan.prefixOf(code)] ?? null;
 }
 
-/** Every stall code in the plan, in plan order. */
+/**
+ * Every bookable stall code, in plan order.
+ *
+ * Filters on a known type so layout labels such as ENTRY and EXIT are never
+ * treated as bookable plots.
+ */
 export function listStallCodes(plan: StallPlan): string[] {
-  return plan.rows.flat().filter((code) => code !== "");
+  return plan.rows
+    .flat()
+    .filter((code) => code !== "" && getStallType(plan, code) !== null);
 }
 
 /** Indian-format rupees, e.g. 180000 -> "₹1,80,000". */
