@@ -308,7 +308,7 @@ export function Footer() {
       {/* ------------------------------------------------------ */}
       <div className="border-t border-white/10 bg-navy-900/60">
         <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-5 py-6 text-xs text-steel-500 lg:flex-row lg:items-center lg:justify-between sm:px-8">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 text-center lg:text-left">
             <p className="leading-relaxed">
               © {new Date().getFullYear()} {siteConfig.legalName} · Organised by{" "}
               {siteConfig.organizer.name}. All rights reserved.
@@ -326,19 +326,19 @@ export function Footer() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 lg:justify-end lg:gap-x-5">
             {footerNav.legalLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="uppercase tracking-[0.14em] transition hover:text-gold-500"
+                className="text-[11px] uppercase tracking-[0.12em] transition hover:text-gold-500 lg:text-xs lg:tracking-[0.14em]"
               >
                 {link.label}
               </Link>
             ))}
             <Link
               href="/admin"
-              className="uppercase tracking-[0.14em] transition hover:text-gold-500"
+              className="text-[11px] uppercase tracking-[0.12em] transition hover:text-gold-500 lg:text-xs lg:tracking-[0.14em]"
             >
               Admin
             </Link>
