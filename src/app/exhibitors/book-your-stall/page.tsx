@@ -100,7 +100,7 @@ export default function BookYourStallPage() {
           {/* ------------------------------------------------------ */}
           {/* Form                                                    */}
           {/* ------------------------------------------------------ */}
-          <div className="card p-5 sm:p-8">
+          <div className="card min-w-0 p-5 sm:p-8">
             <span className="eyebrow eyebrow-dark">Exhibitor Registration</span>
             <h2 className="display mt-4 text-[clamp(1.6rem,3vw,2.25rem)] text-navy-900">
               Reserve Your Space
@@ -121,7 +121,7 @@ export default function BookYourStallPage() {
           {/* Side panel                                              */}
           {/* ------------------------------------------------------ */}
           <aside className="flex flex-col gap-5 lg:sticky lg:top-28">
-            <div className="card p-6">
+            <div className="card min-w-0 p-6">
               <span className="eyebrow eyebrow-dark">What Happens Next</span>
               <ol className="mt-5 space-y-5">
                 {nextSteps.map((step, index) => (
@@ -147,7 +147,7 @@ export default function BookYourStallPage() {
               </ol>
             </div>
 
-            <div className="card p-6">
+            <div className="card min-w-0 p-6">
               <span className="eyebrow eyebrow-dark">Talk to the Team</span>
               <ul className="mt-5 space-y-3">
                 <li>
@@ -191,7 +191,7 @@ export default function BookYourStallPage() {
               </p>
             </div>
 
-            <div className="card p-6">
+            <div className="card min-w-0 p-6">
               <span className="eyebrow eyebrow-dark">Stall Prices From</span>
               <ul className="mt-5 divide-y divide-steel-100">
                 {events.map((event) => (

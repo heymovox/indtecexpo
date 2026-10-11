@@ -104,14 +104,18 @@ export function StallPlanPicker({
       </div>
 
       {/* The plan ------------------------------------------------------ */}
-      <div className="mt-4 overflow-x-auto border border-steel-200 bg-white p-3">
-        <div className="mx-auto w-max">
+      <div className="mt-4 min-w-0 border border-steel-200 bg-white p-2 sm:p-3">
+        <div className="mx-auto w-full max-w-[40rem]">
           <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-steel-400">
             {plan.venue} · {plan.dates}
           </p>
           <div
-            className="grid gap-1"
-            style={{ gridTemplateColumns: `repeat(${plan.rows[0].length}, 3.25rem)` }}
+            className="grid gap-0.5 sm:gap-1"
+            // minmax(0, 1fr) lets the plan fit the available width. A fixed
+            // track size made the whole form wider than a phone viewport.
+            style={{
+              gridTemplateColumns: `repeat(${plan.rows[0].length}, minmax(0, 1fr))`,
+            }}
             role="group"
             aria-label={`Stall layout for ${plan.venue}`}
           >
@@ -121,7 +125,7 @@ export function StallPlanPicker({
                   return (
                     <div
                       key={`${r}-${c}`}
-                      className="h-11 rounded-sm bg-steel-100/70"
+                      className="h-9 rounded-sm bg-steel-100/70 sm:h-11"
                       aria-hidden="true"
                     />
                   );
@@ -138,7 +142,7 @@ export function StallPlanPicker({
                     aria-pressed={isSelected}
                     title={label}
                     className={cn(
-                      "flex h-11 items-center justify-center rounded-sm border text-[11px] font-semibold transition-colors",
+                      "flex h-9 items-center justify-center rounded-sm border text-[9px] font-semibold transition-colors sm:h-11 sm:text-[11px]",
                       "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
                       isSelected
                         ? selectedToneClasses[type.tone]

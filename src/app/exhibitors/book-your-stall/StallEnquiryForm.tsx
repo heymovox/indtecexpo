@@ -446,16 +446,18 @@ export function StallEnquiryForm() {
           )}
 
           <div className="mt-5 overflow-x-auto border border-steel-200 bg-white">
-            <table className="w-full min-w-[460px] border-collapse text-left text-sm">
+            {/* No min-width: the three columns compress to fit any phone so
+                the Price column is never pushed off screen. */}
+            <table className="w-full table-fixed border-collapse text-left text-sm">
               <thead>
                 <tr className="bg-navy-900 text-white">
-                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                  <th className="w-[42%] px-2 py-3 text-[9px] font-semibold uppercase leading-tight tracking-[0.06em] sm:px-4 sm:text-[11px] sm:tracking-[0.14em]">
                     Configuration
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                  <th className="w-[24%] px-2 py-3 text-[9px] font-semibold uppercase leading-tight tracking-[0.06em] sm:px-4 sm:text-[11px] sm:tracking-[0.14em]">
                     Size
                   </th>
-                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                  <th className="w-[34%] px-2 py-3 text-[9px] font-semibold uppercase leading-tight tracking-[0.06em] sm:px-4 sm:text-[11px] sm:tracking-[0.14em]">
                     Price
                   </th>
                 </tr>
@@ -463,13 +465,15 @@ export function StallEnquiryForm() {
               <tbody className="divide-y divide-steel-100">
                 {planEvent.stallOptions.map((option) => (
                   <tr key={option.id}>
-                    <td className="px-4 py-3">
-                      <span className="display-sm text-sm text-navy-900">
+                    <td className="px-2 py-3 sm:px-4">
+                      <span className="display-sm text-[11px] text-navy-900 sm:text-sm">
                         {option.name}
                       </span>
                     </td>
-                    <td className="tabular px-4 py-3 text-steel-600">{option.size}</td>
-                    <td className="tabular px-4 py-3 font-semibold text-navy-800">
+                    <td className="tabular px-2 py-3 text-[11px] text-steel-600 sm:px-4 sm:text-sm">
+                      {option.size}
+                    </td>
+                    <td className="tabular px-2 py-3 text-[11px] font-semibold text-navy-800 sm:px-4 sm:text-sm">
                       {option.price}
                     </td>
                   </tr>
