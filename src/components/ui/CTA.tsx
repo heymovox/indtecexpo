@@ -100,16 +100,17 @@ export function StatStrip({
   return (
     <div
       className={cn(
-        "grid grid-cols-2 divide-white/10 border border-white/12 bg-white/5 sm:grid-cols-4 sm:divide-x",
+        // 5 stats stay on one line from lg up; they step 3 -> 2 below that.
+        "grid grid-cols-2 divide-white/10 border border-white/12 bg-white/5 sm:grid-cols-3 sm:divide-x lg:grid-cols-5",
         className,
       )}
     >
       {items.map((item) => (
-        <div key={item.label} className="px-5 py-6 text-center">
+        <div key={item.label} className="px-4 py-6 text-center lg:px-5">
           <div className="display tabular text-3xl text-gold-500 sm:text-4xl">
             {item.value}
           </div>
-          <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-steel-400">
+          <div className="mt-1.5 text-[11px] font-semibold uppercase leading-tight tracking-[0.16em] text-steel-400 lg:text-[10px] lg:tracking-[0.12em]">
             {item.label}
           </div>
         </div>
