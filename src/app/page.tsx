@@ -100,67 +100,79 @@ export default function HomePage() {
               </ul>
             </div>
 
-            {/* Next event panel */}
-            <aside className="border border-white/15 bg-white/[0.06] p-6 backdrop-blur-sm sm:p-7">
+            {/* All three editions as cards */}
+            <aside className="min-w-0">
               <div className="flex items-center justify-between gap-3">
                 <span className="eyebrow eyebrow-light mb-0 text-[11px]">
-                  Next Edition
+                  Three Editions · 2026–2027
                 </span>
                 <span className="border border-success-500/45 bg-success-500/15 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-success-500">
                   Bookings Open
                 </span>
               </div>
 
-              {nextEvent ? (
-                <>
-                  <h2 className="display mt-4 text-3xl sm:text-4xl">
-                    {nextEvent.city}
-                  </h2>
-                  <p className="mt-1 text-sm uppercase tracking-[0.18em] text-gold-500">
-                    {nextEvent.dateRangeShort} · {nextEvent.days} Days
-                  </p>
-                  <p className="mt-3 flex items-start gap-2 text-sm text-steel-300">
-                    <Icon name="map-pin" size={16} className="mt-0.5 shrink-0 text-brand-400" />
-                    {nextEvent.venue.name}, {nextEvent.venue.locality}
-                  </p>
-
-                  <div className="mt-5 border-t border-white/10 pt-5">
-                    <p className="mb-3 text-[10.5px] font-semibold uppercase tracking-[0.2em] text-steel-400">
-                      Countdown
-                    </p>
-                    <Countdown target={nextEvent.startDate} />
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <Button href={`/events/${nextEvent.slug}`} variant="gold" size="sm" withArrow>
-                      Event Details
-                    </Button>
-                    <Button href="/exhibitors/book-your-stall" variant="outline-light" size="sm">
-                      Book Stall
-                    </Button>
-                  </div>
-                </>
-              ) : null}
-
-              <div className="mt-6 border-t border-white/10 pt-4">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-steel-400">
-                  All Editions
-                </p>
-                <ul className="mt-3 space-y-2">
-                  {events.map((event) => (
-                    <li key={event.slug} className="flex items-center justify-between text-sm">
+              <ul className="mt-4 grid gap-3">
+                {events.map((event) => {
+                  const isNext = event.slug === nextEvent?.slug;
+                  return (
+                    <li key={event.slug}>
                       <Link
                         href={`/events/${event.slug}`}
-                        className="text-steel-200 transition hover:text-gold-500"
+                        className="group block border border-white/15 bg-white/[0.06] p-4 backdrop-blur-sm transition hover:border-gold-500/60 hover:bg-white/[0.10] sm:p-5"
                       >
-                        {event.city}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h2 className="display text-2xl leading-none sm:text-[1.75rem]">
+                              {event.city}
+                            </h2>
+                            <p className="mt-1.5 text-[11px] uppercase tracking-[0.16em] text-gold-500">
+                              {event.dateRangeShort} · {event.days} Days
+                            </p>
+                          </div>
+                          {isNext ? (
+                            <span className="shrink-0 border border-gold-500/50 bg-gold-500/15 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-gold-500">
+                              Next
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <p className="mt-2.5 flex items-start gap-1.5 text-xs leading-relaxed text-steel-300">
+                          <Icon
+                            name="map-pin"
+                            size={14}
+                            className="mt-0.5 shrink-0 text-brand-400"
+                          />
+                          <span className="min-w-0">
+                            {event.venue.name}, {event.venue.locality}
+                          </span>
+                        </p>
+
+                        {isNext ? (
+                          <div className="mt-4 border-t border-white/10 pt-4">
+                            <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-steel-400">
+                              Countdown
+                            </p>
+                            <Countdown target={event.startDate} />
+                          </div>
+                        ) : null}
+
+                        <span className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-steel-300 transition group-hover:text-gold-500">
+                          View edition
+                          <Icon name="arrow-right" size={13} />
+                        </span>
                       </Link>
-                      <span className="tabular text-xs uppercase tracking-[0.14em] text-steel-400">
-                        {event.dateRangeShort}
-                      </span>
                     </li>
-                  ))}
-                </ul>
+                  );
+                })}
+              </ul>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button href="/events" variant="outline-light" size="sm" withArrow>
+                  Compare Editions
+                </Button>
+                <Button href="/exhibitors/book-your-stall" variant="gold" size="sm">
+                  Book a Stall
+                </Button>
               </div>
             </aside>
           </div>

@@ -144,9 +144,9 @@ export const events: ExpoEvent[] = [
       "Four business days are structured around live equipment demos, application-led presentations and structured networking with the region's engineering buyer community.",
     ],
     venue: {
-      name: "Codessia Road, Coimbatore",
+      name: "Codessia Road Ground",
       address: "Codessia Road, Coimbatore",
-      locality: "Codessia Road",
+      locality: "Coimbatore",
       city: "Coimbatore",
       state: "Tamil Nadu",
       mapUrl:
