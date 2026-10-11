@@ -57,8 +57,10 @@ export default function HomePage() {
         <div className="hatch-surface absolute inset-x-0 bottom-0 h-1.5" />
 
         <div className="mx-auto w-full max-w-[1280px] px-5 py-16 sm:px-8 sm:py-20 lg:py-28">
+          {/* On mobile the editions lead, so a visitor sees what/when/where
+              before the brand statement. Desktop keeps copy left, cards right. */}
           <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-            <div className="animate-rise">
+            <div className="animate-rise order-2 lg:order-1">
               <span className="eyebrow eyebrow-light mb-6">
                 {siteConfig.fullName}
               </span>
@@ -111,7 +113,7 @@ export default function HomePage() {
             </div>
 
             {/* All three editions as cards */}
-            <aside className="min-w-0">
+            <aside className="order-1 min-w-0 lg:order-2">
               <div className="flex items-center justify-between gap-3">
                 <span className="eyebrow eyebrow-light mb-0 text-[11px]">
                   Three Editions · 2026–2027
