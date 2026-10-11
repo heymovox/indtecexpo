@@ -53,8 +53,10 @@ export default function HomePage() {
 
         <div className="mx-auto w-full max-w-[1280px] px-5 py-16 sm:px-8 sm:py-20 lg:py-28">
           {/* On mobile the editions lead, so a visitor sees what/when/where
-              before the brand statement. Desktop keeps copy left, cards right. */}
-          <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+              before the brand statement. Desktop keeps copy left, cards right.
+              `items-start` (not `items-end`) because the card column is much
+              taller — bottom-aligning left a large void above the headline. */}
+          <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
             <div className="animate-rise order-2 lg:order-1">
               <span className="eyebrow eyebrow-light mb-6">
                 {siteConfig.fullName}
