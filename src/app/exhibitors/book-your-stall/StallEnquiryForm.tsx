@@ -301,10 +301,10 @@ export function StallEnquiryForm() {
                   value={event.slug}
                   checked={checked}
                   onChange={() => toggleEvent(event.slug)}
-                  className="mt-1 h-4 w-4 shrink-0 accent-[#0f5fbf]"
+                  className="mt-1 h-5 w-5 shrink-0 accent-[#0f5fbf]"
                 />
                 <span className="min-w-0">
-                  <span className="flex items-baseline gap-2">
+                  <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                     <span className="display-sm text-base text-navy-900">
                       {event.city}
                     </span>
@@ -312,11 +312,13 @@ export function StallEnquiryForm() {
                       {event.dateRangeShort}
                     </span>
                   </span>
-                  <span className="mt-1 flex items-center gap-1.5 text-xs text-steel-600">
-                    <Icon name="map-pin" size={13} className="shrink-0 text-brand-600" />
-                    {event.venue.name}
+                  <span className="mt-1 flex items-start gap-1.5 text-xs text-steel-600">
+                    <Icon name="map-pin" size={13} className="mt-0.5 shrink-0 text-brand-600" />
+                    <span className="min-w-0">{event.venue.name}</span>
                   </span>
-                  <span className="mt-2 block text-xs leading-relaxed text-steel-500">
+                  {/* Indented to match the venue text so the card reads as one
+                      aligned column rather than a ragged left edge. */}
+                  <span className="mt-2 block pl-[19px] text-xs leading-relaxed text-steel-500">
                     {event.positioning} · {event.days} business days
                   </span>
                 </span>
@@ -875,25 +877,45 @@ export function StallEnquiryForm() {
           {step === 2 ? stepDetails : null}
           {step === 3 ? stepStall : null}
 
-          <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-steel-100 pt-6">
+          <div className="mt-8 flex flex-col gap-3 border-t border-steel-100 pt-6 sm:flex-row sm:flex-wrap sm:items-center">
             {step > 0 ? (
-              <Button type="button" variant="outline" size="lg" onClick={handleBack}>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={handleBack}
+              >
                 <Icon name="arrow-left" size={16} className="mr-1.5" />
                 Back
               </Button>
             ) : null}
 
             {step < 3 ? (
-              <Button type="button" variant="primary" size="lg" withArrow onClick={handleNext}>
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                withArrow
+                className="w-full sm:w-auto"
+                onClick={handleNext}
+              >
                 Continue
               </Button>
             ) : (
-              <Button type="submit" variant="primary" size="lg" withArrow disabled={submitting}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                withArrow
+                className="w-full sm:w-auto"
+                disabled={submitting}
+              >
                 {submitting ? "Submitting…" : "Register My Stall"}
               </Button>
             )}
 
-            <span className="text-xs text-steel-500">
+            <span className="text-center text-xs text-steel-500 sm:ml-auto sm:text-left">
               Step {step + 1} of {steps.length} · {steps[step].label}
             </span>
           </div>

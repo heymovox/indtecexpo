@@ -133,7 +133,7 @@ export function CheckboxGroup({
                 value={option}
                 checked={checked}
                 onChange={() => onToggle(option)}
-                className="h-4 w-4 shrink-0 accent-[#0f5fbf]"
+                className="h-5 w-5 shrink-0 accent-[#0f5fbf]"
               />
               <span className="leading-snug">{option}</span>
             </label>

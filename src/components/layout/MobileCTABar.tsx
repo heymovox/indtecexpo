@@ -15,7 +15,12 @@ export function MobileCTABar() {
     pathname.startsWith("/admin") ||
     pathname.includes("thank-you") ||
     pathname === "/privacy-policy" ||
-    pathname === "/terms";
+    pathname === "/terms" ||
+    // On the registration forms this bar sat on top of the page's own submit
+    // button, and its "Book Stall" / "Register" links only duplicated the form
+    // the visitor is already completing.
+    pathname === "/exhibitors/book-your-stall" ||
+    pathname === "/visitors/register";
 
   if (hidden) return null;
 

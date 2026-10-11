@@ -271,7 +271,7 @@ export function VisitorRegistrationForm() {
             name="consent"
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-[#0f5fbf]"
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[#0f5fbf]"
           />
           <span>
             I agree that Konnekt Globe may contact me about INDTEC EXPO and
