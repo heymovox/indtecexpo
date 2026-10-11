@@ -74,15 +74,25 @@ export default function HomePage() {
                 buyers who move manufacturing forward.
               </p>
 
-              <div className="mt-9 flex flex-wrap gap-3">
-                <Button href="/exhibitors/book-your-stall" variant="primary" size="lg" withArrow>
+              {/* Two equal columns on mobile so the CTAs sit on one row;
+                  flex again once there is room to breathe. */}
+              <div className="mt-9 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+                <Button
+                  href="/exhibitors/book-your-stall"
+                  variant="primary"
+                  size="lg"
+                  withArrow
+                  className="px-3 text-[0.95rem] sm:px-8 sm:text-base"
+                >
                   Book Your Stall
                 </Button>
-                <Button href="/visitors/register" variant="gold" size="lg">
+                <Button
+                  href="/visitors/register"
+                  variant="gold"
+                  size="lg"
+                  className="px-3 text-[0.95rem] sm:px-8 sm:text-base"
+                >
                   Register as Visitor
-                </Button>
-                <Button href="/events" variant="outline-light" size="lg">
-                  Explore Events
                 </Button>
               </div>
 
