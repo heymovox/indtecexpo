@@ -198,7 +198,10 @@ export function StallEnquiryForm() {
 
       if (!res.ok) {
         setErrors(data.errors ?? {});
-        setFormError(data.message ?? fallbackError);
+        // For validation failures (4xx) the server's field errors are useful.
+        // For server failures (5xx) the generic "Something went wrong" tells
+        // the visitor nothing actionable, so surface the contact route instead.
+        setFormError(res.status >= 500 ? fallbackError : (data.message ?? fallbackError));
         return;
       }
 

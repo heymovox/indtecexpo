@@ -77,7 +77,13 @@ export function ContactForm() {
 
       if (!res.ok) {
         setErrors(data.errors ?? {});
-        setFormError(data.message ?? "Something went wrong. Please try again.");
+        // A 5xx message ("Something went wrong") gives the visitor nothing to
+        // act on, so point them at a human instead.
+        setFormError(
+          res.status >= 500
+            ? "We could not send your message just now. Please try again in a moment, or contact the team."
+            : (data.message ?? "Something went wrong. Please try again."),
+        );
         return;
       }
 
