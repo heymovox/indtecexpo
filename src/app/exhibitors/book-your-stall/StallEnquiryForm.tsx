@@ -109,9 +109,20 @@ const sponsorshipOptions = [
 
 const fieldId = (name: string) => `exhibitor-${name}`;
 
-export function StallEnquiryForm() {
+/**
+ * `initialEvent` lets a card on another page deep-link straight into this form
+ * with that edition already ticked, e.g.
+ * /exhibitors/book-your-stall?event=bengaluru
+ */
+export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormState>(initialState);
+  const [form, setForm] = useState<FormState>({
+    ...initialState,
+    eventSlugs:
+      initialEvent && events.some((event) => event.slug === initialEvent)
+        ? [initialEvent]
+        : initialState.eventSlugs,
+  });
   const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);

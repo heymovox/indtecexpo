@@ -277,6 +277,44 @@ body {
   transform: translateY(-1px);
 }
 
+/*
+ * Shining sweep for primary calls to action. The highlight is a skewed
+ * gradient that travels across the button on a loop, and is skipped for
+ * visitors who ask for reduced motion.
+ */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%) skewX(-18deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.55) 45%,
+    rgb(255 255 255 / 0.75) 50%,
+    rgb(255 255 255 / 0.55) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: btn-shine-sweep 3.2s ease-in-out infinite;
+}
+
+.btn-shine:hover::after {
+  animation-duration: 1.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-shine::after {
+    display: none;
+  }
+}
+
 .btn-sm {
   padding: 0.5625rem 1rem;
   font-size: 0.8125rem;
@@ -409,3 +447,4 @@ select.field {
 .animate-rise {
   animation: rise 520ms var(--ease-out-expo) both;
 }
+

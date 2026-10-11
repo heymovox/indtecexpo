@@ -136,10 +136,10 @@ export default function HomePage() {
                         : "Later";
                   return (
                     <li key={event.slug}>
-                      <Link
-                        href={`/events/${event.slug}`}
-                        className="group block border border-white/15 bg-white/[0.06] p-4 backdrop-blur-sm transition hover:border-gold-500/60 hover:bg-white/[0.10] sm:p-5"
-                      >
+                      {/* A plain container, not a Link: the card now holds two
+                          separate links (view edition + book a stall) and
+                          anchors cannot be nested. */}
+                      <div className="group border border-white/15 bg-white/[0.06] p-4 backdrop-blur-sm transition hover:border-gold-500/60 hover:bg-white/[0.10] sm:p-5">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <h2 className="display text-2xl leading-none sm:text-[1.75rem]">
@@ -186,24 +186,28 @@ export default function HomePage() {
                           </div>
                         ) : null}
 
-                        <span className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-steel-300 transition group-hover:text-gold-500">
-                          View edition
-                          <Icon name="arrow-right" size={13} />
-                        </span>
-                      </Link>
+                        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
+                          <Button
+                            href={`/exhibitors/book-your-stall?event=${event.slug}`}
+                            variant="gold"
+                            size="sm"
+                            className="btn-shine"
+                          >
+                            Book a Stall
+                          </Button>
+                          <Link
+                            href={`/events/${event.slug}`}
+                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-steel-300 transition hover:text-gold-500"
+                          >
+                            View edition
+                            <Icon name="arrow-right" size={13} />
+                          </Link>
+                        </div>
+                      </div>
                     </li>
                   );
                 })}
               </ul>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button href="/events" variant="outline-light" size="sm" withArrow>
-                  Compare Editions
-                </Button>
-                <Button href="/exhibitors/book-your-stall" variant="gold" size="sm">
-                  Book a Stall
-                </Button>
-              </div>
             </aside>
           </div>
         </div>

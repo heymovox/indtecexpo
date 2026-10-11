@@ -65,9 +65,19 @@ const trustPoints = [
   "Early-bird and association offers available",
 ] as const;
 
-export default function BookYourStallPage() {
+export default async function BookYourStallPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ event?: string | string[] }>;
+}) {
   const events = getSortedEvents();
   const phone = contactConfig.phones[0];
+  // Hero edition cards deep-link here as ?event=<slug> to pre-tick that city.
+  const requested = (await searchParams).event;
+  const requestedSlug = Array.isArray(requested) ? requested[0] : requested;
+  const initialEvent = events.some((event) => event.slug === requestedSlug)
+    ? requestedSlug
+    : undefined;
 
   return (
     <>
@@ -114,7 +124,7 @@ export default function BookYourStallPage() {
             </p>
 
             <div className="mt-7">
-              <StallEnquiryForm />
+              <StallEnquiryForm initialEvent={initialEvent} />
             </div>
           </div>
 
