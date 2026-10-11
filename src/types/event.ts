@@ -47,6 +47,8 @@ export interface ExpoEvent {
   sectors: string[];
   highlights: string[];
   stallOptions: StallOption[];
+  /** Sponsorship packages, where the organiser publishes them per edition. */
+  sponsorship?: { name: string; code: string; price: string }[];
   stats: { label: string; value: string }[];
   schedule: { day: string; date: string; label: string; detail: string }[];
 }

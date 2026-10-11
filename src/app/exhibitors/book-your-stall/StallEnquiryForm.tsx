@@ -6,8 +6,10 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/Form";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { StallPlanPicker } from "@/components/exhibitors/StallPlanPicker";
 import { contactConfig } from "@/config/site";
 import { getSortedEvents } from "@/data/events";
+import { getStallPlan } from "@/data/floorPlans";
 import { industries, productCategories } from "@/data/industries";
 import { cn } from "@/lib/utils";
 import { exhibitorEnquirySchema, flattenErrors } from "@/lib/validations";
@@ -15,6 +17,8 @@ import { waLinkForEnquiry } from "@/lib/whatsapp";
 
 type FormState = {
   eventSlugs: string[];
+  /** Stall codes chosen on the interactive floor plan. */
+  stallCodes: string[];
   companyName: string;
   contactPerson: string;
   designation: string;
@@ -71,6 +75,7 @@ const stepSchemas = [
 
 const initialState: FormState = {
   eventSlugs: [],
+  stallCodes: [],
   companyName: "",
   contactPerson: "",
   designation: "",
@@ -108,11 +113,15 @@ export function StallEnquiryForm() {
     for (const event of selectedEvents) {
       for (const option of event.stallOptions) names.add(option.name);
     }
-    return [...names, "Custom / Island"];
+    // Fall back only when the selected editions publish no options; appending
+    // unconditionally would duplicate an entry the data already provides.
+    return names.size > 0 ? [...names] : ["Custom / Island"];
   }, [selectedEvents]);
 
   const planEvent =
     selectedEvents.find((event) => event.slug === activePlan) ?? selectedEvents[0];
+
+  const plan = planEvent ? getStallPlan(planEvent.slug) : null;
 
   const update = (name: keyof FormState, value: string | string[]) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -124,7 +133,13 @@ export function StallEnquiryForm() {
     const next = form.eventSlugs.includes(slug)
       ? form.eventSlugs.filter((item) => item !== slug)
       : [...form.eventSlugs, slug];
-    setForm((prev) => ({ ...prev, eventSlugs: next }));
+    setForm((prev) => ({
+      ...prev,
+      eventSlugs: next,
+      // Stall codes belong to a specific plan; drop them if that edition
+      // is no longer selected.
+      stallCodes: next.some((item) => getStallPlan(item)) ? prev.stallCodes : [],
+    }));
     setErrors((prev) => ({ ...prev, eventSlugs: undefined }));
     setFormError(null);
     if (!next.includes(activePlan)) setActivePlan(next[0] ?? "");
@@ -333,11 +348,12 @@ export function StallEnquiryForm() {
   const stepFloorPlan = (
     <div>
       <h3 className="display-sm text-lg text-navy-900">
-        Floor plan for your selected {selectedEvents.length > 1 ? "editions" : "edition"}
+        Choose your {selectedEvents.length > 1 ? "preferred stalls" : "preferred stall"}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-steel-600">
-        Review the hall layout, sector zoning and stall configuration before you
-        continue. Corner and demonstration-bay stalls are allocated first.
+        Tap the stalls you would like on the plan below. Your selection is recorded
+        as a preference — our exhibitions team confirms availability, pricing and
+        allocation when they contact you.
       </p>
 
       {selectedEvents.length > 1 ? (
@@ -362,28 +378,70 @@ export function StallEnquiryForm() {
 
       {planEvent ? (
         <div className="mt-5">
-          <figure className="min-w-0 border border-steel-200 bg-white p-3 sm:p-4">
-            <Image
-              src={planEvent.floorPlanImage}
-              alt={`Floor plan of ${planEvent.name} at ${planEvent.venue.name}`}
-              width={960}
-              height={640}
-              className="h-auto w-full"
-              sizes="(max-width: 1024px) 100vw, 620px"
-            />
-            <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-steel-100 pt-3 text-xs text-steel-500">
-              <span>
-                {planEvent.venue.name} · {planEvent.venue.address}
-              </span>
-              <a
-                href={planEvent.floorPlanPdf}
-                className="link-underline font-semibold uppercase tracking-[0.12em] text-brand-600"
-                download
-              >
-                Download PDF
-              </a>
-            </figcaption>
-          </figure>
+          {plan ? (
+            <>
+              <StallPlanPicker
+                plan={plan}
+                selected={form.stallCodes}
+                onToggle={(code) =>
+                  setForm((prev) => {
+                    const has = prev.stallCodes.includes(code);
+                    const next = has
+                      ? prev.stallCodes.filter((item) => item !== code)
+                      : [...prev.stallCodes, code];
+                    return {
+                      ...prev,
+                      stallCodes: next,
+                      // Keep the legacy stall count in step 3 aligned with the plan.
+                      stalls: String(next.length || prev.stalls || "1"),
+                    };
+                  })
+                }
+                onReplace={(codes) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    stallCodes: codes,
+                    stalls: String(codes.length || prev.stalls || "1"),
+                  }))
+                }
+              />
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-steel-500">
+                <span>
+                  {planEvent.venue.name} · {planEvent.venue.address}
+                </span>
+                <a
+                  href={planEvent.floorPlanPdf}
+                  className="link-underline font-semibold uppercase tracking-[0.12em] text-brand-600"
+                  download
+                >
+                  Download PDF
+                </a>
+              </div>
+            </>
+          ) : (
+            <figure className="min-w-0 border border-steel-200 bg-white p-3 sm:p-4">
+              <Image
+                src={planEvent.floorPlanImage}
+                alt={`Floor plan of ${planEvent.name} at ${planEvent.venue.name}`}
+                width={960}
+                height={640}
+                className="h-auto w-full"
+                sizes="(max-width: 1024px) 100vw, 620px"
+              />
+              <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-steel-100 pt-3 text-xs text-steel-500">
+                <span>
+                  {planEvent.venue.name} · {planEvent.venue.address}
+                </span>
+                <a
+                  href={planEvent.floorPlanPdf}
+                  className="link-underline font-semibold uppercase tracking-[0.12em] text-brand-600"
+                  download
+                >
+                  Download PDF
+                </a>
+              </figcaption>
+            </figure>
+          )}
 
           <div className="mt-5 overflow-x-auto border border-steel-200 bg-white">
             <table className="w-full min-w-[460px] border-collapse text-left text-sm">
@@ -741,6 +799,14 @@ export function StallEnquiryForm() {
               "—",
           },
           { label: "Venue", value: selectedEvents.map((event) => event.venue.name).join(", ") || "—" },
+          ...(form.stallCodes.length > 0
+            ? [
+                {
+                  label: "Selected stalls",
+                  value: form.stallCodes.join(", "),
+                },
+              ]
+            : []),
           { label: "Stall size", value: form.stallSize || "—" },
           { label: "No. of stalls", value: form.stalls },
           { label: "Product category", value: form.productCategory || "—" },

@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
         eventSlugs: record.eventSlugs,
         stallSize: record.stallSize,
         stalls: record.stalls,
+        stallCodes: record.stallCodes,
         productCategory: record.productCategory,
       }),
     });

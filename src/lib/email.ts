@@ -89,6 +89,7 @@ export function buildExhibitorEnquiryEmail(input: {
   eventSlugs: string[];
   stallSize: string;
   stalls: number;
+  stallCodes?: string[];
   productCategory: string;
 }): string {
   return [
@@ -102,6 +103,14 @@ export function buildExhibitorEnquiryEmail(input: {
     `Product      : ${input.productCategory}`,
     `Stall size   : ${input.stallSize}`,
     `No. of stalls: ${input.stalls}`,
+    ...(input.stallCodes?.length
+      ? [
+          `Preferred    : ${input.stallCodes.join(", ")}`,
+          "",
+          `The exhibitor picked the above stalls from the interactive floor plan.`,
+          `Treat this as a preference request and confirm actual availability.`,
+        ]
+      : []),
     "",
     `Contact the exhibitor as soon as possible with availability and pricing.`,
     `Reply directly to this enquiry within one working day.`,

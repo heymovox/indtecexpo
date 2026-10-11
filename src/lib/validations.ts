@@ -44,6 +44,12 @@ export const exhibitorEnquirySchema = z.object({
     .array(z.string())
     .min(1, "Select at least one expo location")
     .max(3, "Select up to 3 expo locations"),
+  /** Stall codes picked from the interactive floor plan, e.g. ["B42", "K7"]. */
+  stallCodes: z
+    .array(z.string().max(12, "Stall code is too long"))
+    .max(30, "Select up to 30 stalls")
+    .optional()
+    .default([]),
   companyName: companySchema,
   contactPerson: nameSchema,
   designation: nameSchema,

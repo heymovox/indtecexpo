@@ -45,6 +45,8 @@ export interface ExhibitorEnquiry {
   productCategory: string;
   stallSize: string;
   stalls: number;
+  /** Stall codes chosen on the interactive floor plan, e.g. ["B42", "K7"]. */
+  stallCodes?: string[];
   preferredLocation?: string;
   message?: string;
   source: string;

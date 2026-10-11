@@ -29,7 +29,12 @@ function exhibitorLead(record: ExhibitorEnquiry & StoredRecord): AdminLead {
     reference: record.reference,
     type: "Exhibitor",
     title: `${record.companyName} — ${record.contactPerson}`,
-    subtitle: `${record.productCategory} · ${record.stallSize} · ${record.stalls} stall${record.stalls === 1 ? "" : "s"}`,
+    subtitle: [
+      record.productCategory,
+      record.stallSize,
+      `${record.stalls} stall${record.stalls === 1 ? "" : "s"}`,
+      ...(record.stallCodes?.length ? [`wants ${record.stallCodes.join(", ")}`] : []),
+    ].join(" · "),
     stage: record.stage ?? "new",
     notes: noteOf(record),
     createdAt: record.createdAt,
