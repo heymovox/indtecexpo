@@ -3,7 +3,7 @@ import { createRecord, type StoredRecord } from "@/lib/db";
 import type { VisitorRegistration } from "@/types/exhibitor";
 import { clientIp, isSameOrigin, rateLimit } from "@/lib/protection";
 import { visitorRegistrationSchema, flattenErrors } from "@/lib/validations";
-import { buildVisitorRegistrationEmail, sendNotification } from "@/lib/email";
+import { buildVisitorConfirmationEmail, buildVisitorRegistrationEmail, sendNotification } from "@/lib/email";
 import { referenceNumber, uniqueId } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { sanitizeBody } from "@/app/api/_lib/parse";
@@ -49,6 +49,23 @@ export async function POST(request: NextRequest) {
 
     await createRecord("visitorRegistrations", record);
 
+    const expos = record.interestedExpos.join(", ");
+
+    // Confirm to the registrant first so a provider hiccup cannot cost them
+    // their receipt, then notify the desk.
+    const confirmation = buildVisitorConfirmationEmail({
+      reference: record.reference,
+      name: record.fullName,
+      company: record.companyName,
+      email: record.email,
+      expos,
+    });
+    await sendNotification({
+      to: [record.email],
+      replyTo: siteConfig.visitorEmail,
+      ...confirmation,
+    });
+
     await sendNotification({
       to: [siteConfig.visitorEmail],
       subject: `New visitor registration — ${record.reference}`,
@@ -57,7 +74,7 @@ export async function POST(request: NextRequest) {
         name: record.fullName,
         company: record.companyName,
         email: record.email,
-        expos: record.interestedExpos.join(", "),
+        expos,
       }),
     });
 

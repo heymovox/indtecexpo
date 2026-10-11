@@ -3,7 +3,7 @@ import { createRecord, type StoredRecord } from "@/lib/db";
 import type { ExhibitorEnquiry } from "@/types/exhibitor";
 import { clientIp, isSameOrigin, rateLimit } from "@/lib/protection";
 import { exhibitorEnquirySchema, flattenErrors } from "@/lib/validations";
-import { buildExhibitorEnquiryEmail, sendNotification } from "@/lib/email";
+import { buildExhibitorConfirmationEmail, buildExhibitorEnquiryEmail, sendNotification } from "@/lib/email";
 import { referenceNumber, uniqueId } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { sanitizeBody } from "@/app/api/_lib/parse";
@@ -49,6 +49,27 @@ export async function POST(request: NextRequest) {
     };
 
     await createRecord("exhibitorEnquiries", record);
+
+    const expos = record.eventSlugs.join(", ");
+
+    // Confirm to the exhibitor before notifying the desk, so the enquiry is
+    // acknowledged even if the internal notification fails.
+    const confirmation = buildExhibitorConfirmationEmail({
+      reference: record.reference,
+      contact: record.contactPerson,
+      company: record.companyName,
+      email: record.email,
+      expos,
+      stallCodes: record.stallCodes,
+      stalls: record.stalls,
+      powerLoad: record.powerLoad,
+      sponsorship: record.sponsorship,
+    });
+    await sendNotification({
+      to: [record.email],
+      replyTo: siteConfig.exhibitorEmail,
+      ...confirmation,
+    });
 
     await sendNotification({
       to: [siteConfig.exhibitorEmail],
