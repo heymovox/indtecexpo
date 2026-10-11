@@ -93,15 +93,20 @@ export function ExhibitorCTA({
 export function StatStrip({
   items,
   className,
+  columns = "grid-cols-2 sm:grid-cols-3 sm:divide-x lg:grid-cols-5",
 }: {
   items: { value: string; label: string }[];
   className?: string;
+  /** Responsive grid classes; override when the strip sits in a narrow column. */
+  columns?: string;
 }) {
   return (
     <div
       className={cn(
-        // 5 stats stay on one line from lg up; they step 3 -> 2 below that.
-        "grid grid-cols-2 divide-white/10 border border-white/12 bg-white/5 sm:grid-cols-3 sm:divide-x lg:grid-cols-5",
+        // `columns` drives the layout because cn() does not merge conflicting
+        // Tailwind utilities, so a className override would not win.
+        "grid divide-white/10 border border-white/12 bg-white/5",
+        columns,
         className,
       )}
     >

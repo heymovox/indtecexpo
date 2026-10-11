@@ -7,7 +7,7 @@ import { Countdown } from "@/components/ui/Countdown";
 import { ExhibitorCTA, StatStrip } from "@/components/ui/CTA";
 import { HeroSlider } from "@/components/ui/HeroSlider";
 import { Icon, type IconName } from "@/components/ui/Icon";
-import { Container, Section, SectionHeading } from "@/components/ui/Section";
+import { Section, SectionHeading } from "@/components/ui/Section";
 import { EventCard } from "@/components/events/EventCard";
 import { contactConfig, siteConfig } from "@/config/site";
 import { industries } from "@/data/industries";
@@ -20,7 +20,6 @@ import { getSortedEvents, getUpcomingEvents, seriesStats } from "@/data/events";
 import { floorPhotos } from "@/data/floorPhotos";
 import { faqJsonLd, JsonLd } from "@/lib/seo";
 
-const heroStats = seriesStats;
 
 const marqueeItems = [
   "Machine Tools & CNC",
@@ -135,6 +134,15 @@ export default function HomePage() {
                   previous INDTEC EXPO editions.
                 </p>
               </div>
+
+              {/* Series stats, moved up from the strip below the hero. The
+                  hero column is too narrow for all five on one line, so this
+                  uses 3 + 2 instead of the full-width 5-across layout. */}
+              <StatStrip
+                items={seriesStats}
+                columns="grid-cols-2 sm:grid-cols-3 sm:divide-x"
+                className="mt-3"
+              />
             </div>
 
             {/* All three editions as cards */}
@@ -259,15 +267,6 @@ export default function HomePage() {
           ))}
         </div>
       </div>
-
-      {/* ---------------------------------------------------------- */}
-      {/* Series stats                                                */}
-      {/* ---------------------------------------------------------- */}
-      <section className="bg-white">
-        <Container>
-          <StatStrip items={heroStats} />
-        </Container>
-      </section>
 
       {/* ---------------------------------------------------------- */}
       {/* About / brand story                                         */}
