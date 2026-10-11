@@ -60,8 +60,16 @@
 }
 
 :root {
-  --header-height: 4.5rem;
+  /* Height of the fixed header while expanded: utility bar + main bar + border.
+     Kept in sync with Header.tsx. */
+  --header-height: 101px;
   --mobile-cta-height: 3.75rem;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-height: 105px;
+  }
 }
 
 * {
@@ -70,6 +78,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Anchor targets land below the fixed header instead of under it. */
+  scroll-padding-top: calc(var(--header-height) + 1rem);
   -webkit-text-size-adjust: 100%;
 }
 

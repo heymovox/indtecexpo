@@ -39,7 +39,9 @@ export function Header() {
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 12);
-      setCompact(y > 90);
+      // Hysteresis: separate enter/exit thresholds so a scroll resting on the
+      // boundary cannot flap the header between its two heights.
+      setCompact((prev) => (prev ? y > 60 : y > 140));
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -76,7 +78,11 @@ export function Header() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-50">
+    // Fixed rather than sticky: a sticky header stays in the document flow, so
+    // collapsing it reflowed the whole page and scroll anchoring then dragged
+    // the scroll position backwards, making the header visibly wobble near the
+    // threshold. Out of flow, its height change cannot move anything.
+    <header className="fixed inset-x-0 top-0 z-50">
       <div ref={barRef}>
         {/* Utility bar — compact mobile variant (collapses on scroll) */}
         <div
