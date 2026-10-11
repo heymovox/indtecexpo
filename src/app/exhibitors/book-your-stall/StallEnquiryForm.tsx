@@ -9,16 +9,13 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { StallPlanPicker } from "@/components/exhibitors/StallPlanPicker";
 import { contactConfig } from "@/config/site";
 import { getSortedEvents } from "@/data/events";
-import { getStallPlan } from "@/data/floorPlans";
+import { getStallPlan, getStallType } from "@/data/floorPlans";
 import { industries, productCategories } from "@/data/industries";
 import { cn } from "@/lib/utils";
 import { exhibitorEnquirySchema, flattenErrors } from "@/lib/validations";
 import { waLinkForEnquiry } from "@/lib/whatsapp";
 
 type FormState = {
-  eventSlugs: string[];
-  /** Stall codes chosen on the interactive floor plan. */
-  stallCodes: string[];
   companyName: string;
   contactPerson: string;
   designation: string;
@@ -27,8 +24,14 @@ type FormState = {
   website: string;
   industry: string;
   productCategory: string;
-  stallSize: string;
-  stalls: string;
+  eventSlugs: string[];
+  /** Stall positions chosen on the interactive floor plan. */
+  stallCodes: string[];
+  powerLoad: string;
+  machinery: string;
+  water: string;
+  branding: string;
+  sponsorship: string;
   message: string;
 };
 
@@ -44,17 +47,15 @@ interface EnquiryResponse {
 const events = getSortedEvents();
 
 const steps: { label: string; short: string; icon: IconName }[] = [
-  { label: "Choose Location", short: "Location", icon: "map-pin" },
-  { label: "Review Floor Plan", short: "Floor Plan", icon: "map" },
-  { label: "Your Details", short: "Details", icon: "building" },
-  { label: "Stall Requirement", short: "Stall", icon: "stall" },
+  { label: "Company & Contact", short: "Details", icon: "building" },
+  { label: "Event Location", short: "Location", icon: "map-pin" },
+  { label: "Stall Position", short: "Position", icon: "map" },
+  { label: "Special Requirements", short: "Needs", icon: "list" },
   { label: "Registration Done", short: "Done", icon: "check-circle" },
 ];
 
 /* Step-scoped schemas — each Continue validates only the visible fields. */
 const stepSchemas = [
-  exhibitorEnquirySchema.pick({ eventSlugs: true }),
-  null,
   exhibitorEnquirySchema.pick({
     companyName: true,
     contactPerson: true,
@@ -62,20 +63,23 @@ const stepSchemas = [
     phone: true,
     email: true,
     website: true,
-  }),
-  exhibitorEnquirySchema.pick({
     industry: true,
     productCategory: true,
-    stallSize: true,
-    stalls: true,
+  }),
+  exhibitorEnquirySchema.pick({ eventSlugs: true }),
+  exhibitorEnquirySchema.pick({ stallCodes: true }),
+  exhibitorEnquirySchema.pick({
+    powerLoad: true,
+    machinery: true,
+    water: true,
+    branding: true,
+    sponsorship: true,
     message: true,
     consent: true,
   }),
 ] as const;
 
 const initialState: FormState = {
-  eventSlugs: [],
-  stallCodes: [],
   companyName: "",
   contactPerson: "",
   designation: "",
@@ -84,12 +88,25 @@ const initialState: FormState = {
   website: "",
   industry: "",
   productCategory: "",
-  stallSize: "",
-  stalls: "1",
+  eventSlugs: [],
+  stallCodes: [],
+  powerLoad: "",
+  machinery: "",
+  water: "",
+  branding: "",
+  sponsorship: "",
   message: "",
 };
 
 const fallbackError = `We could not submit your enquiry. Please try again or call ${contactConfig.phones[0].display}.`;
+
+const waterOptions = ["Required", "Not required"];
+const sponsorshipOptions = [
+  "Title Sponsor",
+  "Co Sponsor",
+  "Royal Sponsor",
+  "Not required",
+];
 
 const fieldId = (name: string) => `exhibitor-${name}`;
 
@@ -108,20 +125,24 @@ export function StallEnquiryForm() {
     [form.eventSlugs],
   );
 
-  const stallSizeOptions = useMemo(() => {
-    const names = new Set<string>();
-    for (const event of selectedEvents) {
-      for (const option of event.stallOptions) names.add(option.name);
-    }
-    // Fall back only when the selected editions publish no options; appending
-    // unconditionally would duplicate an entry the data already provides.
-    return names.size > 0 ? [...names] : ["Custom / Island"];
-  }, [selectedEvents]);
-
   const planEvent =
     selectedEvents.find((event) => event.slug === activePlan) ?? selectedEvents[0];
 
   const plan = planEvent ? getStallPlan(planEvent.slug) : null;
+
+  /**
+   * Stall size and count are derived from the positions picked on the plan
+   * rather than asked separately, so the two can never disagree.
+   */
+  const derivedStallSize = useMemo(() => {
+    if (!plan || form.stallCodes.length === 0) return "";
+    const names = new Set<string>();
+    for (const code of form.stallCodes) {
+      const type = getStallType(plan, code);
+      if (type) names.add(type.name);
+    }
+    return [...names].join(", ");
+  }, [plan, form.stallCodes]);
 
   const update = (name: keyof FormState, value: string | string[]) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -156,8 +177,8 @@ export function StallEnquiryForm() {
     const fieldErrors = flattenErrors(result.error);
     setErrors(fieldErrors);
     setFormError(
-      index === 0
-        ? "Select at least one expo location to continue."
+      index === 2
+        ? "Choose at least one stall position on the plan to continue."
         : "Please complete the highlighted fields to continue.",
     );
     const firstInvalid = Object.keys(fieldErrors).find((key) => Boolean(fieldErrors[key]));
@@ -186,7 +207,12 @@ export function StallEnquiryForm() {
     setSubmitting(true);
     setFormError(null);
 
-    const payload = { ...form, consent: consent ? "on" : "" };
+    const payload = {
+      ...form,
+      stallSize: derivedStallSize,
+      stalls: String(form.stallCodes.length || 1),
+      consent: consent ? "on" : "",
+    };
 
     try {
       const res = await fetch("/api/exhibitor-enquiry", {
@@ -394,20 +420,11 @@ export function StallEnquiryForm() {
                     const next = has
                       ? prev.stallCodes.filter((item) => item !== code)
                       : [...prev.stallCodes, code];
-                    return {
-                      ...prev,
-                      stallCodes: next,
-                      // Keep the legacy stall count in step 3 aligned with the plan.
-                      stalls: String(next.length || prev.stalls || "1"),
-                    };
+                    return { ...prev, stallCodes: next };
                   })
                 }
                 onReplace={(codes) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    stallCodes: codes,
-                    stalls: String(codes.length || prev.stalls || "1"),
-                  }))
+                  setForm((prev) => ({ ...prev, stallCodes: codes }))
                 }
               />
               <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-steel-500">
@@ -612,67 +629,28 @@ export function StallEnquiryForm() {
             invalid={Boolean(errors.website)}
           />
         </Field>
-      </div>
-    </div>
-  );
 
-  /* --------------------------------------------------------------- */
-  /* Step 3 — Stall requirement                                      */
-  /* --------------------------------------------------------------- */
-  const stepStall = (
-    <div>
-      <h3 className="display-sm text-lg text-navy-900">
-        Define your stall requirement
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-steel-600">
-        Share the configuration you need. Our team confirms live availability,
-        final pricing and the best aisle position for your product line.
-      </p>
-
-      <div className="mt-6 grid gap-5 sm:grid-cols-2">
         <Field
-          label="Stall size"
-          htmlFor={fieldId("stallSize")}
+          label="Industry"
+          htmlFor={fieldId("industry")}
           required
-          error={errors.stallSize}
+          error={errors.industry}
         >
           <Select
-            id={fieldId("stallSize")}
-            name="stallSize"
-            value={form.stallSize}
-            onChange={(event) => update("stallSize", event.target.value)}
-            invalid={Boolean(errors.stallSize)}
+            id={fieldId("industry")}
+            name="industry"
+            value={form.industry}
+            onChange={(event) => update("industry", event.target.value)}
+            invalid={Boolean(errors.industry)}
             required
           >
-            <option value="">Select a stall size</option>
-            {stallSizeOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
+            <option value="">Select an industry</option>
+            {industries.map((industry) => (
+              <option key={industry.id} value={industry.name}>
+                {industry.name}
               </option>
             ))}
           </Select>
-        </Field>
-
-        <Field
-          label="Number of stalls"
-          htmlFor={fieldId("stalls")}
-          required
-          hint="1 to 50 stalls"
-          error={errors.stalls}
-        >
-          <Input
-            id={fieldId("stalls")}
-            name="stalls"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={50}
-            step={1}
-            value={form.stalls}
-            onChange={(event) => update("stalls", event.target.value)}
-            invalid={Boolean(errors.stalls)}
-            required
-          />
         </Field>
 
         <Field
@@ -697,44 +675,138 @@ export function StallEnquiryForm() {
             ))}
           </Select>
         </Field>
+      </div>
+    </div>
+  );
+
+  /* --------------------------------------------------------------- */
+  /* Step 3 — Special requirements                                   */
+  /* --------------------------------------------------------------- */
+  const stepSpecial = (
+    <div>
+      <h3 className="display-sm text-lg text-navy-900">
+        Any special requirements?
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed text-steel-600">
+        Tell us what your stand needs so our production team can plan power,
+        water and rigging. Everything here is optional.
+      </p>
+
+      <div className="mt-6 grid gap-5 sm:grid-cols-2">
+        <Field
+          label="Power load"
+          htmlFor={fieldId("powerLoad")}
+          hint="Optional — approximate load in kW"
+          error={errors.powerLoad}
+        >
+          <Input
+            id={fieldId("powerLoad")}
+            name="powerLoad"
+            type="text"
+            inputMode="decimal"
+            placeholder="e.g. 15 or 15-20"
+            value={form.powerLoad}
+            onChange={(event) => update("powerLoad", event.target.value)}
+            invalid={Boolean(errors.powerLoad)}
+          />
+        </Field>
 
         <Field
-          label="Industry"
-          htmlFor={fieldId("industry")}
-          required
-          error={errors.industry}
+          label="Water supply"
+          htmlFor={fieldId("water")}
+          hint="Optional"
+          error={errors.water}
         >
           <Select
-            id={fieldId("industry")}
-            name="industry"
-            value={form.industry}
-            onChange={(event) => update("industry", event.target.value)}
-            invalid={Boolean(errors.industry)}
-            required
+            id={fieldId("water")}
+            name="water"
+            value={form.water}
+            onChange={(event) => update("water", event.target.value)}
+            invalid={Boolean(errors.water)}
           >
-            <option value="">Select an industry</option>
-            {industries.map((industry) => (
-              <option key={industry.id} value={industry.name}>
-                {industry.name}
+            <option value="">Select</option>
+            {waterOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
               </option>
             ))}
           </Select>
+        </Field>
+
+        <Field
+          label="Sponsorship"
+          htmlFor={fieldId("sponsorship")}
+          hint="Optional"
+          error={errors.sponsorship}
+        >
+          <Select
+            id={fieldId("sponsorship")}
+            name="sponsorship"
+            value={form.sponsorship}
+            onChange={(event) => update("sponsorship", event.target.value)}
+            invalid={Boolean(errors.sponsorship)}
+          >
+            <option value="">Select</option>
+            {sponsorshipOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </Select>
+        </Field>
+
+        <Field
+          label="Branding"
+          htmlFor={fieldId("branding")}
+          hint="Optional — backdrop, signage or live branding"
+          error={errors.branding}
+        >
+          <Input
+            id={fieldId("branding")}
+            name="branding"
+            type="text"
+            maxLength={300}
+            placeholder="e.g. 3 m backwall with logo"
+            value={form.branding}
+            onChange={(event) => update("branding", event.target.value)}
+            invalid={Boolean(errors.branding)}
+          />
         </Field>
       </div>
 
       <div className="mt-5">
         <Field
-          label="Message"
+          label="Machinery to be demonstrated"
+          htmlFor={fieldId("machinery")}
+          hint="Optional — machine names, dimensions and weight"
+          error={errors.machinery}
+        >
+          <Textarea
+            id={fieldId("machinery")}
+            name="machinery"
+            rows={3}
+            maxLength={1000}
+            placeholder="e.g. 1 × CNC machining centre, 4.2 m × 2.6 m, approx. 6 tonnes"
+            value={form.machinery}
+            onChange={(event) => update("machinery", event.target.value)}
+            invalid={Boolean(errors.machinery)}
+          />
+        </Field>
+      </div>
+
+      <div className="mt-5">
+        <Field
+          label="Anything else"
           htmlFor={fieldId("message")}
-          hint="Optional — machinery requirements, power needs, corner preference or package details"
+          hint="Optional"
           error={errors.message}
         >
           <Textarea
             id={fieldId("message")}
             name="message"
-            rows={4}
+            rows={3}
             maxLength={1000}
-            placeholder="Tell us what you plan to exhibit and any stand requirements…"
+            placeholder="Corner preference, rigging, accessibility or any other note…"
             value={form.message}
             onChange={(event) => update("message", event.target.value)}
             invalid={Boolean(errors.message)}
@@ -816,12 +888,17 @@ export function StallEnquiryForm() {
                 },
               ]
             : []),
-          { label: "Stall size", value: form.stallSize || "—" },
-          { label: "No. of stalls", value: form.stalls },
+          { label: "Stall size", value: derivedStallSize || "—" },
+          { label: "No. of stalls", value: String(form.stallCodes.length || 1) },
           { label: "Product category", value: form.productCategory || "—" },
           { label: "Industry", value: form.industry || "—" },
           { label: "Company", value: form.companyName || "—" },
           { label: "Contact", value: `${form.contactPerson} · ${form.phone}` },
+          ...(form.powerLoad ? [{ label: "Power load", value: `${form.powerLoad} kW` }] : []),
+          ...(form.water ? [{ label: "Water", value: form.water }] : []),
+          ...(form.sponsorship ? [{ label: "Sponsorship", value: form.sponsorship }] : []),
+          ...(form.branding ? [{ label: "Branding", value: form.branding }] : []),
+          ...(form.machinery ? [{ label: "Machinery", value: form.machinery }] : []),
         ].map((row) => (
           <div key={row.label} className="bg-white px-4 py-3">
             <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-steel-500">
@@ -879,10 +956,10 @@ export function StallEnquiryForm() {
         <div className="mt-2">{stepSuccess}</div>
       ) : (
         <form noValidate onSubmit={handleSubmit} className="mt-8">
-          {step === 0 ? stepLocation : null}
-          {step === 1 ? stepFloorPlan : null}
-          {step === 2 ? stepDetails : null}
-          {step === 3 ? stepStall : null}
+          {step === 0 ? stepDetails : null}
+          {step === 1 ? stepLocation : null}
+          {step === 2 ? stepFloorPlan : null}
+          {step === 3 ? stepSpecial : null}
 
           <div className="mt-8 flex flex-col gap-3 border-t border-steel-100 pt-6 sm:flex-row sm:flex-wrap sm:items-center">
             {step > 0 ? (

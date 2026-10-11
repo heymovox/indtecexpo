@@ -39,17 +39,30 @@ const consentSchema = z.string().refine((value) => value === "on", {
   message: "Please accept the privacy policy",
 });
 
+export const waterRequirementSchema = z.enum([
+  "",
+  "Required",
+  "Not required",
+]);
+
+export const sponsorshipInterestSchema = z.enum([
+  "",
+  "Title Sponsor",
+  "Co Sponsor",
+  "Royal Sponsor",
+  "Not required",
+]);
+
 export const exhibitorEnquirySchema = z.object({
   eventSlugs: z
     .array(z.string())
     .min(1, "Select at least one expo location")
     .max(3, "Select up to 3 expo locations"),
-  /** Stall codes picked from the interactive floor plan, e.g. ["B42", "K7"]. */
+  /** Stall positions picked from the interactive floor plan, e.g. ["B42", "K7"]. */
   stallCodes: z
     .array(z.string().max(12, "Stall code is too long"))
-    .max(30, "Select up to 30 stalls")
-    .optional()
-    .default([]),
+    .min(1, "Choose at least one stall position on the plan")
+    .max(30, "Select up to 30 stalls"),
   companyName: companySchema,
   contactPerson: nameSchema,
   designation: nameSchema,
@@ -62,12 +75,36 @@ export const exhibitorEnquirySchema = z.object({
     .transform((value) => (value ? value.replace(/^https?:\/\//i, "") : "")),
   industry: z.string().min(1, "Select an industry"),
   productCategory: z.string().min(1, "Select a product category"),
-  stallSize: z.string().min(1, "Select a stall size"),
-  stalls: z.coerce
-    .number()
-    .int("Enter a whole number of stalls")
-    .min(1, "Minimum 1 stall")
-    .max(50, "Maximum 50 stalls"),
+  /** Derived from the selected stall codes rather than asked directly. */
+  stallSize: z.string().max(200, "Stall size is too long").optional().default(""),
+  /** Derived from the number of selected stall codes. */
+  stalls: z.coerce.number().int().min(1).max(50).optional().default(1),
+
+  /* Special requirements, captured in the final step. */
+  /** Electrical load in kW, e.g. "15" or "15-20". */
+  powerLoad: z
+    .string()
+    .trim()
+    .max(20, "Power load is too long")
+    .optional()
+    .default(""),
+  /** Machinery to be demonstrated, free text. */
+  machinery: z
+    .string()
+    .trim()
+    .max(1000, "Machinery details are too long")
+    .optional()
+    .default(""),
+  water: waterRequirementSchema.optional().default(""),
+  /** Branding needs: backdrop, signage, live branding, etc. */
+  branding: z
+    .string()
+    .trim()
+    .max(300, "Branding details are too long")
+    .optional()
+    .default(""),
+  sponsorship: sponsorshipInterestSchema.optional().default(""),
+
   message: z
     .string()
     .trim()

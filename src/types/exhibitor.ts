@@ -45,8 +45,15 @@ export interface ExhibitorEnquiry {
   productCategory: string;
   stallSize: string;
   stalls: number;
-  /** Stall codes chosen on the interactive floor plan, e.g. ["B42", "K7"]. */
+  /** Stall positions chosen on the interactive floor plan, e.g. ["B42", "K7"]. */
   stallCodes?: string[];
+  /** Approximate electrical load in kW. */
+  powerLoad?: string;
+  /** Machinery to be demonstrated on the stand. */
+  machinery?: string;
+  water?: string;
+  branding?: string;
+  sponsorship?: string;
   preferredLocation?: string;
   message?: string;
   source: string;

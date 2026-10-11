@@ -74,7 +74,7 @@ export default function BookYourStallPage() {
       <PageHero
         eyebrow="Book Your Stall"
         title="Start Your Exhibitor Enquiry"
-        description="Register in five steps — choose your city, review the floor plan, share your company details and confirm your stall requirement. Your enquiry is registered instantly and our exhibitions team contacts you as soon as possible."
+        description="Register in four steps — share your company details, choose the expo location, pick your stall position on the floor plan, and tell us any special requirements. Your enquiry is registered instantly and our exhibitions team contacts you as soon as possible."
         image="/images/hero/hero-book-stall.svg"
         crumbs={[
           { label: "Exhibitors", href: "/exhibitors" },
@@ -106,10 +106,11 @@ export default function BookYourStallPage() {
               Reserve Your Space
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-steel-600">
-              Five short steps: pick your expo location, review the floor plan,
-              share your company details, then confirm your stall size, product
-              category and industry. Your enquiry is registered instantly and
-              our team gets back to you with availability and pricing.
+              Four short steps: share your company and contact details, pick the
+              edition you want to exhibit in, choose your stall position on the
+              floor plan, then tell us any special requirements. Your enquiry is
+              registered instantly and our team gets back to you with
+              availability and pricing.
             </p>
 
             <div className="mt-7">

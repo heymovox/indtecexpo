@@ -137,6 +137,10 @@ export const PII_FIELDS = [
   "designation",
   "website",
   "message",
+  // Free-text requirement fields: exhibitors often name people or include
+  // contact details inside these, so treat them as PII too.
+  "machinery",
+  "branding",
 ] as const;
 
 export function encryptPii<T extends Record<string, unknown>>(

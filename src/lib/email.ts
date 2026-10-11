@@ -90,8 +90,21 @@ export function buildExhibitorEnquiryEmail(input: {
   stallSize: string;
   stalls: number;
   stallCodes?: string[];
+  powerLoad?: string;
+  machinery?: string;
+  water?: string;
+  branding?: string;
+  sponsorship?: string;
   productCategory: string;
 }): string {
+  const requirements = [
+    input.powerLoad ? `Power load : ${input.powerLoad} kW` : "",
+    input.water ? `Water      : ${input.water}` : "",
+    input.branding ? `Branding   : ${input.branding}` : "",
+    input.sponsorship ? `Sponsorship: ${input.sponsorship}` : "",
+    input.machinery ? `Machinery  : ${input.machinery}` : "",
+  ].filter(Boolean);
+
   return [
     `New stall enquiry — ${input.reference}`,
     "",
@@ -101,15 +114,18 @@ export function buildExhibitorEnquiryEmail(input: {
     `Email        : ${input.email}`,
     `Expos        : ${input.eventSlugs.join(", ")}`,
     `Product      : ${input.productCategory}`,
-    `Stall size   : ${input.stallSize}`,
+    `Stall size   : ${input.stallSize || "—"}`,
     `No. of stalls: ${input.stalls}`,
     ...(input.stallCodes?.length
       ? [
-          `Preferred    : ${input.stallCodes.join(", ")}`,
+          `Positions   : ${input.stallCodes.join(", ")}`,
           "",
           `The exhibitor picked the above stalls from the interactive floor plan.`,
           `Treat this as a preference request and confirm actual availability.`,
         ]
+      : []),
+    ...(requirements.length
+      ? ["", "Special requirements:", ...requirements.map((line) => `  ${line}`)]
       : []),
     "",
     `Contact the exhibitor as soon as possible with availability and pricing.`,
