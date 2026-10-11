@@ -104,59 +104,92 @@ export function StallPlanPicker({
       </div>
 
       {/* The plan ------------------------------------------------------ */}
-      <div className="mt-4 min-w-0 border border-steel-200 bg-white p-2 sm:p-3">
-        <div className="mx-auto w-full max-w-[40rem]">
-          <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-steel-400">
-            {plan.venue} · {plan.dates}
-          </p>
-          <div
-            className="grid gap-0.5 sm:gap-1"
-            // minmax(0, 1fr) lets the plan fit the available width. A fixed
-            // track size made the whole form wider than a phone viewport.
-            style={{
-              gridTemplateColumns: `repeat(${plan.rows[0].length}, minmax(0, 1fr))`,
-            }}
-            role="group"
-            aria-label={`Stall layout for ${plan.venue}`}
-          >
-            {plan.rows.flatMap((row, r) =>
-              row.map((code, c) => {
-                if (!code) {
-                  return (
-                    <div
-                      key={`${r}-${c}`}
-                      className="h-9 rounded-sm bg-steel-100/70 sm:h-11"
-                      aria-hidden="true"
-                    />
-                  );
-                }
-                const type = getStallType(plan, code);
-                if (!type) return null;
-                const isSelected = selectedSet.has(code);
-                const label = `${code} — ${type.name}, ${type.dimensions}, ${type.area} square metres`;
-                return (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => toggle(code)}
-                    aria-pressed={isSelected}
-                    title={label}
-                    className={cn(
-                      "flex h-9 items-center justify-center rounded-sm border text-[9px] font-semibold transition-colors sm:h-11 sm:text-[11px]",
-                      "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
-                      isSelected
-                        ? selectedToneClasses[type.tone]
-                        : toneClasses[type.tone],
-                    )}
-                  >
-                    {code}
-                  </button>
-                );
-              }),
-            )}
+      {(() => {
+        const cols = plan.rows[0].length;
+        // A narrow plan (Bengaluru, 12 columns) can scale to the screen. A
+        // dense one (Coimbatore, 20 columns) cannot: squeezing it makes the
+        // codes collide and overlap, so it pans at a readable cell size
+        // instead.
+        const fitsScreen = cols <= 14;
+        return (
+          <div className="mt-4 min-w-0 border border-steel-200 bg-white p-2 sm:p-3">
+            <div className={cn(fitsScreen ? "mx-auto w-full max-w-[40rem]" : "overflow-x-auto")}>
+              <div className={cn("mx-auto", fitsScreen ? "w-full" : "w-max")}>
+                <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-steel-400">
+                  {plan.venue} · {plan.dates}
+                </p>
+                <div
+                  className={cn("grid", fitsScreen ? "gap-0.5 sm:gap-1" : "gap-1")}
+                  style={{
+                    gridTemplateColumns: fitsScreen
+                      ? `repeat(${cols}, minmax(0, 1fr))`
+                      : `repeat(${cols}, 2.75rem)`,
+                  }}
+                  role="group"
+                  aria-label={`Stall layout for ${plan.venue}`}
+                >
+                  {plan.rows.flatMap((row, r) =>
+                    row.map((code, c) => {
+                      if (!code) {
+                        return (
+                          <div
+                            key={`${r}-${c}`}
+                            className={cn(
+                              "rounded-sm bg-steel-100/70",
+                              fitsScreen ? "h-9 sm:h-11" : "h-11",
+                            )}
+                            aria-hidden="true"
+                          />
+                        );
+                      }
+                      const type = getStallType(plan, code);
+                      if (!type) {
+                        // Labels such as ENTRY / EXIT are part of the
+                        // published plan but are not bookable stalls.
+                        return (
+                          <div
+                            key={code}
+                            className="flex h-11 items-center justify-center text-[8px] font-bold uppercase tracking-[0.06em] text-steel-400"
+                            title={code}
+                          >
+                            {code}
+                          </div>
+                        );
+                      }
+                      const isSelected = selectedSet.has(code);
+                      const label = `${code} — ${type.name}, ${type.dimensions}, ${type.area} square metres`;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => toggle(code)}
+                          aria-pressed={isSelected}
+                          title={label}
+                          className={cn(
+                            "flex items-center justify-center rounded-sm border font-semibold transition-colors",
+                            fitsScreen ? "h-9 text-[9px] sm:h-11 sm:text-[11px]" : "h-11 text-[11px]",
+                            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
+                            isSelected
+                              ? selectedToneClasses[type.tone]
+                              : toneClasses[type.tone],
+                          )}
+                        >
+                          {code}
+                        </button>
+                      );
+                    }),
+                  )}
+                </div>
+                {!fitsScreen ? (
+                  <p className="mt-2 text-center text-[10px] text-steel-400 sm:hidden">
+                    Swipe the plan sideways to see all stalls
+                  </p>
+                ) : null}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Selection summary --------------------------------------------- */}
       <div className="mt-4 border border-steel-200 bg-steel-25 p-4">
