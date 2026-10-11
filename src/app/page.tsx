@@ -37,7 +37,7 @@ const marqueeItems = [
 
 export default function HomePage() {
   const events = getSortedEvents();
-  const upcomingEvents = getUpcomingEvents(2);
+  const upcomingEvents = getUpcomingEvents(events.length);
   const featuredFaqs = faqs.filter((item) => item.group === "Exhibiting").slice(0, 5);
 
   return (
@@ -120,13 +120,20 @@ export default function HomePage() {
 
               <ul className="mt-4 grid gap-3">
                 {events.map((event) => {
-                  // The next two editions each get a live countdown; the third
-                  // stays a plain card so the column does not get too tall.
+                  // Every edition that has not finished yet gets a live
+                  // countdown; once one has run, the next takes over the "Next"
+                  // badge automatically.
                   const upcomingIndex = upcomingEvents.findIndex(
                     (upcoming) => upcoming.slug === event.slug,
                   );
                   const isNext = upcomingIndex === 0;
                   const hasCountdown = upcomingIndex > -1;
+                  const badge =
+                    upcomingIndex === 0
+                      ? "Next"
+                      : upcomingIndex === 1
+                        ? "Then"
+                        : "Later";
                   return (
                     <li key={event.slug}>
                       <Link
@@ -142,13 +149,15 @@ export default function HomePage() {
                               {event.dateRangeShort} · {event.days} Days
                             </p>
                           </div>
-                          {isNext ? (
-                            <span className="shrink-0 border border-gold-500/50 bg-gold-500/15 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-gold-500">
-                              Next
-                            </span>
-                          ) : hasCountdown ? (
-                            <span className="shrink-0 border border-white/25 bg-white/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-steel-300">
-                              Then
+                          {hasCountdown ? (
+                            <span
+                              className={`shrink-0 border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] ${
+                                isNext
+                                  ? "border-gold-500/50 bg-gold-500/15 text-gold-500"
+                                  : "border-white/25 bg-white/10 text-steel-300"
+                              }`}
+                            >
+                              {badge}
                             </span>
                           ) : null}
                         </div>
