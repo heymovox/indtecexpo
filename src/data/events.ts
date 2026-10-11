@@ -416,12 +416,22 @@ export function getSortedEvents(): ExpoEvent[] {
 }
 
 export function getNextEvent(now: Date = new Date()): ExpoEvent | null {
-  const sorted = getSortedEvents();
-  return (
-    sorted.find((event) => new Date(event.endDate).getTime() > now.getTime()) ??
-    sorted[sorted.length - 1] ??
-    null
+  return getUpcomingEvents(1, now)[0] ?? null;
+}
+
+/**
+ * The next `count` editions that have not finished yet, soonest first.
+ * Used by the hero to show countdowns for more than just the first edition.
+ */
+export function getUpcomingEvents(count = 2, now: Date = new Date()): ExpoEvent[] {
+  const upcoming = getSortedEvents().filter(
+    (event) => new Date(event.endDate).getTime() > now.getTime(),
   );
+  // Once the whole series has run, fall back to the last edition rather than
+  // rendering an empty hero.
+  return upcoming.length > 0
+    ? upcoming.slice(0, count)
+    : getSortedEvents().slice(-count);
 }
 
 export function getEventStatus(event: ExpoEvent, now: Date = new Date()) {

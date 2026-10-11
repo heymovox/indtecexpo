@@ -18,10 +18,12 @@ export function Countdown({
   target,
   className,
   size = "md",
+  label = "Countdown to next event",
 }: {
   target: string;
   className?: string;
   size?: "sm" | "md" | "lg";
+  label?: string;
 }) {
   const [time, setTime] = useState<ReturnType<typeof diff> | null>(null);
 
@@ -58,11 +60,11 @@ export function Countdown({
   ];
 
   return (
-    <div
-      className={cn("flex items-stretch gap-2", className)}
-      role="timer"
-      aria-label="Countdown to next event"
-    >
+      <div
+        className={cn("flex items-stretch gap-2", className)}
+        role="timer"
+        aria-label={label}
+      >
       {items.map((item) => (
         <div
           key={item.label}

@@ -16,7 +16,7 @@ import {
   whyVisitBenefits,
 } from "@/data/exhibitors";
 import { faqs } from "@/data/faqs";
-import { getSortedEvents, getNextEvent, seriesStats } from "@/data/events";
+import { getSortedEvents, getUpcomingEvents, seriesStats } from "@/data/events";
 import { floorPhotos } from "@/data/floorPhotos";
 import { faqJsonLd, JsonLd } from "@/lib/seo";
 
@@ -37,7 +37,7 @@ const marqueeItems = [
 
 export default function HomePage() {
   const events = getSortedEvents();
-  const nextEvent = getNextEvent();
+  const upcomingEvents = getUpcomingEvents(2);
   const featuredFaqs = faqs.filter((item) => item.group === "Exhibiting").slice(0, 5);
 
   return (
@@ -120,7 +120,13 @@ export default function HomePage() {
 
               <ul className="mt-4 grid gap-3">
                 {events.map((event) => {
-                  const isNext = event.slug === nextEvent?.slug;
+                  // The next two editions each get a live countdown; the third
+                  // stays a plain card so the column does not get too tall.
+                  const upcomingIndex = upcomingEvents.findIndex(
+                    (upcoming) => upcoming.slug === event.slug,
+                  );
+                  const isNext = upcomingIndex === 0;
+                  const hasCountdown = upcomingIndex > -1;
                   return (
                     <li key={event.slug}>
                       <Link
@@ -140,6 +146,10 @@ export default function HomePage() {
                             <span className="shrink-0 border border-gold-500/50 bg-gold-500/15 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-gold-500">
                               Next
                             </span>
+                          ) : hasCountdown ? (
+                            <span className="shrink-0 border border-white/25 bg-white/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-steel-300">
+                              Then
+                            </span>
                           ) : null}
                         </div>
 
@@ -154,12 +164,16 @@ export default function HomePage() {
                           </span>
                         </p>
 
-                        {isNext ? (
+                        {hasCountdown ? (
                           <div className="mt-4 border-t border-white/10 pt-4">
                             <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-steel-400">
-                              Countdown
+                              {isNext ? "Countdown" : "Also coming up"}
                             </p>
-                            <Countdown target={event.startDate} />
+                            <Countdown
+                              target={event.startDate}
+                              size="sm"
+                              label={`Countdown to INDTEC EXPO ${event.city}`}
+                            />
                           </div>
                         ) : null}
 
