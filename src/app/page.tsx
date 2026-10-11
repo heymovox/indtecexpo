@@ -107,6 +107,34 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
+
+              {/* Attendee rating card */}
+              <div className="mt-9 flex w-full max-w-lg flex-wrap items-center gap-x-6 gap-y-4 border border-white/15 bg-white/[0.06] p-4 backdrop-blur-sm sm:p-5">
+                <div className="flex items-center gap-3">
+                  <span className="display tabular text-4xl leading-none text-white">
+                    4.9
+                  </span>
+                  <div>
+                    <div
+                      className="flex items-center gap-0.5 text-gold-500"
+                      role="img"
+                      aria-label="Rated 4.9 out of 5"
+                    >
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <Icon key={index} name="star" size={16} className="fill-current" />
+                      ))}
+                    </div>
+                    <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-steel-400">
+                      550+ Industrial Reviews
+                    </p>
+                  </div>
+                </div>
+
+                <p className="min-w-[12rem] flex-1 border-l border-white/10 pl-6 text-xs leading-relaxed text-steel-300">
+                  Rated by buyers, plant heads and exhibitors who visited the
+                  previous INDTEC EXPO editions.
+                </p>
+              </div>
             </div>
 
             {/* All three editions as cards */}
