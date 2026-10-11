@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -409,61 +408,30 @@ export function StallEnquiryForm() {
 
       {planEvent ? (
         <div className="mt-5">
+          {/* Every edition has a plan, so there is no static-image fallback:
+              the plan is shown rather than offered as a download. */}
           {plan ? (
-            <>
-              <StallPlanPicker
-                plan={plan}
-                selected={form.stallCodes}
-                onToggle={(code) =>
-                  setForm((prev) => {
-                    const has = prev.stallCodes.includes(code);
-                    const next = has
-                      ? prev.stallCodes.filter((item) => item !== code)
-                      : [...prev.stallCodes, code];
-                    return { ...prev, stallCodes: next };
-                  })
-                }
-                onReplace={(codes) =>
-                  setForm((prev) => ({ ...prev, stallCodes: codes }))
-                }
-              />
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-steel-500">
-                <span>
-                  {planEvent.venue.name} · {planEvent.venue.address}
-                </span>
-                <a
-                  href={planEvent.floorPlanPdf}
-                  className="link-underline font-semibold uppercase tracking-[0.12em] text-brand-600"
-                  download
-                >
-                  Download PDF
-                </a>
-              </div>
-            </>
-          ) : (
-            <figure className="min-w-0 border border-steel-200 bg-white p-3 sm:p-4">
-              <Image
-                src={planEvent.floorPlanImage}
-                alt={`Floor plan of ${planEvent.name} at ${planEvent.venue.name}`}
-                width={960}
-                height={640}
-                className="h-auto w-full"
-                sizes="(max-width: 1024px) 100vw, 620px"
-              />
-              <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-steel-100 pt-3 text-xs text-steel-500">
-                <span>
-                  {planEvent.venue.name} · {planEvent.venue.address}
-                </span>
-                <a
-                  href={planEvent.floorPlanPdf}
-                  className="link-underline font-semibold uppercase tracking-[0.12em] text-brand-600"
-                  download
-                >
-                  Download PDF
-                </a>
-              </figcaption>
-            </figure>
-          )}
+            <StallPlanPicker
+              plan={plan}
+              selected={form.stallCodes}
+              onToggle={(code) =>
+                setForm((prev) => {
+                  const has = prev.stallCodes.includes(code);
+                  const next = has
+                    ? prev.stallCodes.filter((item) => item !== code)
+                    : [...prev.stallCodes, code];
+                  return { ...prev, stallCodes: next };
+                })
+              }
+              onReplace={(codes) =>
+                setForm((prev) => ({ ...prev, stallCodes: codes }))
+              }
+            />
+          ) : null}
+
+          <p className="mt-4 text-xs text-steel-500">
+            {planEvent.venue.name} · {planEvent.venue.address}
+          </p>
 
           <div className="mt-5 overflow-x-auto border border-steel-200 bg-white">
             {/* No min-width: the three columns compress to fit any phone so

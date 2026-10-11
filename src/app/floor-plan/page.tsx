@@ -1,17 +1,21 @@
-import Image from "next/image";
-
 import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
+import { StallPlanView } from "@/components/exhibitors/StallPlanView";
 import { getSortedEvents } from "@/data/events";
+import {
+  formatRupees,
+  getStallPlan,
+  listStallCodes,
+} from "@/data/floorPlans";
 import { buildMetadata } from "@/lib/seo";
 import { whatsappLinks } from "@/lib/whatsapp";
 
 export const metadata = buildMetadata({
   title: "Floor Plan & Stall Layout",
   description:
-    "Download the INDTEC EXPO 2026–2027 floor plans for Bengaluru, Coimbatore and Hosur. Stall dimensions, aisle widths, zoning notes and PDF downloads for every edition.",
+    "View the INDTEC EXPO 2026–2027 floor plans for Bengaluru, Coimbatore and Hosur. Every stall position, its dimensions and the pricing for each edition.",
   path: "/floor-plan",
 });
 
@@ -50,13 +54,14 @@ const zoningNotes: { icon: IconName; title: string; text: string }[] = [
 
 export default function FloorPlanPage() {
   const events = getSortedEvents();
+  const bengaluruPlan = getStallPlan("bengaluru");
 
   return (
     <>
       <PageHero
         eyebrow="Floor Plan"
         title="Plan Your Stall. Plan Your Walk."
-        description="Every INDTEC EXPO edition is laid out for business flow — sector zones, demonstration bays and buyer registration positioned so footfall reaches every aisle. Download the plans below."
+        description="Every INDTEC EXPO edition is laid out for business flow — sector zones, demonstration bays and buyer registration positioned so footfall reaches every aisle. View the plans below."
         image="/images/hero/hero-floorplan.svg"
         crumbs={[{ label: "Floor Plan" }]}
         compact
@@ -97,49 +102,37 @@ export default function FloorPlanPage() {
       </Section>
 
       {/* Per-event plans */}
-      {events.map((event, index) => (
-        <Section key={event.slug} tone={index % 2 === 0 ? "light" : "white"} id={index === 0 ? "plans" : undefined}>
-          <SectionHeading
-            eyebrow={`${event.city} Edition · ${event.dateRangeShort}`}
-            title={`${event.city} Floor Plan`}
-            description={`${event.venue.name}, ${event.venue.locality}. ${event.summary}`}
-            action={
-              <div className="flex flex-wrap gap-2">
-                <Button href={event.floorPlanPdf} variant="secondary" size="sm">
-                  <Icon name="download" size={15} className="mr-1.5" />
-                  Download PDF
-                </Button>
+      {events.map((event, index) => {
+        const plan = getStallPlan(event.slug);
+        const stallCount = plan ? listStallCodes(plan).length : null;
+
+        return (
+          <Section
+            key={event.slug}
+            tone={index % 2 === 0 ? "light" : "white"}
+            id={index === 0 ? "plans" : undefined}
+          >
+            <SectionHeading
+              eyebrow={`${event.city} Edition · ${event.dateRangeShort}`}
+              title={`${event.city} Floor Plan`}
+              description={`${event.venue.name}, ${event.venue.locality}. ${
+                stallCount
+                  ? `${stallCount} stall positions shown below.`
+                  : ""
+              }`}
+              action={
                 <Button href={`/events/${event.slug}`} variant="outline" size="sm">
                   Event Details
                 </Button>
-              </div>
-            }
-          />
+              }
+            />
 
-          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-            <figure className="min-w-0 border border-steel-200 bg-white p-3 sm:p-4">
-              <Image
-                src={event.floorPlanImage}
-                alt={`Floor plan of ${event.name} at ${event.venue.name}`}
-                width={960}
-                height={640}
-                className="h-auto w-full"
-                sizes="(max-width: 1024px) 100vw, 560px"
-                loading="lazy"
-              />
-              <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-steel-100 pt-3 text-xs text-steel-500">
-                <span>
-                  {event.venue.name} · {event.venue.address}
-                </span>
-                <a
-                  href={event.floorPlanPdf}
-                  className="link-underline font-semibold uppercase tracking-[0.12em] text-brand-600"
-                  download
-                >
-                  PDF · {event.city} Floor Plan
-                </a>
-              </figcaption>
-            </figure>
+            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+              {plan ? (
+                <div className="min-w-0">
+                  <StallPlanView plan={plan} />
+                </div>
+              ) : null}
 
             <div className="min-w-0">
               <h3 className="display-sm text-lg text-navy-900 sm:text-xl">
@@ -213,7 +206,7 @@ export default function FloorPlanPage() {
                 </Button>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-2">
+                <div className="mt-6 flex flex-wrap gap-2">
                 {event.sectors.map((sector) => (
                   <Badge key={sector} tone="brand">
                     {sector}
@@ -223,7 +216,8 @@ export default function FloorPlanPage() {
             </div>
           </div>
         </Section>
-      ))}
+        );
+      })}
 
       {/* Footer CTA */}
       <Section tone="muted" className="grid-surface-dark">
@@ -250,16 +244,28 @@ export default function FloorPlanPage() {
             </div>
           </div>
 
+          {/* Derived from the Bengaluru plan and its space schemes rather than
+              hardcoded, so this list cannot drift from the pricing above. */}
           <ul className="space-y-4 border-l border-white/10 lg:pl-10">
-            {[
-              { label: "Raw Space", value: "6 m × 3 m min." },
-              { label: "Shell Scheme", value: "3 m × 3 m" },
-              { label: "Premium Corner", value: "6 m × 6 m" },
-              { label: "Main Aisle", value: "4 m width" },
-            ].map((item) => (
+            {(bengaluruPlan
+              ? [
+                  ...Object.values(bengaluruPlan.types)
+                    .filter((type) => !type.sponsorship)
+                    .sort((a, b) => b.area - a.area)
+                    .map((type) => ({
+                      label: type.name,
+                      value: `${type.dimensions} · ${type.area} m²`,
+                    })),
+                  ...bengaluruPlan.schemes.map((scheme) => ({
+                    label: scheme.name,
+                    value: `${formatRupees(scheme.pricePerSqM)} / m²`,
+                  })),
+                ]
+              : []
+            ).map((item) => (
               <li
                 key={item.label}
-                className="flex items-baseline justify-between border-b border-white/10 pb-3 last:border-0"
+                className="flex items-baseline justify-between gap-4 border-b border-white/10 pb-3 last:border-0"
               >
                 <span className="text-sm uppercase tracking-[0.14em] text-steel-400">
                   {item.label}

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { EventCard } from "@/components/events/EventCard";
 import { HighlightGallery } from "@/components/events/HighlightGallery";
+import { StallPlanView } from "@/components/exhibitors/StallPlanView";
 import { Button } from "@/components/ui/Button";
 import { Countdown } from "@/components/ui/Countdown";
 import { ExhibitorCTA, StatStrip } from "@/components/ui/CTA";
@@ -11,6 +12,7 @@ import { Icon } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Badge, Section, SectionHeading } from "@/components/ui/Section";
 import { eventBySlug, eventSlugs, getSortedEvents } from "@/data/events";
+import { getStallPlan } from "@/data/floorPlans";
 import {
   JsonLd,
   breadcrumbJsonLd,
@@ -63,6 +65,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   const relatedEvents = getSortedEvents().filter(
     (item) => item.slug !== event.slug,
   );
+
+  const plan = getStallPlan(event.slug);
 
   return (
     <>
@@ -535,16 +539,14 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                 Floor Plan · {event.city}
               </span>
             </div>
-            <div className="relative bg-white p-4 sm:p-6">
-              <Image
-                src={event.floorPlanImage}
-                alt={`Floor plan of ${event.venue.name} for INDTEC EXPO ${event.city}`}
-                width={960}
-                height={600}
-                className="h-auto w-full border border-steel-200"
-                sizes="(max-width: 1024px) 100vw, 560px"
-                loading="lazy"
-              />
+            <div className="relative min-w-0 bg-white p-4 sm:p-6">
+              {plan ? (
+                <StallPlanView plan={plan} />
+              ) : (
+                <p className="text-sm text-steel-500">
+                  The floor plan for {event.city} will be published shortly.
+                </p>
+              )}
             </div>
             <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-steel-200 px-6 py-5">
               <p className="text-xs leading-relaxed text-steel-500">

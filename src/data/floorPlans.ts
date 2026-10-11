@@ -39,8 +39,17 @@ export interface StallPlan {
   rows: string[][];
   types: Record<string, StallTypeSpec>;
   schemes: SpaceScheme[];
-  /** Two-letter (or one) prefix used for grouping, e.g. "B" from "B42". */
-  prefixOf: (code: string) => string;
+}
+
+/**
+ * Stall type prefix for a code, e.g. "B" from "B42".
+ *
+ * A standalone function rather than a member on StallPlan: these objects are
+ * passed into client components, and a function property cannot cross the
+ * server/client boundary.
+ */
+export function stallPrefix(code: string): string {
+  return code.match(/^[A-Z]+/)?.[0] ?? code;
 }
 
 const BENGALURU_TYPES: Record<string, StallTypeSpec> = {
@@ -121,7 +130,6 @@ export const bengaluruStallPlan: StallPlan = {
     { name: "Shell Space Scheme", pricePerSqM: 10000 },
     { name: "Bare Space Scheme", pricePerSqM: 9000 },
   ],
-  prefixOf: (code) => (code.match(/^[A-Z]+/)?.[0] ?? code),
 };
 
 const COIMBATORE_TYPES: Record<string, StallTypeSpec> = {
@@ -216,7 +224,6 @@ export const coimbatoreStallPlan: StallPlan = {
     { name: "Shell Space Scheme", pricePerSqM: 10000 },
     { name: "Bare Space Scheme", pricePerSqM: 9000 },
   ],
-  prefixOf: (code) => (code.match(/^[A-Z]+/)?.[0] ?? code),
 };
 
 const HOSUR_TYPES: Record<string, StallTypeSpec> = {
@@ -303,7 +310,6 @@ export const hosurStallPlan: StallPlan = {
     { name: "Shell Space Scheme", pricePerSqM: 8000 },
     { name: "Bare Space Scheme", pricePerSqM: 7000 },
   ],
-  prefixOf: (code) => (code.match(/^[A-Z]+/)?.[0] ?? code),
 };
 
 export const stallPlans: Record<string, StallPlan> = {
@@ -320,7 +326,7 @@ export function getStallType(
   plan: StallPlan,
   code: string,
 ): StallTypeSpec | null {
-  return plan.types[plan.prefixOf(code)] ?? null;
+  return plan.types[stallPrefix(code)] ?? null;
 }
 
 /**
