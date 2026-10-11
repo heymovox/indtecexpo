@@ -13,6 +13,7 @@ import { sponsorTiers } from "@/data/sponsors";
 import { galleryImages, galleryCategories } from "@/data/gallery";
 import { mediaArticles } from "@/data/media";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { StorageManager } from "@/components/admin/StorageManager";
 import { RecordsTable, type RecordsTableRow } from "../RecordsTable";
 import { EventEditor, type EventEditValues } from "../EventEditor";
 
@@ -491,7 +492,11 @@ export default async function AdminSectionPage({
       description = "Published gallery images by category.";
       body = (
         <div className="space-y-4">
-          <ReadOnlyNote />
+          <StorageManager
+            folder="gallery"
+            title="Upload gallery images"
+            hint="Images uploaded here are stored in Cloudflare R2 and listed below. The site gallery still uses the curated set; these are for review and future publishing."
+          />
           {galleryPanel()}
         </div>
       );
@@ -500,7 +505,11 @@ export default async function AdminSectionPage({
       description = "Floor plan assets linked to each event.";
       body = (
         <div className="space-y-4">
-          <ReadOnlyNote />
+          <StorageManager
+            folder="floor-plans"
+            title="Upload floor plan artwork"
+            hint="Floor plans shown on the site are rendered from stall data. Upload source artwork or supporting drawings here."
+          />
           {floorPlanPanel()}
         </div>
       );
@@ -509,6 +518,11 @@ export default async function AdminSectionPage({
       description = "News, press releases and industry coverage.";
       body = (
         <div className="space-y-4">
+          <StorageManager
+            folder="media"
+            title="Upload media artwork"
+            hint="Press images, posters and article artwork are stored in Cloudflare R2. Copy a link to use it anywhere on the site."
+          />
           <ReadOnlyNote />
           {articlesPanel()}
         </div>

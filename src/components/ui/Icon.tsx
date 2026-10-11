@@ -63,7 +63,8 @@ export type IconName =
   | "settings"
   | "logout"
   | "refresh"
-  | "eye";
+  | "eye"
+  | "upload";
 
 const paths: Record<IconName, React.ReactNode> = {
   machine: (
@@ -264,10 +265,16 @@ const paths: Record<IconName, React.ReactNode> = {
   "chevron-down": <path d="m5 8.5 7 7 7-7" />,
   "chevron-right": <path d="m8.5 5 7 7-7 7" />,
   download: (
-    <>
-      <path d="M12 3v12m-5-5 5 5 5-5" />
-      <path d="M4 19h16" />
-    </>
+  <>
+  <path d="M12 3v12m-5-5 5 5 5-5" />
+  <path d="M4 19h16" />
+  </>
+  ),
+  upload: (
+  <>
+  <path d="M12 21V9m-5 5 5-5 5 5" />
+  <path d="M4 5h16" />
+  </>
   ),
   "zoom-in": (
     <>
