@@ -2,9 +2,9 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import {
   ADMIN_SESSION_COOKIE,
-  createSessionToken,
+  authenticateAdmin,
+  issueSession,
   sessionCookieOptions,
-  verifyCredentials,
 } from "@/lib/admin-auth";
 import { clientIp, isSameOrigin, rateLimit } from "@/lib/protection";
 import { adminLoginSchema, flattenErrors } from "@/lib/validations";
@@ -30,23 +30,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password } = result.data;
-    if (!verifyCredentials(email, password)) {
-      return Response.json(
-        { ok: false, message: "Invalid email or password." },
-        { status: 401 },
-      );
-    }
+      const { email, password } = result.data;
+      const admin = await authenticateAdmin(email, password);
+      if (!admin) {
+        return Response.json(
+          { ok: false, message: "Invalid email or password." },
+          { status: 401 },
+        );
+      }
 
-    const jar = await cookies();
-    // Mark the cookie Secure only when the request actually arrived over TLS,
-    // so a local `next start` preview on http://localhost still works.
-    jar.set(ADMIN_SESSION_COOKIE, createSessionToken(), {
-      ...sessionCookieOptions,
-      secure: request.nextUrl.protocol === "https:",
-    });
+      const { token, expiresAt } = await issueSession(admin.id, {
+        userAgent: request.headers.get("user-agent"),
+        ip: clientIp(request),
+      });
 
-    return Response.json({ ok: true, redirect: "/admin" });
+      const jar = await cookies();
+      // Mark the cookie Secure only when the request actually arrived over TLS,
+      // so a local `next start` preview on http://localhost still works.
+      jar.set(ADMIN_SESSION_COOKIE, token, {
+        ...sessionCookieOptions,
+        secure: request.nextUrl.protocol === "https:",
+        expires: expiresAt,
+      });
+
+      return Response.json({
+        ok: true,
+        redirect: "/admin",
+        admin: { email: admin.email, name: admin.name, role: admin.role },
+      });
   } catch (error) {
     console.error("[api/admin/login]", error);
     return serverError();

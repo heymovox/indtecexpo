@@ -46,7 +46,9 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+    // method="post" is a safety net: if React never hydrates, a native submit
+    // would otherwise GET these credentials into the URL and server logs.
+    <form onSubmit={handleSubmit} method="post" className="space-y-5" noValidate>
       {error ? <FormAlert type="error">{error}</FormAlert> : null}
 
       <Field label="Email address" htmlFor="admin-email" required>

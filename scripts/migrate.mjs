@@ -44,6 +44,30 @@ const queries = [
      ON records (collection, created_at DESC);`,
   `CREATE INDEX IF NOT EXISTS records_collection_slug_idx
      ON records (collection, (data ->> 'slug'));`,
+  `CREATE TABLE IF NOT EXISTS admin_users (
+     id            TEXT PRIMARY KEY,
+     email         TEXT NOT NULL UNIQUE,
+     name          TEXT,
+     role          TEXT NOT NULL DEFAULT 'editor',
+     password_hash TEXT NOT NULL,
+     created_at    TEXT NOT NULL,
+     updated_at    TEXT,
+     last_login_at TEXT,
+     disabled_at   TEXT
+   );`,
+  `CREATE TABLE IF NOT EXISTS admin_sessions (
+     id         TEXT PRIMARY KEY,
+     admin_id   TEXT NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+     created_at TEXT NOT NULL,
+     expires_at TEXT NOT NULL,
+     revoked_at TEXT,
+     user_agent TEXT,
+     ip         TEXT
+   );`,
+  `CREATE INDEX IF NOT EXISTS admin_sessions_admin_id_idx
+     ON admin_sessions (admin_id);`,
+  `CREATE INDEX IF NOT EXISTS admin_sessions_expires_at_idx
+     ON admin_sessions (expires_at);`,
 ];
 
 const sql = neon(url);

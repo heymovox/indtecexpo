@@ -186,3 +186,183 @@ export function rowsToRecords<T>(rows: Record<string, unknown>[]): T[] {
   }
   return out;
 }
+/* ------------------------------------------------------------------------- *
+ * Admin accounts and sessions
+ *
+ * Kept here (rather than inline in lib/admin-db.ts) so the statements can be
+ * exercised against a real Postgres engine by scripts/verify-db.mjs.
+ * ------------------------------------------------------------------------- */
+
+/** Roles are ordered; `roleAtLeast` compares them by rank. */
+export const ADMIN_ROLES = ["editor", "admin", "superadmin"] as const;
+export type AdminRole = (typeof ADMIN_ROLES)[number];
+
+export function isAdminRole(value: unknown): value is AdminRole {
+  return (
+    typeof value === "string" &&
+    (ADMIN_ROLES as readonly string[]).includes(value)
+  );
+}
+
+const ROLE_RANK: Record<AdminRole, number> = {
+  editor: 1,
+  admin: 2,
+  superadmin: 3,
+};
+
+/** True when `role` is at least as privileged as `minimum`. */
+export function roleAtLeast(role: AdminRole, minimum: AdminRole): boolean {
+  return ROLE_RANK[role] >= ROLE_RANK[minimum];
+}
+
+export const ADMIN_USER_COLUMNS = `
+  id, email, name, role, password_hash,
+  created_at, updated_at, last_login_at, disabled_at
+`;
+
+export const COUNT_ADMIN_USERS = `
+  SELECT COUNT(*)::int AS total FROM admin_users;
+`;
+
+export const SELECT_ADMIN_USER_BY_EMAIL = `
+  SELECT ${ADMIN_USER_COLUMNS}
+  FROM admin_users
+  WHERE email = $1
+  LIMIT 1;
+`;
+
+export const SELECT_ADMIN_USER_BY_ID = `
+  SELECT ${ADMIN_USER_COLUMNS}
+  FROM admin_users
+  WHERE id = $1
+  LIMIT 1;
+`;
+
+export const SELECT_ADMIN_USERS = `
+  SELECT ${ADMIN_USER_COLUMNS}
+  FROM admin_users
+  ORDER BY created_at ASC;
+`;
+
+export const INSERT_ADMIN_USER = `
+  INSERT INTO admin_users
+    (id, email, name, role, password_hash, created_at, updated_at)
+  VALUES ($1, $2, $3, $4, $5, $6, $7)
+  ON CONFLICT (email) DO NOTHING
+  RETURNING ${ADMIN_USER_COLUMNS};
+`;
+
+export const UPDATE_ADMIN_USER_PASSWORD = `
+  UPDATE admin_users
+  SET password_hash = $1, updated_at = $2
+  WHERE id = $3
+  RETURNING ${ADMIN_USER_COLUMNS};
+`;
+
+export const UPDATE_ADMIN_USER_PROFILE = `
+  UPDATE admin_users
+  SET name = $1, role = $2, updated_at = $3
+  WHERE id = $4
+  RETURNING ${ADMIN_USER_COLUMNS};
+`;
+
+export const ENABLE_ADMIN_USER = `
+  UPDATE admin_users
+  SET disabled_at = NULL, updated_at = $1
+  WHERE id = $2
+  RETURNING ${ADMIN_USER_COLUMNS};
+`;
+
+export const DISABLE_ADMIN_USER = `
+  UPDATE admin_users
+  SET disabled_at = $1, updated_at = $1
+  WHERE id = $2
+  RETURNING ${ADMIN_USER_COLUMNS};
+`;
+
+export const DELETE_ADMIN_USER = `
+  DELETE FROM admin_users WHERE id = $1 RETURNING id;
+`;
+
+export const TOUCH_ADMIN_LAST_LOGIN = `
+  UPDATE admin_users SET last_login_at = $1 WHERE id = $2;
+`;
+
+export const INSERT_ADMIN_SESSION = `
+  INSERT INTO admin_sessions
+    (id, admin_id, created_at, expires_at, user_agent, ip)
+  VALUES ($1, $2, $3, $4, $5, $6)
+  RETURNING id, expires_at;
+`;
+
+export const SELECT_ACTIVE_SESSION = `
+  SELECT s.id            AS session_id,
+         s.expires_at    AS session_expires_at,
+         u.id            AS admin_id,
+         u.email, u.name, u.role,
+         u.last_login_at, u.disabled_at
+  FROM admin_sessions s
+  JOIN admin_users u ON u.id = s.admin_id
+  WHERE s.id = $1
+    AND s.revoked_at IS NULL
+    AND u.disabled_at IS NULL
+  LIMIT 1;
+`;
+
+export const REVOKE_SESSION = `
+  UPDATE admin_sessions
+  SET revoked_at = $1
+  WHERE id = $2 AND revoked_at IS NULL
+  RETURNING id;
+`;
+
+export const REVOKE_SESSIONS_FOR_ADMIN = `
+  UPDATE admin_sessions
+  SET revoked_at = $1
+  WHERE admin_id = $2 AND revoked_at IS NULL
+  RETURNING id;
+`;
+
+export const DELETE_EXPIRED_SESSIONS = `
+  DELETE FROM admin_sessions WHERE expires_at < $1 RETURNING id;
+`;
+
+/** Maps an `admin_users` row to the shape used across the app. */
+export function rowToAdminUser(
+  row: Record<string, unknown> | null | undefined,
+): AdminUserRow | null {
+  if (!row || !row.id) return null;
+  const role = isAdminRole(row.role) ? row.role : "editor";
+  return {
+    id: String(row.id),
+    email: String(row.email),
+    name: row.name === null || row.name === undefined ? null : String(row.name),
+    role,
+    passwordHash: String(row.password_hash ?? ""),
+    createdAt: String(row.created_at ?? ""),
+    updatedAt:
+      row.updated_at === null || row.updated_at === undefined
+        ? null
+        : String(row.updated_at),
+    lastLoginAt:
+      row.last_login_at === null || row.last_login_at === undefined
+        ? null
+        : String(row.last_login_at),
+    disabledAt:
+      row.disabled_at === null || row.disabled_at === undefined
+        ? null
+        : String(row.disabled_at),
+  };
+}
+
+export interface AdminUserRow {
+  id: string;
+  email: string;
+  name: string | null;
+  role: AdminRole;
+  passwordHash: string;
+  createdAt: string;
+  updatedAt: string | null;
+  lastLoginAt: string | null;
+  disabledAt: string | null;
+}

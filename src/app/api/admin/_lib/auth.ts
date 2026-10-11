@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 import {
   ADMIN_SESSION_COOKIE,
-  verifySessionToken,
+  canAccess,
+  resolveSession,
+  type AdminIdentity,
+  type AdminRole,
 } from "@/lib/admin-auth";
 
 export function unauthorized(): Response {
@@ -32,9 +35,20 @@ export function serverError(): Response {
   );
 }
 
-export async function isAdminAuthenticated(): Promise<boolean> {
-  const jar = await cookies();
-  return verifySessionToken(jar.get(ADMIN_SESSION_COOKIE)?.value);
+/**
+ * Resolves the caller from the session cookie.
+ *
+ * Unlike the edge proxy, which only checks the signature, this consults the
+ * database so revoked sessions and disabled accounts are rejected immediately.
+ */
+export async function getAdmin(): Promise<AdminIdentity | null> {
+  try {
+    const jar = await cookies();
+    return await resolveSession(jar.get(ADMIN_SESSION_COOKIE)?.value);
+  } catch (error) {
+    console.error("[admin-auth] session lookup failed", error);
+    return null;
+  }
 }
 
 /**
@@ -43,6 +57,16 @@ export async function isAdminAuthenticated(): Promise<boolean> {
  * request may proceed.
  */
 export async function requireAdmin(): Promise<Response | null> {
-  const authed = await isAdminAuthenticated();
-  return authed ? null : unauthorized();
+  const admin = await getAdmin();
+  return admin ? null : unauthorized();
+}
+
+/**
+ * Role guard. `requireRole("admin")` admits admins and superadmins but not
+ * editors. Returns a 403 when the caller is authenticated but under-privileged.
+ */
+export async function requireRole(minimum: AdminRole): Promise<Response | null> {
+  const admin = await getAdmin();
+  if (!admin) return unauthorized();
+  return canAccess(admin, minimum) ? null : forbidden();
 }
