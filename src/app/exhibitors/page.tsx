@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { contactConfig } from "@/config/site";
-import { getSortedEvents } from "@/data/events";
+import { getSortedEvents, seriesStats } from "@/data/events";
 import { whyExhibitBenefits } from "@/data/exhibitors";
 import { faqsByGroup } from "@/data/faqs";
 import { faqJsonLd, JsonLd, buildMetadata } from "@/lib/seo";
@@ -22,13 +22,6 @@ export const metadata = buildMetadata({
     "machine tools exhibition stall",
   ],
 });
-
-const sumStatValue = (events: ReturnType<typeof getSortedEvents>, label: string): number =>
-  events.reduce((total, event) => {
-    const stat = event.stats.find((item) => item.label === label);
-    if (!stat) return total;
-    return total + Number(stat.value.replace(/[^\d]/g, ""));
-  }, 0);
 
 const bookingSteps = [
   {
@@ -61,16 +54,7 @@ export default function ExhibitorsPage() {
   const events = getSortedEvents();
   const exhibitingFaqs = faqsByGroup("Exhibiting");
 
-  const totalDays = events.reduce((total, event) => total + event.days, 0);
-  const totalVisitors = sumStatValue(events, "Visitors");
-  const totalExhibitors = sumStatValue(events, "Exhibitors");
-
-  const audienceStats = [
-    { value: String(events.length), label: "Industrial Editions" },
-    { value: `${totalVisitors.toLocaleString("en-IN")}+`, label: "Qualified Visitors" },
-    { value: `${totalExhibitors.toLocaleString("en-IN")}+`, label: "Exhibitors Across Series" },
-    { value: String(totalDays), label: "Business Days" },
-  ];
+  const audienceStats = seriesStats;
 
   return (
     <>

@@ -6,7 +6,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { EventCard } from "@/components/events/EventCard";
 import { contactConfig, siteConfig } from "@/config/site";
-import { getSortedEvents } from "@/data/events";
+import { getSortedEvents, seriesStats } from "@/data/events";
 import { faqsByGroup } from "@/data/faqs";
 import { whyVisitBenefits, visitorPrerequisites } from "@/data/exhibitors";
 import { buildMetadata } from "@/lib/seo";
@@ -19,29 +19,11 @@ export const metadata = buildMetadata({
   path: "/visitors",
 });
 
-function sumStat(
-  events: ReturnType<typeof getSortedEvents>,
-  label: string,
-): string {
-  const total = events.reduce((sum, event) => {
-    const stat = event.stats.find((item) => item.label === label);
-    if (!stat) return sum;
-    const digits = stat.value.replace(/\D/g, "");
-    return sum + (digits ? parseInt(digits, 10) : 0);
-  }, 0);
-  return total > 0 ? `${total.toLocaleString("en-IN")}+` : "—";
-}
-
 export default function VisitorsPage() {
   const events = getSortedEvents();
   const visitingFaqs = faqsByGroup("Visiting");
 
-  const attendanceStats = [
-    { value: String(events.length), label: "Industrial Cities" },
-    { value: sumStat(events, "Exhibitors"), label: "Exhibitors Across Series" },
-    { value: sumStat(events, "Visitors"), label: "Qualified Visitors" },
-    { value: String(events.reduce((sum, e) => sum + e.days, 0)), label: "Business Days" },
-  ];
+  const attendanceStats = seriesStats;
 
   return (
     <>

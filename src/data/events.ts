@@ -1,5 +1,20 @@
 import type { ExpoEvent } from "@/types/event";
 
+/**
+ * Headline figures for the expo series, shared by the home hero, the
+ * exhibitor/visitor pages and every edition's stat strip.
+ *
+ * Defined once so the numbers can never drift apart between pages — these are
+ * series-level figures, so they are deliberately NOT summed across editions.
+ */
+export const seriesStats = [
+  { value: "3", label: "Industrial Hubs" },
+  { value: "500+", label: "Exhibitors" },
+  { value: "800+", label: "Stalls" },
+  { value: "30,000+", label: "Industrial Visitors" },
+  { value: "50+", label: "Industrial Associations" },
+];
+
 export const events: ExpoEvent[] = [
   {
     id: "evt-bengaluru-2026",
@@ -99,10 +114,11 @@ export const events: ExpoEvent[] = [
       { name: "Royal Sponsor", code: "R", price: "₹6 lakh" },
     ],
     stats: [
-      { label: "Exhibitors", value: "350+" },
-      { label: "Visitors", value: "25,000+" },
-      { label: "Product Categories", value: "40+" },
-      { label: "Business Days", value: "3" },
+      { label: "Industrial Hubs", value: "3" },
+      { label: "Exhibitors", value: "500+" },
+      { label: "Stalls", value: "800+" },
+      { label: "Industrial Visitors", value: "30,000+" },
+      { label: "Industrial Associations", value: "50+" },
     ],
     schedule: [
       {
@@ -226,10 +242,11 @@ export const events: ExpoEvent[] = [
       { name: "Royal Sponsor", code: "R", price: "₹10 lakh" },
     ],
     stats: [
-      { label: "Exhibitors", value: "300+" },
-      { label: "Visitors", value: "20,000+" },
-      { label: "Product Categories", value: "35+" },
-      { label: "Business Days", value: "3" },
+      { label: "Industrial Hubs", value: "3" },
+      { label: "Exhibitors", value: "500+" },
+      { label: "Stalls", value: "800+" },
+      { label: "Industrial Visitors", value: "30,000+" },
+      { label: "Industrial Associations", value: "50+" },
     ],
     schedule: [
       {
@@ -352,10 +369,11 @@ export const events: ExpoEvent[] = [
       { name: "Royal Sponsor", code: "R", price: "₹6 lakh" },
     ],
     stats: [
-      { label: "Exhibitors", value: "320+" },
-      { label: "Visitors", value: "22,000+" },
-      { label: "Product Categories", value: "38+" },
-      { label: "Business Days", value: "4" },
+      { label: "Industrial Hubs", value: "3" },
+      { label: "Exhibitors", value: "500+" },
+      { label: "Stalls", value: "800+" },
+      { label: "Industrial Visitors", value: "30,000+" },
+      { label: "Industrial Associations", value: "50+" },
     ],
     schedule: [
       {

@@ -16,16 +16,11 @@ import {
   whyVisitBenefits,
 } from "@/data/exhibitors";
 import { faqs } from "@/data/faqs";
-import { getSortedEvents, getNextEvent } from "@/data/events";
+import { getSortedEvents, getNextEvent, seriesStats } from "@/data/events";
 import { floorPhotos } from "@/data/floorPhotos";
 import { faqJsonLd, JsonLd } from "@/lib/seo";
 
-const heroStats = [
-  { value: "3", label: "Industrial Cities" },
-  { value: "7,000+", label: "Exhibitors Across Series" },
-  { value: "67,000+", label: "Qualified Visitors" },
-  { value: "40+", label: "Product Categories" },
-];
+const heroStats = seriesStats;
 
 const marqueeItems = [
   "Machine Tools & CNC",
@@ -72,7 +67,7 @@ export default function HomePage() {
 
               <p className="mt-6 max-w-2xl text-base leading-relaxed text-steel-300 sm:text-lg">
                 Three strategic industrial hubs. One powerful business network.
-                Meet 350+ exhibitors, see live machinery and connect with the
+                Meet 500+ exhibitors, see live machinery and connect with the
                 buyers who move manufacturing forward.
               </p>
 

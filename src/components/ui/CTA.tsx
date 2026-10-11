@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Container } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
+import { seriesStats } from "@/data/events";
 import { cn } from "@/lib/utils";
 
 export function ExhibitorCTA({
@@ -69,12 +70,7 @@ export function ExhibitorCTA({
           </div>
 
           <ul className="grid gap-3 border-l border-white/10 pl-0 lg:pl-10">
-            {[
-              ["350+", "Exhibitors per edition"],
-              ["25,000+", "Qualified industrial visitors"],
-              ["3", "Strategic industrial hubs"],
-              ["40+", "Product categories"],
-            ].map(([value, label]) => (
+            {seriesStats.map(({ value, label }) => (
               <li
                 key={label}
                 className="flex items-baseline gap-4 border-b border-white/10 pb-3 last:border-0"
