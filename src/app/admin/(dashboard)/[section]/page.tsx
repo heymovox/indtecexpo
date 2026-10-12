@@ -15,7 +15,7 @@ import { mediaArticles } from "@/data/media";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { StorageManager } from "@/components/admin/StorageManager";
 import { RecordsTable, type RecordsTableRow } from "../RecordsTable";
-import { EventEditor, type EventEditValues } from "../EventEditor";
+import { EventsManager, type EventAdminItem } from "../EventsManager";
 
 export const dynamic = "force-dynamic";
 
@@ -169,44 +169,93 @@ async function contactRows(): Promise<RecordsTableRow[]> {
   }));
 }
 
-async function eventsPanel() {
-  const overrides = await listEventOverrides();
-  return (
-    <div className="grid gap-5">
-      {events.map((event) => {
-        const override = overrides.find((item) => item.slug === event.slug);
-        const values: EventEditValues = {
-          slug: event.slug,
-          name: override?.name || event.name,
-          dateLabel: override?.dateLabel || event.dateLabel,
-          dateRangeShort: override?.dateRangeShort || event.dateRangeShort,
-          positioning: override?.positioning || event.positioning,
-          venueName: override?.venueName || event.venue.name,
-          summary: override?.summary || event.summary,
-          published: override ? override.published : true,
-        };
-        return (
-          <section key={event.slug} className="card p-5">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-steel-100 pb-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.14em] text-steel-500">
-                  {event.edition} · {event.status}
-                </p>
-                <h2 className="display-sm mt-1 text-xl text-navy-900">
-                  {event.name}
-                </h2>
-              </div>
-              <span className="border border-steel-200 bg-steel-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-steel-600">
-                {event.dateRangeShort}
-              </span>
-            </div>
-            <EventEditor values={values} hasOverride={Boolean(override)} />
-          </section>
-        );
-      })}
-    </div>
-  );
-}
+  async function eventsPanel() {
+    const overrides = await listEventOverrides();
+    const overrideSlugs = new Set(overrides.map((item) => item.slug));
+
+    const items: EventAdminItem[] = events.map((event) => {
+      const override = overrides.find((item) => item.slug === event.slug);
+      return {
+        id: override?.id ?? null,
+        slug: event.slug,
+        name: override?.name || event.name,
+        city: override?.city || event.city,
+        state: override?.state || event.state,
+        edition: override?.edition || event.edition,
+        dateLabel: override?.dateLabel || event.dateLabel,
+        dateRangeShort: override?.dateRangeShort || event.dateRangeShort,
+        positioning: override?.positioning || event.positioning,
+        venueName: override?.venueName || event.venue.name,
+        venueAddress: override?.venueAddress || event.venue.address,
+        summary: override?.summary || event.summary,
+        description: override?.description?.length
+          ? override.description
+          : [...event.description],
+        sectors: override?.sectors?.length ? override.sectors : [...event.sectors],
+        highlights: override?.highlights?.length
+          ? override.highlights
+          : [...event.highlights],
+        bannerImage: override?.bannerImage || event.heroImage,
+        posterImage: override?.posterImage || event.posterImage,
+        floorPlanImage: override?.floorPlanImage || event.floorPlanImage,
+        floorPlanPdf: override?.floorPlanPdf || event.floorPlanPdf,
+        startDate: override?.startDate || event.startDate,
+        endDate: override?.endDate || event.endDate,
+        days: override?.days ?? event.days,
+        monthLabel: override?.monthLabel || event.monthLabel,
+        status: override?.status ?? event.status,
+        published: override ? override.published : true,
+        hasOverride: Boolean(override),
+        createdAt: override?.createdAt,
+        updatedAt: override?.updatedAt,
+      };
+    });
+
+    for (const override of overrides) {
+      if (overrideSlugs.has(override.slug)) continue;
+      items.push({
+        id: override.id,
+        slug: override.slug,
+        name: override.name,
+        city: override.city ?? "",
+        state: override.state ?? "",
+        edition: override.edition ?? "",
+        dateLabel: override.dateLabel,
+        dateRangeShort: override.dateRangeShort,
+        positioning: override.positioning,
+        venueName: override.venueName,
+        venueAddress: override.venueAddress ?? "",
+        summary: override.summary,
+        description: override.description ?? [],
+        sectors: override.sectors ?? [],
+        highlights: override.highlights ?? [],
+        bannerImage: override.bannerImage ?? "",
+        posterImage: override.posterImage ?? "",
+        floorPlanImage: override.floorPlanImage ?? "",
+        floorPlanPdf: override.floorPlanPdf ?? "",
+        startDate: override.startDate ?? "",
+        endDate: override.endDate ?? "",
+        days: override.days ?? 3,
+        monthLabel: override.monthLabel ?? "",
+        status: override.status ?? "upcoming",
+        published: override.published,
+        hasOverride: true,
+        createdAt: override.createdAt,
+        updatedAt: override.updatedAt,
+      });
+    }
+
+    return (
+      <div className="space-y-4">
+        <StorageManager
+          folder="floor-plans"
+          title="Upload floor plan artwork"
+          hint="Upload a banner or floor plan, then copy its link into the event form below (Banner image URL / Floor plan image URL / Floor plan PDF URL)."
+        />
+        <EventsManager items={items} />
+      </div>
+    );
+  }
 
 function sponsorsPanel() {
   return (

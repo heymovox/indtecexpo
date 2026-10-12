@@ -225,6 +225,23 @@ export interface EventOverride extends StoredRecord {
   venueName: string;
   summary: string;
   published: boolean;
+  city?: string;
+  state?: string;
+  edition?: string;
+  status?: "upcoming" | "live" | "completed";
+  startDate?: string;
+  endDate?: string;
+  days?: number;
+  monthLabel?: string;
+  bannerImage?: string;
+  posterImage?: string;
+  floorPlanImage?: string;
+  floorPlanPdf?: string;
+  venueAddress?: string;
+  sectors?: string[];
+  highlights?: string[];
+  description?: string[];
+  order?: number;
 }
 
 export async function listEventOverrides(): Promise<EventOverride[]> {
@@ -278,7 +295,10 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
 ): Promise<T[]> {
   const overrides = await listEventOverrides();
   if (overrides.length === 0) return defaults;
-  return defaults.map((event) => {
+
+  const staticSlugs = new Set(defaults.map((event) => event.slug));
+
+  const merged = defaults.map((event) => {
     const override = overrides.find((item) => item.slug === event.slug);
     if (!override) return event;
     return {
@@ -288,10 +308,68 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
       dateRangeShort: override.dateRangeShort || event.dateRangeShort,
       positioning: override.positioning || event.positioning,
       summary: override.summary || event.summary,
+      city: override.city || event.city,
+      state: override.state || event.state,
+      edition: override.edition || event.edition,
+      status: override.status ?? event.status,
+      startDate: override.startDate || event.startDate,
+      endDate: override.endDate || event.endDate,
+      days: override.days ?? event.days,
+      monthLabel: override.monthLabel || event.monthLabel,
+      heroImage: override.bannerImage || event.heroImage,
+      posterImage: override.posterImage || event.posterImage,
+      floorPlanImage: override.floorPlanImage || event.floorPlanImage,
+      floorPlanPdf: override.floorPlanPdf || event.floorPlanPdf,
+      sectors: override.sectors?.length ? override.sectors : event.sectors,
+      highlights: override.highlights?.length ? override.highlights : event.highlights,
+      description: override.description?.length ? override.description : event.description,
       venue: {
         ...event.venue,
         name: override.venueName || event.venue.name,
+        address: override.venueAddress || event.venue.address,
       },
     };
   });
+
+  // Editions created in the admin (no static counterpart) are appended so the
+  // public event list shows them too.
+  const created: T[] = [];
+  for (const override of overrides) {
+    if (staticSlugs.has(override.slug)) continue;
+    const base = defaults[0];
+    if (!base) break;
+    const synthetic = {
+      ...base,
+      id: override.id,
+      slug: override.slug,
+      name: override.name,
+      city: override.city ?? "",
+      state: override.state ?? "",
+      edition: override.edition ?? "",
+      positioning: override.positioning,
+      summary: override.summary,
+      dateLabel: override.dateLabel,
+      dateRangeShort: override.dateRangeShort,
+      monthLabel: override.monthLabel ?? "",
+      startDate: override.startDate ?? base.startDate,
+      endDate: override.endDate ?? base.endDate,
+      days: override.days ?? base.days,
+      status: override.status ?? "upcoming",
+      heroImage: override.bannerImage ?? base.heroImage,
+      posterImage: override.posterImage ?? base.posterImage,
+      floorPlanImage: override.floorPlanImage ?? base.floorPlanImage,
+      floorPlanPdf: override.floorPlanPdf ?? base.floorPlanPdf,
+      sectors: override.sectors?.length ? override.sectors : [],
+      highlights: override.highlights?.length ? override.highlights : [],
+      description: override.description?.length ? override.description : [],
+      venue: {
+        ...base.venue,
+        name: override.venueName,
+        address: override.venueAddress ?? base.venue.address,
+      },
+    } as unknown as T;
+    created.push(synthetic);
+  }
+
+  return [...merged, ...created];
 }
