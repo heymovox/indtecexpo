@@ -8,6 +8,7 @@ import { ExhibitorCTA, StatStrip } from "@/components/ui/CTA";
 import { HeroSlider } from "@/components/ui/HeroSlider";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Section, SectionHeading } from "@/components/ui/Section";
+import { VideoEmbed } from "@/components/ui/VideoEmbed";
 import { EventCard } from "@/components/events/EventCard";
 import { contactConfig, siteConfig } from "@/config/site";
 import { industries } from "@/data/industries";
@@ -32,6 +33,19 @@ const marqueeItems = [
   "Engineering Components",
   "Manufacturing Solutions",
   "Industrial Services",
+];
+
+const showcaseVideos = [
+  {
+    videoId: "gItAr4bSQek",
+    title: "INDTEC EXPO — Official Showreel",
+    caption: "Official Showreel",
+  },
+  {
+    videoId: "GmPyxwAa6UI",
+    title: "INDTEC EXPO — Show Floor Highlights",
+    caption: "Show Floor Highlights",
+  },
 ];
 
 export default function HomePage() {
@@ -177,7 +191,16 @@ export default function HomePage() {
                       {/* A plain container, not a Link: the card now holds two
                           separate links (view edition + book a stall) and
                           anchors cannot be nested. */}
-                      <div className="group border border-white/15 bg-white/[0.06] p-4 backdrop-blur-sm transition hover:border-gold-500/60 hover:bg-white/[0.10] sm:p-5">
+                      <div className="group relative isolate overflow-hidden border border-white/15 p-4 transition hover:border-gold-500/60 sm:p-5">
+                        <Image
+                          src={event.heroImage}
+                          alt=""
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 420px"
+                          className="-z-10 object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:transition-none"
+                          loading="lazy"
+                        />
+                        <div className="-z-10 absolute inset-0 bg-gradient-to-br from-navy-950/90 via-navy-950/70 to-navy-950/50" />
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <h2 className="display text-2xl leading-none sm:text-[1.75rem]">
@@ -485,10 +508,10 @@ export default function HomePage() {
 
         <div className="border border-steel-200 bg-white p-4 sm:p-6 lg:p-8">
           <Image
-            src="/images/clients/client-logos.webp"
-            alt="Logos of companies that have exhibited at INDTEC EXPO — including machine tool builders, automation suppliers and engineering component manufacturers"
-            width={1600}
-            height={873}
+            src="/images/clients/client-partner-showcase.webp"
+            alt="Logos of corporate clients and partner companies that exhibit at INDTEC EXPO, spanning machine tools, automation, electrical, instrumentation and engineering component manufacturers"
+            width={1698}
+            height={926}
             className="h-auto w-full"
             sizes="(max-width: 1280px) 100vw, 1184px"
             loading="lazy"
@@ -532,10 +555,33 @@ export default function HomePage() {
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 loading="lazy"
               />
-              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-transparent px-3 pb-2.5 pt-8 text-[11px] font-semibold uppercase leading-snug tracking-[0.1em] text-white">
+              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-transparent px-3 pb-2.5 pt-8 text-[11px] font-semibold uppercase leading-snug tracking-[0.1em] text-white sm:block hidden">
                 {photo.caption}
               </figcaption>
             </figure>
+          ))}
+        </div>
+      </Section>
+
+      {/* ---------------------------------------------------------- */}
+      {/* Video showcase                                              */}
+      {/* ---------------------------------------------------------- */}
+      <Section tone="muted" className="grid-surface-dark" id="videos">
+        <SectionHeading
+          eyebrow="Watch"
+          tone="light"
+          title="See the Expo in Action"
+          description="A look at the machinery, the crowds and the conversations that define an INDTEC EXPO edition."
+        />
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {showcaseVideos.map((video) => (
+            <VideoEmbed
+              key={video.videoId}
+              videoId={video.videoId}
+              title={video.title}
+              caption={video.caption}
+            />
           ))}
         </div>
       </Section>

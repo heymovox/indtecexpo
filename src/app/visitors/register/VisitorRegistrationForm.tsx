@@ -304,6 +304,7 @@ export function VisitorRegistrationForm() {
               {industry.name}
             </option>
           ))}
+          <option value="Other">Other</option>
         </Select>
       </Field>
 

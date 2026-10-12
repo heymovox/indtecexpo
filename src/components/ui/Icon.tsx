@@ -64,6 +64,7 @@ export type IconName =
   | "logout"
   | "refresh"
   | "eye"
+  | "play"
   | "upload";
 
 const paths: Record<IconName, React.ReactNode> = {
@@ -450,6 +451,7 @@ const paths: Record<IconName, React.ReactNode> = {
       <circle cx="12" cy="12" r="3" />
     </>
   ),
+  play: <path d="M7.5 5 19 12 7.5 19V5Z" />,
 };
 
 interface IconProps extends Omit<SVGProps<SVGSVGElement>, "name"> {

@@ -69,6 +69,7 @@ export const footerNav = {
     { label: "Exhibitor Profile", href: "/exhibitors/exhibitor-profile" },
     { label: "Book Your Stall", href: "/exhibitors/book-your-stall" },
     { label: "Sponsorship", href: "/sponsors" },
+    { label: "Our Clients", href: "/clients" },
     { label: "Why Visit?", href: "/visitors" },
     { label: "Register as Visitor", href: "/visitors/register" },
     { label: "Contact Us", href: "/contact" },

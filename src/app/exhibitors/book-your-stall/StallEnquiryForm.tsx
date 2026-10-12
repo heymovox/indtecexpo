@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/Button";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/Form";
@@ -629,6 +630,7 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
                 {industry.name}
               </option>
             ))}
+            <option value="Other">Other</option>
           </Select>
         </Field>
 
@@ -652,6 +654,7 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
                 {category}
               </option>
             ))}
+            <option value="Other">Other</option>
           </Select>
         </Field>
       </div>
@@ -813,7 +816,11 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
           <span>
             I consent to the INDTEC EXPO team contacting me about stall
             availability, pricing and exhibitor services. My details are used
-            only to process this booking.
+            only to process this booking as described in the{" "}
+            <Link href="/terms#stall-bookings" className="link-underline font-semibold text-brand-600">
+              Stall Booking Policy
+            </Link>
+            .
           </span>
         </label>
         {errors.consent ? (

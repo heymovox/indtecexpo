@@ -5,16 +5,16 @@ import { useEffect, useState } from "react";
 
 const slides = [
   {
-    src: "/images/hero/hero-slide-1.webp",
-    alt: "Visitors walking a high-tech industrial automation exhibition floor with robotic arms and CNC machining on display",
+    src: "/images/hero/hero-precision-milling.webp",
+    alt: "Precision CNC milling machine cutting a metal component on an industrial workshop floor",
   },
   {
-    src: "/images/hero/hero-slide-2.webp",
-    alt: "Industrial automation expo floor with a robotic arm, CNC machines and buyers walking the aisle",
+    src: "/images/hero/hero-torch-sparks.webp",
+    alt: "Fabricator using a torch on metal with sparks flying across a dark industrial workshop",
   },
   {
-    src: "/images/hero/hero-slide-3.webp",
-    alt: "Futuristic industrial expo hall with machining centres, robotic cells and exhibition visitors",
+    src: "/images/hero/hero-robotic-welding.webp",
+    alt: "Automated robotic welding cell welding metal components in a modern manufacturing plant",
   },
 ];
 

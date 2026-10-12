@@ -91,19 +91,38 @@ export function Header() {
             compact ? "max-h-0 opacity-0" : "max-h-10 opacity-100",
           )}
         >
-          <div className="mx-auto flex h-8 w-full max-w-[1280px] items-center justify-between gap-4 px-4 text-[10px] uppercase tracking-[0.14em] sm:px-8 sm:text-[11.5px] sm:tracking-[0.16em]">
-            <span className="truncate text-gold-500">
+          <div className="mx-auto flex h-8 w-full max-w-[1280px] items-center justify-between gap-3 px-4 text-[10px] uppercase tracking-[0.14em] sm:px-8 sm:text-[11.5px] sm:tracking-[0.16em]">
+            <span className="min-w-0 truncate text-gold-500">
               {siteConfig.organizer.mission}
             </span>
-            <div className="flex shrink-0 items-center gap-4">
+            <div className="flex shrink-0 items-center gap-3">
               <a
                 href={`tel:+91${siteConfig.primaryPhone}`}
                 aria-label={`Call +91 ${siteConfig.primaryPhone}`}
-                className="flex items-center gap-1.5 transition hover:text-gold-500"
+                className="flex items-center gap-1.5 transition hover:text-gold-500 sm:hidden"
               >
                 <Icon name="phone" size={12} />
-                <span className="hidden sm:inline">+91 {siteConfig.primaryPhone}</span>
+                {siteConfig.primaryPhone}
               </a>
+              <span className="hidden items-center gap-2 sm:flex">
+                <Icon name="phone" size={12} className="text-gold-500" />
+                {contactConfig.phones.map((phone, index) => (
+                  <span key={phone.tel} className="flex items-center gap-2">
+                    {index > 0 ? (
+                      <span aria-hidden className="text-steel-600">
+                        ·
+                      </span>
+                    ) : null}
+                    <a
+                      href={`tel:${phone.tel}`}
+                      aria-label={`Call ${phone.display}`}
+                      className="transition hover:text-gold-500"
+                    >
+                      {phone.number}
+                    </a>
+                  </span>
+                ))}
+              </span>
               <a
                 href={contactConfig.phones[0].wa}
                 target="_blank"
@@ -112,7 +131,7 @@ export function Header() {
                 className="flex items-center gap-1.5 transition hover:text-gold-500"
               >
                 <Icon name="whatsapp" size={12} />
-                <span className="hidden sm:inline">WhatsApp</span>
+                <span className="hidden md:inline">WhatsApp</span>
               </a>
             </div>
           </div>
@@ -123,20 +142,29 @@ export function Header() {
         <div className="mx-auto flex h-9 w-full max-w-[1280px] items-center justify-between px-8 text-[11.5px] uppercase tracking-[0.16em]">
           <div className="flex items-center gap-6">
             <span className="text-gold-500">{siteConfig.organizer.mission}</span>
-            <span className="text-steel-500">|</span>
-            <span>{siteConfig.organizer.name} — {siteConfig.organizer.descriptor}</span>
           </div>
           <div className="flex items-center gap-5">
-            <a
-              href={`tel:+91${siteConfig.primaryPhone}`}
-              className="flex items-center gap-2 transition hover:text-gold-500"
-            >
+            <span className="flex items-center gap-2">
               <Icon name="phone" size={13} />
-              +91 {siteConfig.primaryPhone}
-            </a>
+              {contactConfig.phones.map((phone, index) => (
+                <span key={phone.tel} className="flex items-center gap-2">
+                  {index > 0 ? (
+                    <span aria-hidden className="text-steel-600">
+                      ·
+                    </span>
+                  ) : null}
+                  <a
+                    href={`tel:${phone.tel}`}
+                    className="whitespace-nowrap transition hover:text-gold-500"
+                  >
+                    {phone.display}
+                  </a>
+                </span>
+              ))}
+            </span>
             <a
               href={`mailto:${siteConfig.email}`}
-              className="flex items-center gap-2 transition hover:text-gold-500"
+              className="hidden items-center gap-2 transition hover:text-gold-500 xl:flex"
             >
               <Icon name="mail" size={13} />
               {siteConfig.email}
@@ -326,14 +354,17 @@ export function Header() {
               {secondaryCta.label}
             </Button>
             <div className="grid grid-cols-2 gap-2.5">
-              <Button
-                href={`tel:+91${siteConfig.primaryPhone}`}
-                variant="outline-light"
-                size="sm"
-                className="w-full"
-              >
-                <Icon name="phone" size={15} /> Call
-              </Button>
+              {contactConfig.phones.map((phone) => (
+                <Button
+                  key={phone.tel}
+                  href={`tel:${phone.tel}`}
+                  variant="outline-light"
+                  size="sm"
+                  className="w-full"
+                >
+                  <Icon name="phone" size={15} /> {phone.number}
+                </Button>
+              ))}
               <Button
                 href={contactConfig.phones[0].wa}
                 variant="outline-light"
