@@ -14,9 +14,9 @@ export default function AdminLoginPage() {
         <div className="relative">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/brand/logo-light.svg"
+            src="/images/brand/logo-indtec-compact-white.png"
             alt="INDTEC EXPO"
-            className="h-10 w-auto"
+            className="h-12 w-auto"
           />
         </div>
         <div className="relative max-w-md">
@@ -40,9 +40,9 @@ export default function AdminLoginPage() {
             <div className="mb-7 flex items-center gap-3 lg:hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/brand/logo.svg"
+                src="/images/brand/logo-indtec-compact-dark.png"
                 alt="INDTEC EXPO"
-                className="h-9 w-auto"
+                className="h-11 w-auto"
               />
             </div>
             <span className="eyebrow mb-3">Admin</span>

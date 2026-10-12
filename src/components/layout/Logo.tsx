@@ -18,13 +18,13 @@ export function Logo({
       className={cn("relative block shrink-0", className)}
     >
       <Image
-        src={light ? "/images/brand/logo-light.svg" : "/images/brand/logo-indtec.png"}
+        src={light ? "/images/brand/logo-indtec-compact-white.png" : "/images/brand/logo-indtec-compact-dark.png"}
         alt="INDTEC EXPO"
-        width={400}
-        height={270}
+        width={539}
+        height={240}
         priority={priority}
         className="h-[48px] w-auto sm:h-[56px]"
-        sizes="(max-width: 640px) 96px, 112px"
+        sizes="(max-width: 640px) 108px, 126px"
       />
     </Link>
   );

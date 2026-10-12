@@ -61,7 +61,7 @@ export function organizationJsonLd() {
     name: siteConfig.name,
     legalName: siteConfig.legalName,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/images/brand/logo.svg"),
+    logo: absoluteUrl("/images/brand/logo-footer-white.png"),
     slogan: siteConfig.tagline,
     description: siteConfig.shortDescription,
     email: `mailto:${siteConfig.email}`,
