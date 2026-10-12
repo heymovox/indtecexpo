@@ -245,16 +245,7 @@ async function contactRows(): Promise<RecordsTableRow[]> {
       });
     }
 
-    return (
-      <div className="space-y-4">
-        <StorageManager
-          folder="floor-plans"
-          title="Upload floor plan artwork"
-          hint="Upload a banner or floor plan, then copy its link into the event form below (Banner image URL / Floor plan image URL / Floor plan PDF URL)."
-        />
-        <EventsManager items={items} />
-      </div>
-    );
+    return <EventsManager items={items} />;
   }
 
 function sponsorsPanel() {
