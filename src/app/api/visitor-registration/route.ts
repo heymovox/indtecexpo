@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
     await createRecord("visitorRegistrations", record);
 
     const expos = record.interestedExpos.join(", ");
+    const schedule = (record.visitingSchedule ?? []).join("; ");
 
     // Confirm to the registrant first so a provider hiccup cannot cost them
     // their receipt, then notify the desk.
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
       company: record.companyName,
       email: record.email,
       expos,
+      schedule,
     });
     await sendNotification({
       to: [record.email],
@@ -75,6 +77,7 @@ export async function POST(request: NextRequest) {
         company: record.companyName,
         email: record.email,
         expos,
+        schedule,
       }),
     });
 

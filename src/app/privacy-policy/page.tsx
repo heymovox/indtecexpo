@@ -28,7 +28,7 @@ const sections: { id: string; heading: string; paragraphs: string[]; list?: stri
     list: [
       "Identity and professional details — full name, designation, company name, city and industry sector.",
       "Contact details — email address, phone / WhatsApp number.",
-      "Visitor registration data — the expo editions you plan to visit and your stated areas of interest.",
+      "Visitor registration data — the expo editions you plan to visit, the days and one-hour time slots you plan to attend, and your stated areas of interest.",
       "Exhibitor enquiry data — stall preferences, product categories, stall sizes and messages submitted through the stall enquiry form.",
       "Technical data — IP address, browser type, device information, pages visited and referring URLs, collected automatically through cookies and similar technologies.",
       "Communications — records of correspondence when you call, email or message us.",

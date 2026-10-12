@@ -73,6 +73,8 @@ export interface VisitorRegistration {
   city: string;
   industry: string;
   interestedExpos: string[];
+  /** Planned one-hour visiting slots, e.g. "Bengaluru · 24 Dec 2026 · 09:00 AM – 10:00 AM". */
+  visitingSchedule?: string[];
   interests: string[];
   stage: LeadStage;
 }

@@ -144,6 +144,7 @@ async function visitorRows(): Promise<RecordsTableRow[]> {
       record.interestedExpos.length
         ? `Expos: ${record.interestedExpos.join(", ")}`
         : undefined,
+      ...(record.visitingSchedule ?? []).map((entry) => `Visiting: ${entry}`),
     ]),
     stage: record.stage ?? "new",
     createdAt: record.createdAt,

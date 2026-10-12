@@ -127,6 +127,11 @@ export const visitorRegistrationSchema = z.object({
     .array(z.string())
     .min(1, "Select at least one expo")
     .max(3, "Select up to 3 expos"),
+  /** e.g. ["Bengaluru · 24 Dec 2026 · 09:00 AM – 10:00 AM"]. */
+  visitingSchedule: z
+    .array(z.string().min(1).max(120, "Schedule entry is too long"))
+    .min(1, "Choose at least one visiting date and time")
+    .max(25, "Select up to 25 visiting times"),
   interests: z
     .array(z.string())
     .min(1, "Select at least one area of interest")

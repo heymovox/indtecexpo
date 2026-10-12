@@ -143,6 +143,7 @@ export function buildVisitorRegistrationEmail(input: {
   company: string;
   email: string;
   expos: string;
+  schedule?: string;
 }): string {
   return [
     `New visitor registration — ${input.reference}`,
@@ -151,6 +152,7 @@ export function buildVisitorRegistrationEmail(input: {
     `Company  : ${input.company}`,
     `Email    : ${input.email}`,
     `Expos    : ${input.expos}`,
+    ...(input.schedule ? [`Schedule : ${input.schedule}`] : []),
     "",
     `Issue the digital e-pass and add to the visitor CRM list.`,
   ].join("\n");
@@ -266,6 +268,7 @@ export function buildVisitorConfirmationEmail(input: {
   company: string;
   email: string;
   expos: string;
+  schedule?: string;
 }): { subject: string; text: string; html: string } {
   const subject = `Your INDTEC EXPO visitor pass — ${input.reference}`;
   const text = [
@@ -277,6 +280,7 @@ export function buildVisitorConfirmationEmail(input: {
     `Reference : ${input.reference}`,
     `Company   : ${input.company}`,
     `Editions  : ${input.expos}`,
+    ...(input.schedule ? [`Schedule  : ${input.schedule}`] : []),
     "",
     `Your digital e-pass will be issued by our team shortly. Entry is free for trade visitors.`,
     "",
@@ -291,6 +295,7 @@ export function buildVisitorConfirmationEmail(input: {
       { label: "Name", value: input.name },
       { label: "Company", value: input.company },
       { label: "Editions", value: input.expos },
+      ...(input.schedule ? [{ label: "Visiting", value: input.schedule }] : []),
       { label: "Entry", value: "Free for trade visitors" },
     ],
     closing:

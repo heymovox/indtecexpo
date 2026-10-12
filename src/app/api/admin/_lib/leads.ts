@@ -85,6 +85,7 @@ function visitorLead(record: VisitorRegistration & StoredRecord): AdminLead {
       city: record.city,
       industry: record.industry,
       interestedExpos: record.interestedExpos,
+      visitingSchedule: record.visitingSchedule ?? [],
       interests: record.interests,
     },
   };

@@ -18,6 +18,13 @@ import {
   flattenErrors,
   visitorRegistrationSchema,
 } from "@/lib/validations";
+import {
+  formatVisitEntry,
+  MAX_VISIT_SLOTS,
+  parseSlotKey,
+  sortSlotKeys,
+} from "@/lib/visit-slots";
+import { VisitSchedule } from "./VisitSchedule";
 
 const southIndianCities = [
   "Bengaluru",
@@ -41,7 +48,8 @@ const southIndianCities = [
   "Other South Indian City",
 ];
 
-const expoOptions = events.map((event) => `${event.city} — ${event.dateRangeShort}`);
+const expoLabel = (event: (typeof events)[number]) =>
+  `${event.city} — ${event.dateRangeShort}`;
 
 type FormState = {
   fullName: string;
@@ -66,7 +74,8 @@ const initialState: FormState = {
 export function VisitorRegistrationForm() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(initialState);
-  const [interestedExpos, setInterestedExpos] = useState<string[]>([]);
+  const [selectedExpos, setSelectedExpos] = useState<string[]>([]);
+  const [slots, setSlots] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -89,14 +98,62 @@ export function VisitorRegistrationForm() {
     });
   };
 
+  const toggleExpo = (slug: string) => {
+    if (selectedExpos.includes(slug)) {
+      setSelectedExpos((prev) => prev.filter((item) => item !== slug));
+      setSlots((prev) => prev.filter((key) => !key.startsWith(`${slug}|`)));
+    } else {
+      setSelectedExpos((prev) => [...prev, slug]);
+    }
+  };
+
+  const toggleSlot = (key: string) => {
+    setSlots((prev) => {
+      if (prev.includes(key)) return prev.filter((item) => item !== key);
+      if (prev.length >= MAX_VISIT_SLOTS) return prev;
+      return [...prev, key];
+    });
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (pending) return;
     setFormError(null);
 
+    const chosenEvents = events.filter((item) =>
+      selectedExpos.includes(item.slug),
+    );
+
+    const missingSchedule = chosenEvents.filter(
+      (item) => !slots.some((key) => key.startsWith(`${item.slug}|`)),
+    );
+    if (missingSchedule.length > 0) {
+      setErrors({
+        visitingSchedule: `Pick at least one visiting date and time for ${missingSchedule
+          .map((item) => item.city)
+          .join(", ")}.`,
+      });
+      setFormError(
+        "Please choose a visiting date and time for every expo you selected.",
+      );
+      return;
+    }
+
+    const interestedExpos = chosenEvents.map(expoLabel);
+    const visitingSchedule = sortSlotKeys(slots, events).map((key) => {
+      const parsed = parseSlotKey(key);
+      const item = parsed
+        ? events.find((candidate) => candidate.slug === parsed.slug)
+        : undefined;
+      return item && parsed
+        ? formatVisitEntry(item.city, parsed.day, parsed.hour)
+        : key;
+    });
+
     const payload = {
       ...form,
       interestedExpos,
+      visitingSchedule,
       interests,
       consent: consent ? "on" : "",
     };
@@ -250,14 +307,14 @@ export function VisitorRegistrationForm() {
         </Select>
       </Field>
 
-      <CheckboxGroup
-        legend="Expos You Plan to Visit"
-        name="interestedExpos"
-        options={expoOptions}
-        selected={interestedExpos}
-        onToggle={(value) => toggle(value, setInterestedExpos, 3)}
-        error={errors.interestedExpos}
-        columns={1}
+      <VisitSchedule
+        events={events}
+        selectedExpos={selectedExpos}
+        slots={slots}
+        onToggleExpo={toggleExpo}
+        onToggleSlot={toggleSlot}
+        expoError={errors.interestedExpos}
+        scheduleError={errors.visitingSchedule}
       />
 
       <CheckboxGroup
