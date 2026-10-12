@@ -3,8 +3,8 @@ import { getAdminMetrics, type AdminMetrics } from "@/lib/db";
 import { getAllLeads } from "@/app/api/admin/_lib/leads";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { timeAgo } from "@/lib/utils";
-import { KanbanBoard } from "./KanbanBoard";
 import { StageChip } from "./StageChip";
+import { LeadsCards } from "./LeadsCards";
 
 export const dynamic = "force-dynamic";
 
@@ -145,9 +145,7 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
 
-      <section aria-label="Kanban board">
-        <KanbanBoard initialLeads={leads} />
-      </section>
+      <LeadsCards leads={leads} />
     </div>
   );
 }

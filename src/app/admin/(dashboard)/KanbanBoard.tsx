@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { adminConfig } from "@/config/admin";
 import { timeAgo } from "@/lib/utils";
-import { Icon } from "@/components/ui/Icon";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { LeadDrawer } from "./LeadDrawer";
 import type { AdminLead, LeadKind } from "@/app/admin/lead-types";
 import type { LeadStage } from "@/types/exhibitor";
@@ -17,6 +17,12 @@ interface LeadsResponse {
 
 function kindOf(lead: AdminLead): LeadKind {
   return lead.type.toLowerCase() as LeadKind;
+}
+
+function typeIcon(kind: LeadKind): IconName {
+  if (kind === "exhibitor") return "building";
+  if (kind === "visitor") return "users";
+  return "inbox";
 }
 
 export function KanbanBoard({ initialLeads }: { initialLeads: AdminLead[] }) {
@@ -142,25 +148,20 @@ export function KanbanBoard({ initialLeads }: { initialLeads: AdminLead[] }) {
                     isOver ? "border-brand-400 ring-2 ring-brand-200" : "border-steel-200"
                   }`}
                 >
-                  <header
-                    className="border-t-2 border-b border-b-steel-200 px-3 py-2.5"
-                    style={{ borderTopColor: column.color }}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span
-                          aria-hidden
-                          className="h-2 w-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: column.color }}
-                        />
-                        <span className="truncate text-xs font-semibold uppercase tracking-[0.12em] text-navy-800">
-                          {column.label}
-                        </span>
-                      </span>
-                      <span className="tabular text-xs font-bold text-steel-500">
-                        {items.length}
+                  <header className="flex items-center justify-between gap-2 rounded-t-xl border-b border-steel-100 px-3 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: column.color }}
+                      />
+                      <span className="truncate text-xs font-semibold uppercase tracking-[0.14em] text-navy-800">
+                        {column.label}
                       </span>
                     </div>
+                    <span className="tabular rounded-full bg-steel-50 px-1.5 py-0.5 text-[11px] font-bold text-steel-600">
+                      {items.length}
+                    </span>
                   </header>
 
                   <div className="flex flex-1 flex-col gap-2.5 p-2.5">
@@ -169,52 +170,92 @@ export function KanbanBoard({ initialLeads }: { initialLeads: AdminLead[] }) {
                         Drop leads here
                       </p>
                     ) : null}
-                    {items.map((lead) => (
-                      <article
-                        key={lead.id}
-                        draggable
-                        onDragStart={() => {
-                          dragRef.current = { id: lead.id, kind: kindOf(lead) };
-                        }}
-                        onDragEnd={() => {
-                          dragRef.current = null;
-                          setDragOver(null);
-                        }}
-                        onClick={() => setSelectedId(lead.id)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            setSelectedId(lead.id);
-                          }
-                        }}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`Open lead ${lead.reference}`}
-                        className="card cursor-pointer p-3 transition hover:border-brand-300 hover:shadow-sm"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="font-mono text-[11px] text-steel-500">
-                            {lead.reference}
-                          </span>
+                    {items.map((lead) => {
+                      const kind = kindOf(lead);
+                      return (
+                        <article
+                          key={lead.id}
+                          draggable
+                          onDragStart={() => {
+                            dragRef.current = { id: lead.id, kind };
+                          }}
+                          onDragEnd={() => {
+                            dragRef.current = null;
+                            setDragOver(null);
+                          }}
+                          onClick={() => setSelectedId(lead.id)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setSelectedId(lead.id);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`View lead details for ${lead.reference}`}
+                          className="group relative cursor-grab overflow-hidden rounded-xl border border-steel-200 bg-white shadow-sm transition-all duration-150 ease-out active:cursor-grabbing hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+                        >
                           <span
-                            className="shrink-0 border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em]"
-                            style={{
-                              color: column.color,
-                              borderColor: `${column.color}55`,
-                              backgroundColor: `${column.color}14`,
-                            }}
-                          >
-                            {lead.type}
-                          </span>
-                        </div>
-                        <p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-navy-900">
-                          {lead.title}
-                        </p>
-                        <p className="mt-1.5 text-[11px] text-steel-500">
-                          {timeAgo(lead.createdAt)}
-                        </p>
-                      </article>
-                    ))}
+                            aria-hidden
+                            className="absolute inset-y-0 left-0 w-1"
+                            style={{ backgroundColor: column.color }}
+                          />
+                          <div className="flex h-full flex-col gap-2.5 p-3 pl-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="flex h-7 w-7 items-center justify-center rounded-lg border"
+                                  style={{
+                                    color: column.color,
+                                    borderColor: `${column.color}40`,
+                                    backgroundColor: `${column.color}14`,
+                                  }}
+                                >
+                                  <Icon name={typeIcon(kind)} size={14} strokeWidth={1.8} />
+                                </span>
+                                <div className="flex flex-col">
+                                  <span className="font-mono text-[11px] leading-none text-steel-500">
+                                    {lead.reference}
+                                  </span>
+                                  <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-steel-500">
+                                    {lead.type}
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="hidden text-[11px] font-medium text-steel-400 group-hover:inline-flex group-focus-visible:inline-flex">
+                                View details →
+                              </span>
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="line-clamp-2 text-sm font-semibold leading-snug text-navy-900">
+                                {lead.title}
+                              </p>
+                              {lead.subtitle ? (
+                                <p className="mt-1 line-clamp-2 text-xs leading-snug text-steel-600">
+                                  {lead.subtitle}
+                                </p>
+                              ) : null}
+                            </div>
+
+                            <div className="mt-auto flex items-center justify-between">
+                              <span className="text-[11px] text-steel-500">
+                                {timeAgo(lead.createdAt)}
+                              </span>
+                              <span
+                                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]"
+                                style={{
+                                  color: column.color,
+                                  backgroundColor: `${column.color}12`,
+                                }}
+                              >
+                                {column.label}
+                              </span>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 </section>
               );
