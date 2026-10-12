@@ -114,11 +114,9 @@ export const events: ExpoEvent[] = [
       { name: "Royal Sponsor", code: "R", price: "₹6 lakh" },
     ],
     stats: [
-      { label: "Industrial Hubs", value: "3" },
-      { label: "Exhibitors", value: "500+" },
-      { label: "Stalls", value: "800+" },
-      { label: "Industrial Visitors", value: "30,000+" },
-      { label: "Industrial Associations", value: "50+" },
+      { label: "Exhibitors", value: "120+" },
+      { label: "Stalls", value: "160+" },
+      { label: "Visitors", value: "10,000+" },
     ],
     schedule: [
       {
@@ -242,11 +240,9 @@ export const events: ExpoEvent[] = [
       { name: "Royal Sponsor", code: "R", price: "₹10 lakh" },
     ],
     stats: [
-      { label: "Industrial Hubs", value: "3" },
-      { label: "Exhibitors", value: "500+" },
-      { label: "Stalls", value: "800+" },
-      { label: "Industrial Visitors", value: "30,000+" },
-      { label: "Industrial Associations", value: "50+" },
+      { label: "Exhibitors", value: "300+" },
+      { label: "Stalls", value: "400+" },
+      { label: "Visitors", value: "20,000+" },
     ],
     schedule: [
       {
@@ -369,11 +365,9 @@ export const events: ExpoEvent[] = [
       { name: "Royal Sponsor", code: "R", price: "₹6 lakh" },
     ],
     stats: [
-      { label: "Industrial Hubs", value: "3" },
-      { label: "Exhibitors", value: "500+" },
-      { label: "Stalls", value: "800+" },
-      { label: "Industrial Visitors", value: "30,000+" },
-      { label: "Industrial Associations", value: "50+" },
+      { label: "Exhibitors", value: "200+" },
+      { label: "Stalls", value: "300+" },
+      { label: "Visitors", value: "20,000+" },
     ],
     schedule: [
       {

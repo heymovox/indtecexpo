@@ -270,7 +270,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
               ))}
             </div>
           </div>
-          <StatStrip items={event.stats} />
+          <StatStrip items={event.stats} columns="grid-cols-1 sm:grid-cols-3 sm:divide-x" />
         </div>
       </Section>
 
