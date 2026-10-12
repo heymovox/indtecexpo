@@ -1,26 +1,27 @@
-"use client";
-
 import Link from "next/link";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
 import { adminConfig } from "@/config/admin";
 import { Icon, type IconName } from "@/components/ui/Icon";
 
 function NavLinks({
-  pathname,
+  currentPath,
   onNavigate,
+  role,
 }: {
-  pathname: string;
+  currentPath: string;
   onNavigate?: () => void;
+  role: "staff" | "admin" | "superadmin";
 }) {
+  const allowed = adminConfig.sections.filter((s) => [...(s.roles ?? [])].includes(role));
   return (
     <nav className="flex flex-col gap-1 p-3" aria-label="Admin sections">
-      {adminConfig.sections.map((section) => {
+      {allowed.map((section) => {
         const active =
           section.href === "/admin"
-            ? pathname === "/admin"
-            : pathname === section.href ||
-              pathname.startsWith(`${section.href}/`);
+            ? currentPath === "/admin"
+            : currentPath === section.href ||
+              currentPath.startsWith(`${section.href}/`);
         return (
           <Link
             key={section.id}
@@ -44,11 +45,31 @@ function NavLinks({
 
 export function AdminShell({
   children,
-  adminEmail,
 }: {
   children: ReactNode;
-  adminEmail: string;
 }) {
+  const [role, setRole] = useState<"staff" | "admin" | "superadmin">("staff");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled && data.ok && data.admin) {
+          setRole(data.admin.role);
+          setEmail(data.admin.email);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -65,6 +86,21 @@ export function AdminShell({
     router.push("/admin/login");
     router.refresh();
   }
+
+if (loading) {
+      return (
+        <div className="-mt-[var(--header-height)] min-h-screen w-full bg-steel-50 max-lg:-mb-14">
+          <header className="sticky top-0 z-30 border-b border-steel-200 bg-white">
+            <div className="flex h-14 items-center gap-3 px-3 sm:px-5">
+              <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
+                <img src="/images/brand/logo-indtec-compact-dark.png" alt="INDTEC EXPO" className="h-8 w-auto" />
+                <span className="display-sm hidden text-sm uppercase tracking-[0.18em] text-navy-900 sm:inline">Admin</span>
+              </Link>
+            </div>
+          </header>
+        </div>
+      );
+    }
 
   return (
     // Cancel the layout's fixed-header and mobile-CTA spacing: AdminShell supplies its own
@@ -95,7 +131,7 @@ export function AdminShell({
 
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <span className="hidden max-w-[220px] truncate text-xs text-steel-500 md:inline">
-              {adminEmail}
+{email}
             </span>
             <button
               type="button"
@@ -112,7 +148,7 @@ export function AdminShell({
 
       <div className="flex">
         <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto border-r border-navy-800 bg-navy-950 lg:block">
-          <NavLinks pathname={pathname} />
+          <NavLinks currentPath={pathname} role={role} />
         </aside>
 
         {drawerOpen ? (
@@ -137,12 +173,13 @@ export function AdminShell({
                   <Icon name="close" size={18} />
                 </button>
               </div>
-              <NavLinks
-                pathname={pathname}
-                onNavigate={() => setDrawerOpen(false)}
-              />
+<NavLinks
+                  currentPath={pathname}
+                  onNavigate={() => setDrawerOpen(false)}
+                  role={role}
+                />
               <div className="mt-auto border-t border-navy-800 p-4">
-                <p className="truncate text-xs text-steel-500">{adminEmail}</p>
+                <p className="truncate text-xs text-steel-500">{email}</p>
               </div>
             </div>
           </div>

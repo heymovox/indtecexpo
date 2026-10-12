@@ -194,18 +194,18 @@ export function rowsToRecords<T>(rows: Record<string, unknown>[]): T[] {
  * ------------------------------------------------------------------------- */
 
 /** Roles are ordered; `roleAtLeast` compares them by rank. */
-export const ADMIN_ROLES = ["editor", "admin", "superadmin"] as const;
+export const ADMIN_ROLES = ["staff", "admin", "superadmin"] as const;
 export type AdminRole = (typeof ADMIN_ROLES)[number];
 
 export function isAdminRole(value: unknown): value is AdminRole {
   return (
     typeof value === "string" &&
-    (ADMIN_ROLES as readonly string[]).includes(value)
+    (value === "staff" || value === "admin" || value === "superadmin")
   );
 }
 
 const ROLE_RANK: Record<AdminRole, number> = {
-  editor: 1,
+  staff: 1,
   admin: 2,
   superadmin: 3,
 };
@@ -332,7 +332,7 @@ export function rowToAdminUser(
   row: Record<string, unknown> | null | undefined,
 ): AdminUserRow | null {
   if (!row || !row.id) return null;
-  const role = isAdminRole(row.role) ? row.role : "editor";
+  const role = isAdminRole(row.role) ? row.role : "staff";
   return {
     id: String(row.id),
     email: String(row.email),

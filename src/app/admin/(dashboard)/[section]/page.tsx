@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { notFound } from "next/navigation";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 import { adminConfig } from "@/config/admin";
+import { getAdmin } from "@/app/api/admin/_lib/auth";
 import {
   listContactMessages,
   listEventOverrides,
@@ -31,7 +33,8 @@ type SectionId =
   | "media"
   | "blog"
   | "messages"
-  | "settings";
+  | "settings"
+  | "users";
 
 interface SectionParam {
   section: string;
@@ -169,8 +172,8 @@ async function contactRows(): Promise<RecordsTableRow[]> {
   }));
 }
 
-  async function eventsPanel() {
-    const overrides = await listEventOverrides();
+async function eventsPanel(readOnly = false) {
+      const overrides = await listEventOverrides();
     const overrideSlugs = new Set(overrides.map((item) => item.slug));
 
     const items: EventAdminItem[] = events.map((event) => {
@@ -245,7 +248,7 @@ async function contactRows(): Promise<RecordsTableRow[]> {
       });
     }
 
-    return <EventsManager items={items} />;
+    return <EventsManager items={items} readOnly={readOnly} />;
   }
 
 function sponsorsPanel() {
@@ -416,30 +419,135 @@ function articlesPanel() {
   );
 }
 
-function settingsPanel() {
-  const rows: Array<{ label: string; value: string }> = [
-    {
-      label: "Admin sign-in",
-      value: process.env.ADMIN_EMAIL ?? adminConfig.defaultEmail,
-    },
-    { label: "Session lifetime", value: "8 hours" },
-    { label: "Login rate limit", value: "5 attempts / minute" },
-    { label: "Public form rate limit", value: "8 submissions / minute / IP" },
-    { label: "Storage", value: "File-backed store in /.data (JSON)" },
-    { label: "Notifications", value: "Email dispatch with in-app log" },
-  ];
+function settingsPanel(identity: { id: string; email: string; name: string | null; role: string }) {
   return (
     <div className="card p-5">
-      <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
-        {rows.map((row) => (
-          <div key={row.label} className="border-b border-steel-100 pb-3">
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.1em] text-steel-500">
-              {row.label}
-            </dt>
-            <dd className="mt-1 text-sm text-navy-900">{row.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <h2 className="display-sm mb-4 text-lg text-navy-900">Your Profile</h2>
+      <form action="/api/admin/profile" method="POST" className="space-y-4 max-w-md">
+        <input type="hidden" name="id" value={identity.id} />
+        <div>
+          <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
+            Display Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={identity.name ?? ""}
+            className="w-full rounded-xl border border-steel-200 bg-white px-3 py-2 text-sm text-navy-900 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-200/60"
+          />
+        </div>
+        <div>
+          <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={identity.email}
+            disabled
+            className="w-full rounded-xl border border-steel-200 bg-steel-50 px-3 py-2 text-sm text-steel-600"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
+            Role
+          </label>
+          <span className="inline-flex items-center rounded-full border border-steel-200 bg-steel-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-steel-600">
+            {identity.role}
+          </span>
+        </div>
+        <button
+          type="submit"
+          className="btn btn-primary"
+        >
+          Save Changes
+        </button>
+      </form>
+    </div>
+  );
+}
+
+async function usersPanel() {
+  const { listAdmins } = await import("@/lib/admin-db");
+  const admins = await listAdmins();
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <span className="eyebrow mb-2">User Management</span>
+          <h2 className="display-sm text-lg text-navy-900 sm:text-xl">Admin Users</h2>
+        </div>
+<Link
+            href="/admin/users/new"
+            className="btn btn-primary shrink-0"
+          >
+            <span className="flex items-center gap-2">
+              <Icon name="plus" size={16} strokeWidth={2} />
+              Add User
+            </span>
+          </Link>
+      </div>
+      <div className="card overflow-hidden">
+        <table className="w-full min-w-[720px] text-left text-sm">
+          <thead>
+            <tr className="border-b border-steel-200 bg-steel-50 text-[11px] uppercase tracking-[0.12em] text-steel-500">
+              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">Name</th>
+              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">Email</th>
+              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">Role</th>
+              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">Status</th>
+              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">Last Login</th>
+              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {admins.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-steel-500 sm:px-5">
+                  No admin users yet.
+                </td>
+              </tr>
+            ) : (
+              admins.map((admin) => (
+                <tr key={admin.id} className="border-b border-steel-100 last:border-b-0 hover:bg-steel-25">
+                  <td className="px-4 py-3 font-medium text-navy-900 sm:px-5">
+                    {admin.name ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-steel-600 sm:px-5">{admin.email}</td>
+                  <td className="whitespace-nowrap px-4 py-3 sm:px-5">
+                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.1em]"
+                      style={{
+                        backgroundColor: admin.role === "superadmin" ? "#FEF3C7" : admin.role === "admin" ? "#DBEAFE" : "#F3F4F6",
+                        borderColor: admin.role === "superadmin" ? "#F59E0B" : admin.role === "admin" ? "#3B82F6" : "#9CA3AF",
+                        color: admin.role === "superadmin" ? "#92400E" : admin.role === "admin" ? "#1E40AF" : "#374151",
+                      }}
+                    >
+                      {admin.role}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm sm:px-5">
+                    <span className={admin.disabledAt ? "text-signal-600" : "text-emerald-700"}>
+                      {admin.disabledAt ? "Disabled" : "Active"}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-xs text-steel-500 sm:px-5">
+                    {admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleDateString() : "Never"}
+                  </td>
+                  <td className="px-4 py-3 sm:px-5">
+                    <a
+                      href={`/admin/users/${admin.id}`}
+                      className="text-brand-700 underline-offset-2 hover:underline text-sm"
+                    >
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -449,9 +557,20 @@ export default async function AdminSectionPage({
 }: {
   params: Promise<SectionParam>;
 }) {
+  const identity = await getAdmin();
+  if (!identity) {
+    redirect("/admin/login");
+  }
+
   const { section: slug } = await params;
   const section = resolveSection(slug);
   if (!section) notFound();
+
+  // Role-based access control
+  const allowedRoles = section.roles ?? [];
+  if (allowedRoles.length > 0 && ![...allowedRoles].includes(identity.role)) {
+    notFound();
+  }
 
   const id = section.id as SectionId;
 
@@ -459,10 +578,10 @@ export default async function AdminSectionPage({
   let description = "";
 
   switch (id) {
-    case "events":
-      description = "Dates, venues and visibility for the three editions.";
-      body = await eventsPanel();
-      break;
+case "events":
+        description = "Dates, venues and visibility for the three editions.";
+        body = await eventsPanel(identity.role !== "superadmin");
+        break;
     case "exhibitors":
       description = "Exhibitor enquiries submitted through the website forms.";
       body = (
@@ -578,15 +697,14 @@ export default async function AdminSectionPage({
         </div>
       );
       break;
-    case "settings":
-      description = "Platform configuration overview.";
-      body = (
-        <div className="space-y-4">
-          <ReadOnlyNote />
-          {settingsPanel()}
-        </div>
-      );
-      break;
+case "settings":
+        description = "Manage your profile and preferences.";
+        body = settingsPanel(identity);
+        break;
+      case "users":
+        description = "Manage admin users and their roles.";
+        body = await usersPanel();
+        break;
     default:
       notFound();
   }

@@ -202,7 +202,7 @@ export async function findActiveSession(sessionId: string): Promise<{
       email: String(row.email),
       name:
         row.name === null || row.name === undefined ? null : String(row.name),
-      role: isAdminRole(row.role) ? row.role : "editor",
+      role: isAdminRole(row.role) ? row.role : "staff",
       lastLoginAt:
         row.last_login_at === null || row.last_login_at === undefined
           ? null

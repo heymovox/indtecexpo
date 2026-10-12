@@ -97,7 +97,7 @@ interface SaveResponse {
   message?: string;
 }
 
-export function EventsManager({ items }: { items: EventAdminItem[] }) {
+export function EventsManager({ items, readOnly = false }: { items: EventAdminItem[]; readOnly?: boolean }) {
   const router = useRouter();
   const [editing, setEditing] = useState<EventAdminItem | null>(null);
   const [saving, setSaving] = useState(false);
@@ -244,31 +244,41 @@ export function EventsManager({ items }: { items: EventAdminItem[] }) {
               {message.text}
             </p>
           ) : null}
-          <Button type="button" onClick={openCreate} className="shrink-0">
-            <span className="flex items-center gap-2">
-              <Icon name="plus" size={16} strokeWidth={2} />
-              Add Event
-            </span>
-          </Button>
+          {!readOnly ? (
+            <Button type="button" onClick={openCreate} className="shrink-0">
+              <span className="flex items-center gap-2">
+                <Icon name="plus" size={16} strokeWidth={2} />
+                Add Event
+              </span>
+            </Button>
+          ) : null}
         </div>
       </div>
 
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-steel-300 bg-white/70 px-4 py-10 text-center shadow-sm ring-1 ring-black/5">
-          <Icon name="calendar" size={20} className="text-steel-400" strokeWidth={1.5} />
-          <p className="mt-3 text-sm font-medium text-navy-900">No events yet</p>
-          <p className="mt-1 max-w-sm text-xs text-steel-600">
-            Press &ldquo;Add Event&rdquo; to create an edition card with banner, floor plan and full
-            details.
-          </p>
-          <Button type="button" variant="outline" size="sm" onClick={openCreate} className="mt-4">
-            <span className="flex items-center gap-2">
-              <Icon name="plus" size={14} />
-              Add Event
-            </span>
-          </Button>
-        </div>
-      ) : (
+{items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-steel-300 bg-white/70 px-4 py-10 text-center shadow-sm ring-1 ring-black/5">
+            <Icon name="calendar" size={20} className="text-steel-400" strokeWidth={1.5} />
+            <p className="mt-3 text-sm font-medium text-navy-900">No events yet</p>
+            {!readOnly ? (
+              <>
+                <p className="mt-1 max-w-sm text-xs text-steel-600">
+                  Press &ldquo;Add Event&rdquo; to create an edition card with banner, floor plan and full
+                  details.
+                </p>
+                <Button type="button" variant="outline" size="sm" onClick={openCreate} className="mt-4">
+                  <span className="flex items-center gap-2">
+                    <Icon name="plus" size={14} />
+                    Add Event
+                  </span>
+                </Button>
+              </>
+            ) : (
+              <p className="mt-1 max-w-sm text-xs text-steel-600">
+                Contact your superadmin to create new event editions.
+              </p>
+            )}
+          </div>
+        ) : (
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
           {items.map((item) => {
             const style = STATUS_STYLE[item.status];
@@ -364,32 +374,34 @@ export function EventsManager({ items }: { items: EventAdminItem[] }) {
                     ) : null}
                   </div>
 
-                  <footer className="mt-auto flex items-center justify-between gap-2 border-t border-steel-100 pt-3">
-                    <span className="text-[11px] text-steel-500">
-                      {item.hasOverride ? "Edited in admin" : "Source default"}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEdit(item)}
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <Icon name="gear" size={13} />
-                          Edit
-                        </span>
-                      </Button>
-                      <button
-                        type="button"
-                        aria-label={`Delete ${item.name}`}
-                        onClick={() => void handleDelete(item)}
-                        className="border border-steel-200 p-1.5 text-steel-500 transition hover:border-signal-300 hover:text-signal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-300"
-                      >
-                        <Icon name="close" size={13} />
-                      </button>
-                    </div>
-                  </footer>
+<footer className="mt-auto flex items-center justify-between gap-2 border-t border-steel-100 pt-3">
+                      <span className="text-[11px] text-steel-500">
+                        {item.hasOverride ? "Edited in admin" : "Source default"}
+                      </span>
+                      {!readOnly ? (
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEdit(item)}
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <Icon name="gear" size={13} />
+                              Edit
+                            </span>
+                          </Button>
+                          <button
+                            type="button"
+                            aria-label={`Delete ${item.name}`}
+                            onClick={() => void handleDelete(item)}
+                            className="border border-steel-200 p-1.5 text-steel-500 transition hover:border-signal-300 hover:text-signal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-300"
+                          >
+                            <Icon name="close" size={13} />
+                          </button>
+                        </div>
+                      ) : null}
+                    </footer>
                 </div>
               </article>
             );

@@ -23,7 +23,7 @@ export const runtime = "nodejs";
 const newAdminSchema = z.object({
   email: z.string().email(),
   name: z.string().trim().max(80).optional(),
-  role: z.enum(["editor", "admin", "superadmin"]).default("editor"),
+  role: z.enum(["staff", "admin", "superadmin"]).default("staff"),
   password: z
     .string()
     .min(12, "Use at least 12 characters.")
@@ -32,7 +32,7 @@ const newAdminSchema = z.object({
 
 const updateAdminSchema = z.object({
   name: z.string().trim().max(80).nullable().optional(),
-  role: z.enum(["editor", "admin", "superadmin"]).optional(),
+  role: z.enum(["staff", "admin", "superadmin"]).optional(),
   password: z.string().min(12).max(200).optional(),
 });
 
