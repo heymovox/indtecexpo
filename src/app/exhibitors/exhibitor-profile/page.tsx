@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { industries } from "@/data/industries";
-import { galleryImages } from "@/data/gallery";
+import { floorPhotos } from "@/data/floorPhotos";
 import { exhibitableCategories, exhibitorCategories, visitorPrerequisites } from "@/data/exhibitors";
 import { buildMetadata } from "@/lib/seo";
 
@@ -22,9 +22,9 @@ export const metadata = buildMetadata({
   ],
 });
 
-const gallerySlides = galleryImages.map((item) => ({
-  src: item.image,
-  alt: item.title,
+const gallerySlides = floorPhotos.map((item) => ({
+  src: item.src,
+  alt: item.alt,
 }));
 
 const buyerPersonas: { icon: IconName; title: string; detail: string }[] = [
