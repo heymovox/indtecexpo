@@ -67,9 +67,9 @@ export function AdminShell({
   }
 
   return (
-    // Cancel the layout's fixed-header spacing: AdminShell supplies its own
-    // sticky header, while the public Header/Footer return null under /admin.
-    <div className="-mt-[var(--header-height)] min-h-[80vh] bg-steel-50">
+    // Cancel the layout's fixed-header and mobile-CTA spacing: AdminShell supplies its own
+    // sticky header, while the public Header/Footer/MobileCTABar return null under /admin.
+    <div className="-mt-[var(--header-height)] min-h-screen w-full bg-steel-50 max-lg:-mb-14">
       <header className="sticky top-0 z-30 border-b border-steel-200 bg-white">
         <div className="flex h-14 items-center gap-3 px-3 sm:px-5">
           <button
