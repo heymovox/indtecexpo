@@ -8,7 +8,9 @@ export const metadata: Metadata = {
 
 export default function AdminLoginPage() {
   return (
-    <section className="grid min-h-[78vh] lg:grid-cols-2">
+    // Cancel the layout's fixed-header and mobile-CTA spacing on this route:
+    // Header, Footer, and MobileCTABar all return null under /admin.
+    <section className="-mt-[var(--header-height)] grid min-h-screen w-full max-lg:-mb-14 lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden bg-navy-950 p-10 text-white lg:flex xl:p-14">
         <div className="grid-surface-dark pointer-events-none absolute inset-0 opacity-60" />
         <div className="relative">
