@@ -582,63 +582,105 @@ case "events":
         description = "Dates, venues and visibility for the three editions.";
         body = await eventsPanel(identity.role !== "superadmin");
         break;
-    case "exhibitors":
-      description = "Exhibitor enquiries submitted through the website forms.";
-      body = (
-        <RecordsTable
-          kind="exhibitor"
-          label="Exhibitor Enquiries"
-          rows={await exhibitorRows()}
-          emptyMessage="No exhibitor enquiries yet."
-        />
-      );
-      break;
-    case "bookings":
-      description = "Stall booking pipeline — proposals sent and deals won.";
-      body = (
-        <RecordsTable
-          kind="exhibitor"
-          label="Stall Bookings"
-          rows={(await exhibitorRows()).filter((row) =>
-            row.stage === "proposal" || row.stage === "won",
-          )}
-          emptyMessage="No bookings in the proposal or won stages yet."
-        />
-      );
-      break;
-    case "visitors":
-      description = "Visitor pre-registrations across the expo editions.";
-      body = (
-        <RecordsTable
-          kind="visitor"
-          label="Visitor Registrations"
-          rows={await visitorRows()}
-          emptyMessage="No visitor registrations yet."
-        />
-      );
-      break;
-    case "enquiries":
-      description = "General enquiries captured from the website.";
-      body = (
-        <RecordsTable
-          kind="contact"
-          label="Enquiries"
-          rows={await contactRows()}
-          emptyMessage="No enquiries yet."
-        />
-      );
-      break;
-    case "messages":
-      description = "Messages received through the contact page.";
-      body = (
-        <RecordsTable
-          kind="contact"
-          label="Contact Messages"
-          rows={await contactRows()}
-          emptyMessage="No contact messages yet."
-        />
-      );
-      break;
+case "exhibitors":
+        description = "Exhibitor enquiries submitted through the website forms.";
+        body = (
+          <RecordsTable
+            kind="exhibitor"
+            label="Exhibitor Enquiries"
+            rows={await exhibitorRows()}
+            emptyMessage="No exhibitor enquiries yet."
+            events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            exportColumns={[
+              { header: "Company", key: "Company" },
+              { header: "Contact Person", key: "Contact Person" },
+              { header: "Industry", key: "Industry" },
+              { header: "Stall Size", key: "Stall Size" },
+              { header: "Stalls", key: "Stalls" },
+              { header: "Designation", key: "Designation" },
+            ]}
+          />
+        );
+        break;
+case "bookings":
+        description = "Stall booking pipeline — proposals sent and deals won.";
+        body = (
+          <RecordsTable
+            kind="exhibitor"
+            label="Stall Bookings"
+            rows={(await exhibitorRows()).filter((row) =>
+              row.stage === "proposal" || row.stage === "won",
+            )}
+            emptyMessage="No bookings in the proposal or won stages yet."
+            events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            exportColumns={[
+              { header: "Company", key: "Company" },
+              { header: "Contact Person", key: "Contact Person" },
+              { header: "Industry", key: "Industry" },
+              { header: "Stall Size", key: "Stall Size" },
+              { header: "Stalls", key: "Stalls" },
+              { header: "Designation", key: "Designation" },
+            ]}
+          />
+        );
+        break;
+case "visitors":
+        description = "Visitor pre-registrations across the expo editions.";
+        body = (
+          <RecordsTable
+            kind="visitor"
+            label="Visitor Registrations"
+            rows={await visitorRows()}
+            emptyMessage="No visitor registrations yet."
+            events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            exportColumns={[
+              { header: "Company", key: "Company" },
+              { header: "Designation", key: "Designation" },
+              { header: "City", key: "City" },
+              { header: "Industry", key: "Industry" },
+              { header: "Interests", key: "Interests" },
+              { header: "Expos", key: "Expos" },
+              { header: "Visiting Schedule", key: "Visiting Schedule" },
+            ]}
+          />
+        );
+        break;
+case "enquiries":
+        description = "General enquiries captured from the website.";
+        body = (
+          <RecordsTable
+            kind="contact"
+            label="Enquiries"
+            rows={await contactRows()}
+            emptyMessage="No enquiries yet."
+            events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            exportColumns={[
+              { header: "Category", key: "Category" },
+              { header: "Company", key: "Company" },
+              { header: "Phone", key: "Phone" },
+              { header: "Message", key: "Message" },
+            ]}
+          />
+        );
+        break;
+      case "messages":
+        description = "Messages received through the contact page.";
+        body = (
+          <RecordsTable
+            kind="contact"
+            label="Contact Messages"
+            rows={await contactRows()}
+            emptyMessage="No contact messages yet."
+            events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            exportColumns={[
+              { header: "Category", key: "Category" },
+              { header: "Company", key: "Company" },
+              { header: "Phone", key: "Phone" },
+              { header: "Message", key: "Message" },
+            ]}
+          />
+        );
+        break;
     case "sponsors":
       description = "Sponsorship tiers and partners.";
       body = (
