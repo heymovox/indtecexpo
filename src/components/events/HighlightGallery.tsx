@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
@@ -9,18 +9,60 @@ export function HighlightGallery({
   images,
   label,
   className,
+  autoplay = false,
+  intervalMs = 5000,
+  thumbnails = true,
 }: {
   images: { src: string; alt: string }[];
   label: string;
   className?: string;
+  autoplay?: boolean;
+  intervalMs?: number;
+  thumbnails?: boolean;
 }) {
   const [active, setActive] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const resumeAt = useRef(0);
   const current = images[active];
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!autoplay || reduceMotion || paused || images.length < 2) return;
+    const id = window.setInterval(() => {
+      if (document.hidden) return;
+      if (Date.now() < resumeAt.current) return;
+      setActive((index) => (index + 1) % images.length);
+    }, intervalMs);
+    return () => window.clearInterval(id);
+  }, [autoplay, reduceMotion, paused, images.length, intervalMs]);
+
+  function select(index: number) {
+    setActive(index);
+    // Give a visitor time to inspect a manually selected image.
+    resumeAt.current = Date.now() + intervalMs * 2;
+  }
 
   if (!current) return null;
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={`${label} gallery`}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
       <div className="relative bg-navy-900">
         <Image
           key={current.src}
@@ -42,13 +84,13 @@ export function HighlightGallery({
           </span>
         </div>
 
-        {images.length > 1 ? (
+      {thumbnails && images.length > 1 ? (
           <>
             <button
               type="button"
               aria-label="Previous image"
               onClick={() =>
-                setActive((i) => (i - 1 + images.length) % images.length)
+                select((active - 1 + images.length) % images.length)
               }
               className="absolute left-0 top-0 flex h-full w-11 items-start justify-start bg-gradient-to-r from-navy-950/70 to-transparent pt-2 pl-1 text-white/80 transition hover:text-gold-500"
             >
@@ -57,7 +99,7 @@ export function HighlightGallery({
             <button
               type="button"
               aria-label="Next image"
-              onClick={() => setActive((i) => (i + 1) % images.length)}
+              onClick={() => select((active + 1) % images.length)}
               className="absolute right-0 top-0 flex h-full w-11 items-start justify-end bg-gradient-to-l from-navy-950/70 to-transparent pt-2 pr-1 text-white/80 transition hover:text-gold-500"
             >
               <Icon name="chevron-right" size={18} />
@@ -66,13 +108,13 @@ export function HighlightGallery({
         ) : null}
       </div>
 
-      {images.length > 1 ? (
+      {thumbnails && images.length > 1 ? (
         <div className="grid grid-cols-4 gap-2 border-x border-b border-steel-200 bg-white p-2">
           {images.map((image, index) => (
             <button
               key={image.src}
               type="button"
-              onClick={() => setActive(index)}
+              onClick={() => select(index)}
               aria-label={`Show image ${index + 1}`}
               aria-current={index === active}
               className={cn(

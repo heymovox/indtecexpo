@@ -1,11 +1,11 @@
-import Image from "next/image";
-
 import { Button } from "@/components/ui/Button";
 import { ExhibitorCTA } from "@/components/ui/CTA";
+import { HighlightGallery } from "@/components/events/HighlightGallery";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { industries } from "@/data/industries";
+import { galleryImages } from "@/data/gallery";
 import { exhibitableCategories, exhibitorCategories, visitorPrerequisites } from "@/data/exhibitors";
 import { buildMetadata } from "@/lib/seo";
 
@@ -21,6 +21,11 @@ export const metadata = buildMetadata({
     "B2B industrial buyer audience India",
   ],
 });
+
+const gallerySlides = galleryImages.map((item) => ({
+  src: item.image,
+  alt: item.title,
+}));
 
 const buyerPersonas: { icon: IconName; title: string; detail: string }[] = [
   {
@@ -296,14 +301,13 @@ export default function ExhibitorProfilePage() {
 
           <div className="relative">
             <div className="grid-surface absolute -inset-4 -z-10" />
-            <Image
-              src="/images/exhibitors/trade-show-floor.webp"
-              alt="Crowded INDTEC EXPO aisle with trade visitors walking past machinery stands"
-              width={1000}
-              height={750}
-              className="h-auto w-full border border-steel-200"
-              sizes="(max-width: 1024px) 100vw, 560px"
-              loading="lazy"
+            <HighlightGallery
+              images={gallerySlides}
+              label="Expo highlights"
+              autoplay
+              intervalMs={4500}
+              thumbnails={false}
+              className="relative border border-steel-200"
             />
             <div className="mt-4 grid grid-cols-2 gap-4">
               <div className="border border-steel-200 bg-white px-4 py-4 text-center">
