@@ -36,12 +36,32 @@ const updateAdminSchema = z.object({
   password: z.string().min(12).max(200).optional(),
 });
 
-/** Lists admins. Password hashes never leave the server. */
-export async function GET() {
+/** Lists admins or fetches a single admin by id. */
+export async function GET(request: NextRequest) {
   const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
+    const id = request.nextUrl.searchParams.get("id");
+    if (id) {
+      const admin = await findAdminById(id);
+      if (!admin) {
+        return Response.json({ ok: false, message: "Admin not found." }, { status: 404 });
+      }
+      return Response.json({
+        ok: true,
+        admin: {
+          id: admin.id,
+          email: admin.email,
+          name: admin.name,
+          role: admin.role,
+          createdAt: admin.createdAt,
+          lastLoginAt: admin.lastLoginAt,
+          disabledAt: admin.disabledAt,
+        },
+      });
+    }
+
     const admins = await listAdmins();
     return Response.json({
       ok: true,
