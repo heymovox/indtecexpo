@@ -7,16 +7,44 @@ interface PageMetaInput {
   title: string;
   description: string;
   path: string;
-  image?: string;
+  /**
+   * Preset name for the generated share card, e.g. "about" or "floor-plan".
+   * Ignored when ogTitle is supplied, which switches the card to dynamic mode.
+   */
+  card?: string;
+  /** Overrides the card title; enables per-page dynamic cards. */
+  ogTitle?: string;
+  ogEyebrow?: string;
   keywords?: string[];
   noIndex?: boolean;
+}
+
+/**
+ * Builds the absolute URL of the generated PNG share card.
+ *
+ * Always a raster image: every content asset on this site (event, blog, media
+ * and industry artwork) is an SVG, and Facebook, WhatsApp, LinkedIn and X all
+ * refuse to render SVG for og:image, so a shared link showed no preview at all.
+ */
+function ogImageUrl(input: {
+  card?: string;
+  ogTitle?: string;
+  ogEyebrow?: string;
+}): string {
+  const params = new URLSearchParams();
+  params.set("card", input.card ?? "brand");
+  if (input.ogTitle) params.set("title", input.ogTitle);
+  if (input.ogEyebrow) params.set("eyebrow", input.ogEyebrow);
+  return absoluteUrl(`/og?${params.toString()}`);
 }
 
 export function buildMetadata({
   title,
   description,
   path,
-  image = "/images/brand/og-default.svg",
+  card,
+  ogTitle,
+  ogEyebrow,
   keywords,
   noIndex = false,
 }: PageMetaInput): Metadata {
@@ -24,6 +52,7 @@ export function buildMetadata({
   const fullTitle = title.includes(siteConfig.name)
     ? title
     : `${title} | ${siteConfig.name}`;
+  const imageUrl = ogImageUrl({ card, ogTitle, ogEyebrow });
 
   return {
     title: fullTitle,
@@ -38,13 +67,13 @@ export function buildMetadata({
       siteName: siteConfig.name,
       title: fullTitle,
       description,
-      images: [{ url: absoluteUrl(image), width: 1200, height: 630, alt: fullTitle }],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: fullTitle }],
     },
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [absoluteUrl(image)],
+      images: [imageUrl],
     },
   };
 }
@@ -61,7 +90,7 @@ export function organizationJsonLd() {
     name: siteConfig.name,
     legalName: siteConfig.legalName,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/images/brand/logo-footer-white.png"),
+    logo: absoluteUrl("/images/brand/indtec-expo-2026-colored.png"),
     slogan: siteConfig.tagline,
     description: siteConfig.shortDescription,
     email: `mailto:${siteConfig.email}`,
@@ -105,7 +134,14 @@ export function eventJsonLd(event: ExpoEvent) {
     endDate: event.endDate,
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    image: [absoluteUrl(event.image), absoluteUrl(event.heroImage)],
+    // The static event artwork is SVG, which search engines and social
+    // platforms will not render. Point Event schema at the generated PNG card
+    // as well so the rich result always has a usable image.
+    image: [
+      ogImageUrl({ card: "event", ogTitle: event.name, ogEyebrow: `${event.city} · ${event.dateRangeShort}` }),
+      absoluteUrl(event.image),
+      absoluteUrl(event.heroImage),
+    ],
     url: absoluteUrl(`/events/${event.slug}`),
     location: {
       "@type": "Place",

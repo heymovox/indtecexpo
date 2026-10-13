@@ -15,6 +15,7 @@ export const metadata = buildMetadata({
   description:
     "The complete INDTEC EXPO 2026–2027 calendar — Bengaluru, Coimbatore and Hosur. Compare dates, venues, positioning and stall pricing across three South India B2B industrial expos.",
   path: "/events",
+    card: "events",
   keywords: [
     "INDTEC Expo calendar",
     "industrial expo South India 2026",

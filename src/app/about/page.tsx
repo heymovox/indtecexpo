@@ -15,6 +15,7 @@ export const metadata = buildMetadata({
   description:
     "INDTEC EXPO is organised by Konnekt Globe — Connecting Industries Globally. Our mission, values and the story behind South India's B2B industrial expo series across Bengaluru, Coimbatore and Hosur.",
   path: "/about",
+    card: "about",
 });
 
 const valueCopy: Record<(typeof siteConfig.values)[number], string> = {

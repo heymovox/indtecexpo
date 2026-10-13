@@ -17,6 +17,7 @@ export const metadata = buildMetadata({
   description:
     "Free trade entry to INDTEC EXPO 2026–2027 — discover live machinery, meet 900+ exhibitors and connect with industrial decision-makers across Bengaluru, Coimbatore and Hosur.",
   path: "/visitors",
+    card: "visitors",
 });
 
 export default function VisitorsPage() {

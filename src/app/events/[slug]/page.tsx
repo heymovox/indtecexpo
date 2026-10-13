@@ -45,8 +45,10 @@ export async function generateMetadata({ params }: EventPageProps) {
   return buildMetadata({
     title: `${event.name} | ${event.dateRangeShort} · ${event.venue.name}`,
     description: `${event.summary} ${event.city} edition, ${event.dateLabel} at ${event.venue.name} — explore highlights, schedule, stall options and the floor plan.`,
-    path: `/events/${event.slug}`,
-    image: event.image,
+path: `/events/${event.slug}`,
+      card: "event",
+      ogTitle: event.name,
+      ogEyebrow: `${event.city} · ${event.dateRangeShort}`,
     keywords: [
       `${event.city} industrial expo`,
       `${event.city} machine tools exhibition`,

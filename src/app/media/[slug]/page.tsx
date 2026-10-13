@@ -36,8 +36,9 @@ export async function generateMetadata({
   return buildMetadata({
     title: article.title,
     description: article.excerpt,
-    path: `/media/${article.slug}`,
-    image: article.image,
+path: `/media/${article.slug}`,
+      card: "article",
+      ogTitle: article.title,
   });
 }
 

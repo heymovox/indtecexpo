@@ -15,6 +15,7 @@ export const metadata = buildMetadata({
   description:
     "Exhibit at INDTEC EXPO 2026–2027 across Bengaluru, Coimbatore and Hosur. Stall configurations, four-step booking process, qualified industrial visitor profile and exhibitor FAQs.",
   path: "/exhibitors",
+    card: "exhibitors",
   keywords: [
     "exhibit at industrial expo India",
     "book stall INDTEC Expo",

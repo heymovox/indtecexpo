@@ -3,16 +3,58 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Section } from "@/components/ui/Section";
 import { floorPhotos } from "@/data/floorPhotos";
 import { buildMetadata } from "@/lib/seo";
+import { listPublishedGalleryItems, galleryItemSrc } from "@/lib/db";
 import { GalleryGrid } from "./GalleryGrid";
+import type { GalleryDisplayItem } from "./gallery-items";
 
 export const metadata = buildMetadata({
   title: "Gallery",
   description:
     "Inside INDTEC EXPO — live machinery, busy aisles, buyer–seller sessions, inaugurations and networking from previous editions across South India.",
   path: "/gallery",
+    card: "gallery",
 });
 
-export default function GalleryPage() {
+export const revalidate = 300;
+
+/**
+ * Fallback set, used only until the hosted photographs have been imported into
+ * the gallery collection (and again if the database is unreachable). Once
+ * imported they are served from the collection instead, under real categories.
+ */
+const fallback: GalleryDisplayItem[] = floorPhotos.map((photo) => ({
+  id: photo.id,
+  src: photo.src,
+  width: photo.width,
+  height: photo.height,
+  alt: photo.alt,
+  caption: photo.caption,
+  category: "Archive",
+  live: false,
+}));
+
+export default async function GalleryPage() {
+  // A gallery outage must never take the public page down with it.
+  let managed: GalleryDisplayItem[] = [];
+  try {
+    const rows = await listPublishedGalleryItems();
+    managed = rows.map((item) => ({
+      id: item.id,
+      // Hosted photographs keep their /public path; uploads are streamed.
+      src: galleryItemSrc(item),
+      width: item.width ?? 1600,
+      height: item.height ?? 1067,
+      alt: item.alt || item.title,
+      caption: item.caption || item.title,
+      category: item.category,
+      live: true,
+    }));
+  } catch (error) {
+    console.error("[gallery] could not load managed images", error);
+  }
+
+  const items = managed.length > 0 ? managed : fallback;
+
   return (
     <>
       <PageHero
@@ -26,7 +68,7 @@ export default function GalleryPage() {
         <div className="flex flex-wrap gap-x-7 gap-y-3 text-sm text-steel-300">
           <span className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 bg-gold-500" />
-            {floorPhotos.length} exhibition photographs
+            {items.length} exhibition photographs
           </span>
           <span className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 bg-gold-500" />
@@ -40,7 +82,7 @@ export default function GalleryPage() {
       </PageHero>
 
       <Section>
-        <GalleryGrid />
+        <GalleryGrid items={items} />
       </Section>
 
       <Section tone="muted" className="grid-surface-dark">

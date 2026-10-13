@@ -12,6 +12,7 @@ export const metadata = buildMetadata({
   description:
     "Explore the 10 industrial sectors at INDTEC EXPO 2026–2027 — machine tools, automation, Industry 4.0, electricals, instrumentation, material handling, components and more.",
   path: "/industries",
+    card: "industries",
 });
 
 export default function IndustriesPage() {

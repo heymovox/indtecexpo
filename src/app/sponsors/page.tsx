@@ -13,6 +13,7 @@ export const metadata = buildMetadata({
   description:
     "Title sponsors, industry partners, media partners and technology partners of INDTEC EXPO 2026–2027. Explore partnership tiers and become an INDTEC EXPO partner.",
   path: "/sponsors",
+    card: "sponsors",
 });
 
 const partnershipBenefits: { icon: IconName; title: string; text: string }[] = [

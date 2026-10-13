@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
@@ -11,13 +12,17 @@ import {
 } from "@/data/floorPlans";
 import { buildMetadata } from "@/lib/seo";
 import { whatsappLinks } from "@/lib/whatsapp";
+import { listFloorPlanAssets, type FloorPlanAssets } from "@/lib/db";
 
 export const metadata = buildMetadata({
   title: "Floor Plan & Stall Layout",
   description:
     "View the INDTEC EXPO 2026–2027 floor plans for Bengaluru, Coimbatore and Hosur. Every stall position, its dimensions and the pricing for each edition.",
   path: "/floor-plan",
+    card: "floor-plan",
 });
+
+export const revalidate = 300;
 
 const zoningNotes: { icon: IconName; title: string; text: string }[] = [
   {
@@ -52,9 +57,19 @@ const zoningNotes: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-export default function FloorPlanPage() {
+export default async function FloorPlanPage() {
   const events = getSortedEvents();
   const bengaluruPlan = getStallPlan("bengaluru");
+
+  // Uploaded artwork per city. A database outage must not take the page down,
+  // since the interactive stall grid below is rendered from static data.
+  let assets: Record<string, FloorPlanAssets> = {};
+  try {
+    const rows = await listFloorPlanAssets();
+    assets = Object.fromEntries(rows.map((row) => [row.slug, row]));
+  } catch (error) {
+    console.error("[floor-plan] could not load uploaded assets", error);
+  }
 
   return (
     <>
@@ -121,18 +136,56 @@ export default function FloorPlanPage() {
                   : ""
               }`}
               action={
-                <Button href={`/events/${event.slug}`} variant="outline" size="sm">
-                  Event Details
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {assets[event.slug]?.pdfKey ? (
+                    <a
+                      href={`/floor-plan/asset/${event.slug}/pdf`}
+                      className="inline-flex items-center gap-2 border border-navy-900 px-4 py-2 text-sm font-semibold text-navy-900 transition hover:bg-navy-900 hover:text-white"
+                    >
+                      <Icon name="download" size={15} />
+                      {assets[event.slug]?.pdfLabel || "Download floor plan"}
+                    </a>
+                  ) : null}
+                  <Button href={`/events/${event.slug}`} variant="outline" size="sm">
+                    Event Details
+                  </Button>
+                </div>
               }
             />
 
             <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-              {plan ? (
-                <div className="min-w-0">
-                  <StallPlanView plan={plan} />
-                </div>
-              ) : null}
+              <div className="min-w-0 space-y-6">
+                {/* Official artwork uploaded from the admin dashboard takes
+                    precedence; the interactive stall grid always stays live
+                    below it because it drives stall booking. */}
+                {assets[event.slug]?.imageKey ? (
+                  <figure className="overflow-hidden border border-steel-200 bg-white">
+                    <Image
+                      src={`/floor-plan/asset/${event.slug}/image`}
+                      alt={
+                        assets[event.slug]?.imageAlt ||
+                        `${event.city} exhibition floor plan`
+                      }
+                      width={1600}
+                      height={1100}
+                      className="h-auto w-full bg-white object-contain"
+                      sizes="(max-width: 1024px) 100vw, 52vw"
+                    />
+                    <figcaption className="border-t border-steel-200 px-4 py-2.5 text-xs text-steel-600">
+                      Official {event.city} floor plan.
+                    </figcaption>
+                  </figure>
+                ) : null}
+
+                {plan ? (
+                  <div className="min-w-0">
+                    <h3 className="display-sm mb-3 text-base text-navy-900">
+                      Bookable stalls
+                    </h3>
+                    <StallPlanView plan={plan} />
+                  </div>
+                ) : null}
+              </div>
 
             <div className="min-w-0">
               <h3 className="display-sm text-lg text-navy-900 sm:text-xl">
