@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/Form";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { formatDateTime } from "@/lib/utils";
+import { UploadField } from "@/components/admin/UploadField";
 
 export type EventStatus = "upcoming" | "live" | "completed";
 
@@ -575,39 +576,50 @@ function EventFormModal({
                 />
               </Field>
 
-              <Field label="Banner image URL" htmlFor="event-banner" hint="Card banner and page hero">
-                <Input
-                  id="event-banner"
+              <UploadField
+                  label="Banner image"
                   value={item.bannerImage}
-                  onChange={(event) => set("bannerImage", event.target.value)}
-                  placeholder="/images/events/bengaluru-city.webp"
+                  onChange={(url) => set("bannerImage", url)}
+                  folder="posters"
+                  guidelines={{
+                    recommendedDimensions: "1200×675 px (16:9)",
+                    acceptedTypes: "JPG, PNG, WebP, AVIF",
+                    maxSizeMB: 10,
+                  }}
+                  htmlFor="event-banner"
                 />
-              </Field>
-              <Field label="Poster image URL" htmlFor="event-poster" hint="Fallback banner">
-                <Input
-                  id="event-poster"
+                <UploadField
+                  label="Poster image"
                   value={item.posterImage}
-                  onChange={(event) => set("posterImage", event.target.value)}
-                  placeholder="/images/events/bengaluru-poster.webp"
+                  onChange={(url) => set("posterImage", url)}
+                  folder="posters"
+                  guidelines={{
+                    recommendedDimensions: "800×1200 px (portrait)",
+                    acceptedTypes: "JPG, PNG, WebP, AVIF",
+                    maxSizeMB: 10,
+                  }}
+                  htmlFor="event-poster"
                 />
-              </Field>
-
-              <Field label="Floor plan image URL" htmlFor="event-floor-image">
-                <Input
-                  id="event-floor-image"
+                <UploadField
+                  label="Floor plan image"
                   value={item.floorPlanImage}
-                  onChange={(event) => set("floorPlanImage", event.target.value)}
-                  placeholder="/images/floor-plans/bengaluru.svg"
+                  onChange={(url) => set("floorPlanImage", url)}
+                  folder="floor-plans"
+                  guidelines={{
+                    recommendedDimensions: "SVG preferred, or 2000×2000 px PNG",
+                    acceptedTypes: "SVG, PNG, JPG, WebP",
+                    maxSizeMB: 10,
+                  }}
+                  htmlFor="event-floor-image"
                 />
-              </Field>
-              <Field label="Floor plan PDF URL" htmlFor="event-floor-pdf">
-                <Input
-                  id="event-floor-pdf"
-                  value={item.floorPlanPdf}
-                  onChange={(event) => set("floorPlanPdf", event.target.value)}
-                  placeholder="/documents/floor-plan-bengaluru.pdf"
-                />
-              </Field>
+                <Field label="Floor plan PDF URL" htmlFor="event-floor-pdf" hint="Optional PDF download link">
+                  <Input
+                    id="event-floor-pdf"
+                    value={item.floorPlanPdf}
+                    onChange={(event) => set("floorPlanPdf", event.target.value)}
+                    placeholder="/documents/floor-plan-bengaluru.pdf"
+                  />
+                </Field>
 
               <Field label="Start date" htmlFor="event-start">
                 <Input
