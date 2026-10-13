@@ -190,7 +190,61 @@ export function RecordsTable({
         </p>
       ) : null}
 
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="lg:hidden">
+        {eventFiltered.length === 0 ? (
+          <div className="px-4 py-10 text-center text-sm text-steel-500">
+            {rows.length === 0 ? emptyMessage : "No records match your search."}
+          </div>
+        ) : (
+          <div className="grid gap-3 p-4">
+            {eventFiltered.map((row) => {
+              const stage = stages[row.id] ?? row.stage;
+              return (
+                <article key={row.id} className="card p-4 border-steel-200 hover:border-brand-300 transition-colors">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-xs text-steel-500 truncate">{row.reference}</p>
+                      <h4 className="mt-1 font-medium text-navy-900">{row.title}</h4>
+                      <p className="mt-0.5 text-xs text-steel-500">{row.subtitle}</p>
+                    </div>
+                    <StageChip stage={stage} />
+                  </div>
+
+                  <div className="space-y-1.5 mb-3 text-xs text-steel-600">
+                    {row.meta.map((item, index) => (
+                      <p key={`${item}-${index}`} className="break-words">{item}</p>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-steel-100">
+                    <div className="flex flex-col gap-2 w-full sm:w-auto">
+                      <StageChip stage={stage} />
+                      <select
+                        value={stage}
+                        aria-label={`Stage for ${row.reference}`}
+                        disabled={savingId === row.id}
+                        onChange={(event) => void changeStage(row.id, event.target.value as LeadStage)}
+                        className="field py-1.5 text-xs w-full sm:w-auto"
+                      >
+                        {adminConfig.kanbanColumns.map((column) => (
+                          <option key={column.id} value={column.id}>{column.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <time className="text-xs text-steel-500 whitespace-nowrap" dateTime={row.createdAt}>
+                      {formatDateTime(row.createdAt)}
+                    </time>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+        </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead>
             <tr className="border-b border-steel-200 bg-steel-50 text-[11px] uppercase tracking-[0.12em] text-steel-500">
