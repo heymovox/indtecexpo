@@ -11,13 +11,14 @@ import {
   listVisitorRegistrations,
 } from "@/lib/db";
 import { events } from "@/data/events";
-import { sponsorTiers } from "@/data/sponsors";
-import { galleryImages, galleryCategories } from "@/data/gallery";
 import { mediaArticles } from "@/data/media";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { StorageManager } from "@/components/admin/StorageManager";
 import { RecordsTable, type RecordsTableRow } from "../RecordsTable";
 import { EventsManager, type EventAdminItem } from "../EventsManager";
+import { SponsorsManager } from "../SponsorsManager";
+import { GalleryManager } from "../GalleryManager";
+import { FloorPlansManager } from "../FloorPlansManager";
 
 export const dynamic = "force-dynamic";
 
@@ -250,123 +251,6 @@ async function eventsPanel(readOnly = false) {
 
     return <EventsManager items={items} readOnly={readOnly} />;
   }
-
-function sponsorsPanel() {
-  return (
-    <div className="grid gap-4">
-      {sponsorTiers.map((tier) => (
-        <section key={tier.id} className="card p-5">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h2 className="display-sm text-lg text-navy-900">{tier.title}</h2>
-            <span className="text-xs text-steel-500">
-              {tier.logos.length} partner{tier.logos.length === 1 ? "" : "s"}
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-steel-600">{tier.description}</p>
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {tier.logos.map((logo) => (
-              <li
-                key={logo.id}
-                className="flex items-center gap-3 border border-steel-200 bg-steel-50 px-3 py-2.5"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logo.logo} alt="" className="h-7 w-auto max-w-24 object-contain" />
-                <span className="min-w-0 truncate text-sm font-medium text-navy-900">
-                  {logo.name}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </div>
-  );
-}
-
-function galleryPanel() {
-  return (
-    <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {galleryCategories.map((category) => {
-          const count = galleryImages.filter(
-            (image) => image.category === category,
-          ).length;
-          return (
-            <div key={category} className="card p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-steel-500">
-                {category}
-              </p>
-              <p className="display tabular mt-2 text-2xl text-navy-900">
-                {count}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {galleryImages.map((image) => (
-          <figure key={image.id} className="card overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={image.image}
-              alt={image.title}
-              className="h-36 w-full object-cover"
-            />
-            <figcaption className="px-3 py-2.5">
-              <p className="truncate text-sm font-medium text-navy-900">
-                {image.title}
-              </p>
-              <p className="text-xs text-steel-500">{image.category}</p>
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function floorPlanPanel() {
-  return (
-    <div className="card overflow-hidden">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-steel-200 bg-steel-50 text-[11px] uppercase tracking-[0.12em] text-steel-500">
-            <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">
-              Event
-            </th>
-            <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">
-              Plan Image
-            </th>
-            <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">
-              PDF
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {events.map((event) => (
-            <tr
-              key={event.slug}
-              className="border-b border-steel-100 last:border-b-0"
-            >
-              <td className="px-4 py-3 font-medium text-navy-900 sm:px-5">
-                {event.name}
-                <span className="block text-xs font-normal text-steel-500">
-                  /{event.slug}
-                </span>
-              </td>
-              <td className="px-4 py-3 font-mono text-xs text-steel-600 sm:px-5">
-                {event.floorPlanImage}
-              </td>
-              <td className="px-4 py-3 font-mono text-xs text-steel-600 sm:px-5">
-                {event.floorPlanPdf}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 function articlesPanel() {
   return (
@@ -681,40 +565,19 @@ case "enquiries":
           />
         );
         break;
-    case "sponsors":
-      description = "Sponsorship tiers and partners.";
-      body = (
-        <div className="space-y-4">
-          <ReadOnlyNote />
-          {sponsorsPanel()}
-        </div>
-      );
-      break;
+case "sponsors":
+        description = "Sponsorship tiers and partners.";
+        body = (
+          <SponsorsManager readOnly={identity.role !== "superadmin"} />
+        );
+        break;
     case "gallery":
-      description = "Published gallery images by category.";
-      body = (
-        <div className="space-y-4">
-          <StorageManager
-            folder="gallery"
-            title="Upload gallery images"
-            hint="Images uploaded here are stored in Cloudflare R2 and listed below. The site gallery still uses the curated set; these are for review and future publishing."
-          />
-          {galleryPanel()}
-        </div>
-      );
+      description = "Upload and publish images to the website gallery.";
+      body = <GalleryManager />;
       break;
     case "floor-plans":
-      description = "Floor plan assets linked to each event.";
-      body = (
-        <div className="space-y-4">
-          <StorageManager
-            folder="floor-plans"
-            title="Upload floor plan artwork"
-            hint="Floor plans shown on the site are rendered from stall data. Upload source artwork or supporting drawings here."
-          />
-          {floorPlanPanel()}
-        </div>
-      );
+      description = "Stall layouts and published floor plan artwork per city.";
+      body = <FloorPlansManager />;
       break;
     case "media":
       description = "News, press releases and industry coverage.";

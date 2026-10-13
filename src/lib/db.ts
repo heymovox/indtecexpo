@@ -40,6 +40,9 @@ export type Collection =
   | "visitorRegistrations"
   | "contactMessages"
   | "events"
+  | "gallery"
+  | "floorPlans"
+  | "emailSuppressions"
   | "settings";
 
 export interface StoredRecord {
@@ -372,4 +375,217 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
   }
 
   return [...merged, ...created];
+}
+/* ------------------------------------------------------------------ */
+/* Gallery images uploaded from the admin dashboard                   */
+/* ------------------------------------------------------------------ */
+
+export const GALLERY_CATEGORIES = [
+  "Expo",
+  "Exhibitors",
+  "Visitors",
+  "Machines",
+  "Networking",
+  "Events",
+] as const;
+
+export type GalleryCategoryValue = (typeof GALLERY_CATEGORIES)[number];
+
+/**
+ * An admin-managed gallery image.
+ *
+ * Two sources are supported:
+ *  - `objectKey` for admin uploads in Cloudflare R2. The key is never a
+ *    presigned URL: those expire, so the public site resolves the key at
+ *    request time through /gallery/img/[id] instead.
+ *  - `src` for photographs already hosted in /public. These are copied in from
+ *    `data/floorPhotos.ts` so they become editable alongside the uploads.
+ */
+export interface GalleryItem extends StoredRecord {
+  title: string;
+  category: GalleryCategoryValue;
+  objectKey?: string;
+  src?: string;
+  /** "upload" = added from the dashboard, "hosted" = imported from /public. */
+  origin: "upload" | "hosted";
+  caption?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  published: boolean;
+  order: number;
+}
+
+/**
+ * Resolves the public URL for a managed item. Hosted photographs keep their
+ * /public path; uploads are streamed through the authenticated-free asset route.
+ */
+export function galleryItemSrc(item: GalleryItem): string {
+  if (item.src) return item.src;
+  if (item.objectKey) return `/gallery/img/${item.id}`;
+  return "";
+}
+
+export async function listGalleryItems(): Promise<GalleryItem[]> {
+  const items = await listRecords<GalleryItem>("gallery");
+  return items.sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.createdAt.localeCompare(b.createdAt),
+  );
+}
+
+export async function getGalleryItem(id: string): Promise<GalleryItem | null> {
+  return getRecordById<GalleryItem>("gallery", id);
+}
+
+/** Published items only, ordered for display on the public gallery. */
+export async function listPublishedGalleryItems(): Promise<GalleryItem[]> {
+  const items = await listGalleryItems();
+  return items.filter((item) => item.published === true);
+}
+
+export async function createGalleryItem(
+  input: Omit<GalleryItem, "id" | "createdAt"> & { id?: string },
+): Promise<GalleryItem> {
+  const created = {
+    ...input,
+    id: input.id ?? `gal-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    createdAt: new Date().toISOString(),
+  } as GalleryItem;
+
+// `stage` is a lead-pipeline concept and is meaningless for gallery rows,
+  // so this writes the row directly instead of going through createRecord.
+  const columns = toColumns("gallery", { ...created, stage: undefined });
+  await sql().query(INSERT, insertParams(columns));
+  return created;
+}
+
+export async function updateGalleryItem(
+  id: string,
+  patch: Partial<GalleryItem>,
+): Promise<GalleryItem | null> {
+  return updateRecord<GalleryItem>("gallery", id, patch);
+}
+
+export async function deleteGalleryItem(id: string): Promise<boolean> {
+  return deleteRecord("gallery", id);
+}
+
+/* ------------------------------------------------------------------ */
+/* Floor plan artwork uploaded from the admin dashboard               */
+/* ------------------------------------------------------------------ */
+
+/** Slugs are fixed so a record always maps to one of the three editions. */
+export const FLOOR_PLAN_SLUGS = ["bengaluru", "coimbatore", "hosur"] as const;
+
+export type FloorPlanSlug = (typeof FLOOR_PLAN_SLUGS)[number];
+
+export function isFloorPlanSlug(value: string): value is FloorPlanSlug {
+  return (FLOOR_PLAN_SLUGS as readonly string[]).includes(value);
+}
+
+/**
+ * Uploaded floor plan assets for one edition.
+ *
+ * As with GalleryItem, these hold Cloudflare R2 *keys* rather than presigned
+ * URLs. The public site resolves the key per request through
+ * /floor-plan/asset/[slug], so an upload never silently expires.
+ */
+export interface FloorPlanAssets extends StoredRecord {
+  slug: FloorPlanSlug;
+  imageKey?: string;
+  pdfKey?: string;
+  imageAlt?: string;
+  pdfLabel?: string;
+}
+
+export async function listFloorPlanAssets(): Promise<FloorPlanAssets[]> {
+  return listRecords<FloorPlanAssets>("floorPlans");
+}
+
+export async function getFloorPlanAssets(
+  slug: string,
+): Promise<FloorPlanAssets | null> {
+  if (!isFloorPlanSlug(slug)) return null;
+  return getRecordById<FloorPlanAssets>("floorPlans", slug);
+}
+
+/** Creates or updates the single record for a slug. */
+export async function upsertFloorPlanAssets(
+  slug: FloorPlanSlug,
+  patch: Partial<Omit<FloorPlanAssets, "id" | "slug">>,
+): Promise<FloorPlanAssets> {
+  const stamp = new Date().toISOString();
+  const existing = await getFloorPlanAssets(slug);
+
+  if (existing) {
+    return updateRecord<FloorPlanAssets>("floorPlans", slug, {
+      ...patch,
+      updatedAt: stamp,
+    }) as Promise<FloorPlanAssets>;
+  }
+
+  const created = {
+    ...patch,
+    id: slug,
+    slug,
+    createdAt: stamp,
+  } as FloorPlanAssets;
+
+  await sql().query(INSERT, insertParams(toColumns("floorPlans", created)));
+  return created;
+}
+
+/** Clears the uploaded assets for a slug so the static plan is used again. */
+export async function clearFloorPlanAssets(slug: string): Promise<boolean> {
+  if (!isFloorPlanSlug(slug)) return false;
+  return deleteRecord("floorPlans", slug);
+}
+
+/* ------------------------------------------------------------------ */
+/* Email suppression list                                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Addresses that have opted out of non-transactional email.
+ *
+ * Ids are the lower-cased address so the list is naturally unique and a repeat
+ * unsubscribe is idempotent. Transactional receipts (a booking confirmation)
+ * are NOT blocked by this list: suppressing those would deny a customer the
+ * receipt for something they just paid attention to.
+ */
+export interface EmailSuppression extends StoredRecord {
+  email: string;
+  reason: string;
+  createdAt: string;
+}
+
+export async function isEmailSuppressed(email: string): Promise<boolean> {
+  const id = email.trim().toLowerCase();
+  if (!id) return false;
+  const existing = await getRecordById<EmailSuppression>("emailSuppressions", id);
+  return existing !== null;
+}
+
+export async function suppressEmail(
+  email: string,
+  reason = "unsubscribed",
+): Promise<EmailSuppression> {
+  const id = email.trim().toLowerCase();
+  const existing = await getRecordById<EmailSuppression>("emailSuppressions", id);
+  if (existing) return existing;
+
+  const created: EmailSuppression = {
+    id,
+    email: id,
+    reason,
+    createdAt: new Date().toISOString(),
+  };
+
+  // `stage` is a lead-pipeline concept with no meaning here.
+  await sql().query(INSERT, insertParams(toColumns("emailSuppressions", created)));
+  return created;
+}
+
+export async function listEmailSuppressions(): Promise<EmailSuppression[]> {
+  return listRecords<EmailSuppression>("emailSuppressions");
 }

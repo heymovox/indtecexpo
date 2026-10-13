@@ -4,10 +4,24 @@ import { useState, useCallback, type ChangeEvent, type DragEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 
+/** What /api/admin/upload returns once the bytes are in the bucket. */
+export interface UploadResult {
+  key: string;
+  url: string;
+  size: number;
+  contentType: string;
+}
+
 interface UploadFieldProps {
   label: string;
   value: string;
   onChange: (url: string) => void;
+  /**
+   * Fired after a successful upload with the stored object metadata. Use this
+   * instead of `onChange` when persisting: `onChange` receives a presigned URL
+   * that expires in an hour, whereas `key` stays valid forever.
+   */
+  onUploaded?: (result: UploadResult) => void;
   folder: "floor-plans" | "posters" | "gallery" | "media" | "logos";
   guidelines?: {
     recommendedDimensions?: string;
@@ -16,7 +30,14 @@ interface UploadFieldProps {
   };
   htmlFor?: string;
   hint?: string;
+  compact?: boolean;
+  /** "pdf" swaps the image preview for a document tile and widens `accept`. */
+  kind?: "image" | "pdf";
 }
+
+const IMAGE_ACCEPT =
+  "image/jpeg,image/png,image/webp,image/avif,image/gif,image/svg+xml";
+const PDF_ACCEPT = "application/pdf";
 
 const DEFAULT_GUIDELINES = {
   acceptedTypes: "JPG, PNG, WebP, AVIF, GIF, SVG",
@@ -27,10 +48,13 @@ export function UploadField({
   label,
   value,
   onChange,
+  onUploaded,
   folder,
   guidelines,
   htmlFor,
   hint,
+  compact = false,
+  kind = "image",
 }: UploadFieldProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -72,6 +96,7 @@ export function UploadField({
       }
       setPreview(data.url);
       onChange(data.url);
+      onUploaded?.(data as UploadResult);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
@@ -100,6 +125,75 @@ export function UploadField({
   }
 
   const displayUrl = preview || value;
+  const accept = kind === "pdf" ? PDF_ACCEPT : IMAGE_ACCEPT;
+
+  if (compact) {
+    return (
+      <div className="min-w-0" onDrop={handleDrop} onDragOver={handleDragOver}>
+        <label htmlFor={htmlFor} className="sr-only">
+          {label}
+        </label>
+        <input
+          ref={fileInputRef}
+          id={htmlFor}
+          type="file"
+          accept={accept}
+          onChange={handleFileChange}
+          disabled={uploading}
+          className="sr-only"
+        />
+        {displayUrl ? (
+          <div className="flex items-center gap-2">
+            <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded border border-steel-200 bg-white">
+              {kind === "pdf" ? (
+                <span className="flex h-full w-full items-center justify-center text-signal-600">
+                  <Icon name="news" size={16} />
+                </span>
+              ) : (
+                <img src={displayUrl} alt="" className="h-full w-full object-contain p-0.5" />
+              )}
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/75">
+                  <Icon name="refresh" size={12} className="animate-spin text-steel-500" />
+                </div>
+              )}
+            </div>
+            <div className="flex min-w-0 flex-1 items-center gap-1">
+              <button
+                type="button"
+                onClick={() => document.getElementById(htmlFor ?? "")?.click()}
+                className="inline-flex items-center gap-1 rounded border border-steel-200 px-1.5 py-1 text-[11px] font-medium text-steel-700 transition hover:border-brand-400 hover:text-navy-900"
+              >
+                <Icon name="refresh" size={11} />
+                Replace
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                aria-label={`Remove ${label}`}
+                className="inline-flex items-center rounded border border-steel-200 p-1 text-steel-500 transition hover:border-signal-300 hover:text-signal-600"
+              >
+                <Icon name="close" size={11} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <label
+            htmlFor={htmlFor}
+            className="flex cursor-pointer items-center justify-center gap-1.5 rounded border border-dashed border-steel-300 bg-steel-50 px-2 py-2 text-[11px] font-medium text-steel-600 transition hover:border-brand-400 hover:bg-brand-50 hover:text-navy-900"
+          >
+            <Icon name="upload" size={12} />
+            {uploading ? "Uploading…" : "Upload logo"}
+          </label>
+        )}
+        {error && (
+          <p className="mt-1 text-[11px] text-signal-600" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-0">
@@ -121,21 +215,40 @@ export function UploadField({
         >
           {displayUrl ? (
             <div className="p-4 min-h-[120px] flex items-center justify-center">
-              <img
-                src={displayUrl}
-                alt="Preview"
-                className="max-h-48 max-w-full object-contain rounded-lg shadow-sm"
-              />
+              {kind === "pdf" ? (
+                <span className="flex flex-col items-center gap-2 text-signal-600">
+                  <Icon name="news" size={34} strokeWidth={1.5} />
+                  <span className="text-xs font-medium">PDF attached</span>
+                </span>
+              ) : (
+                <img
+                  src={displayUrl}
+                  alt="Preview"
+                  className="max-h-48 max-w-full object-contain rounded-lg shadow-sm"
+                />
+              )}
               <div className="absolute top-2 right-2 flex gap-1">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onChange(displayUrl)}
-                  className="bg-white/90"
-                >
-                  <Icon name="download" size={14} />
-                </Button>
+                {kind === "pdf" ? (
+                  <a
+                    href={displayUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-steel-300 bg-white/90 text-steel-700 transition hover:border-steel-400"
+                    aria-label="Open PDF"
+                  >
+                    <Icon name="external" size={14} />
+                  </a>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onChange(displayUrl)}
+                    className="bg-white/90"
+                  >
+                    <Icon name="download" size={14} />
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="outline"
@@ -152,7 +265,7 @@ export function UploadField({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/avif,image/gif,image/svg+xml"
+                accept={accept}
                 onChange={handleFileChange}
                 disabled={uploading}
                 className="sr-only"

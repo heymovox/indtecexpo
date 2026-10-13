@@ -5,8 +5,8 @@ import { buildObjectKey, getObjectUrl, isR2Configured, putObject } from "@/lib/r
 /**
  * Admin file upload to Cloudflare R2.
  *
- * Accepts multipart/form-data with a `file` part and a `folder` field. Only
- * image types are accepted and the body is capped before any bytes reach R2.
+ * Accepts multipart/form-data with a `file` part and a `folder` field. Images
+ * and PDFs are accepted and the body is capped before any bytes reach R2.
  */
 
 export const runtime = "nodejs";
@@ -20,6 +20,7 @@ const ALLOWED: Record<string, string> = {
   "image/avif": ".avif",
   "image/gif": ".gif",
   "image/svg+xml": ".svg",
+  "application/pdf": ".pdf",
 };
 
 const FOLDERS = ["media", "gallery", "floor-plans", "posters", "logos"] as const;
@@ -62,7 +63,9 @@ export async function POST(request: NextRequest) {
 
   const type = ALLOWED[file.type];
   if (!type) {
-    return badRequest("Only JPG, PNG, WebP, AVIF, GIF or SVG images are allowed.");
+    return badRequest(
+      "Only JPG, PNG, WebP, AVIF, GIF, SVG images or PDF files are allowed.",
+    );
   }
 
   const requested = String(form.get("folder") ?? "media");
