@@ -78,6 +78,7 @@ export function VisitorRegistrationForm() {
   const [slots, setSlots] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [consent, setConsent] = useState(false);
+  const [whatsappConsent, setWhatsappConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -154,8 +155,9 @@ export function VisitorRegistrationForm() {
       ...form,
       interestedExpos,
       visitingSchedule,
-      interests,
+interests,
       consent: consent ? "on" : "",
+      whatsappConsent: whatsappConsent ? "on" : "",
     };
 
     const parsed = visitorRegistrationSchema.safeParse(payload);
@@ -347,6 +349,32 @@ export function VisitorRegistrationForm() {
           </span>
         </label>
         {errors.consent ? <span className="field-error">{errors.consent}</span> : null}
+      </div>
+
+      <div>
+        <label className="flex cursor-pointer items-start gap-2.5 text-sm leading-relaxed text-steel-600">
+          <input
+            type="checkbox"
+            name="whatsappConsent"
+            checked={whatsappConsent}
+            onChange={(e) => {
+              setWhatsappConsent(e.target.checked);
+              setErrors((prev) => ({
+                ...prev,
+                whatsappConsent: undefined,
+              }));
+            }}
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[#0f5fbf]"
+          />
+          <span>
+            Send my registration confirmation and expo updates on WhatsApp.
+            Required, because your confirmation and e-pass are issued on this
+            channel. You can opt out any time from any message we send.
+          </span>
+        </label>
+        {errors.whatsappConsent ? (
+          <span className="field-error">{errors.whatsappConsent}</span>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-4 border-t border-steel-100 pt-6">

@@ -125,6 +125,7 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
         : initialState.eventSlugs,
   });
   const [consent, setConsent] = useState(false);
+  const [whatsappConsent, setWhatsappConsent] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -180,7 +181,11 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
   const validateStep = (index: number): boolean => {
     const schema = stepSchemas[index];
     if (!schema) return true;
-    const result = schema.safeParse({ ...form, consent: consent ? "on" : "" });
+    const result = schema.safeParse({
+      ...form,
+      consent: consent ? "on" : "",
+      whatsappConsent: whatsappConsent ? "on" : "",
+    });
     if (result.success) {
       setErrors((prev) => ({ ...prev, _form: undefined }));
       return true;
@@ -223,6 +228,7 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
       stallSize: derivedStallSize,
       stalls: String(form.stallCodes.length || 1),
       consent: consent ? "on" : "",
+      whatsappConsent: whatsappConsent ? "on" : "",
     };
 
     try {
@@ -255,6 +261,7 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
   const reset = () => {
     setForm(initialState);
     setConsent(false);
+    setWhatsappConsent(false);
     setErrors({});
     setFormError(null);
     setReference(null);
@@ -825,6 +832,38 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
         </label>
         {errors.consent ? (
           <span className="field-error">{errors.consent}</span>
+        ) : null}
+      </div>
+
+      <div>
+        <label
+          htmlFor="exhibitor-whatsapp-consent"
+          className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-steel-600"
+        >
+          <input
+            id="exhibitor-whatsapp-consent"
+            name="whatsappConsent"
+            type="checkbox"
+            checked={whatsappConsent}
+            onChange={(event) => {
+              setWhatsappConsent(event.target.checked);
+              setErrors((prev) => ({
+                ...prev,
+                whatsappConsent: undefined,
+                _form: undefined,
+              }));
+            }}
+            className="mt-1 h-4 w-4 shrink-0 accent-[#e1251b]"
+            required
+          />
+          <span>
+            Send my enquiry confirmation and availability updates on WhatsApp.
+            Required, because your proforma and booking updates are issued on
+            this channel. You can opt out any time from any message we send.
+          </span>
+        </label>
+        {errors.whatsappConsent ? (
+          <span className="field-error">{errors.whatsappConsent}</span>
         ) : null}
       </div>
     </div>

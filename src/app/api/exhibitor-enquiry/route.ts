@@ -6,6 +6,8 @@ import { exhibitorEnquirySchema, flattenErrors } from "@/lib/validations";
 import { buildExhibitorConfirmationEmail, buildExhibitorEnquiryEmail, sendNotification } from "@/lib/email";
 import { referenceNumber, uniqueId } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
+import { summariseEvents } from "@/lib/event-summary";
+import { sendExhibitorReceipt } from "@/lib/whatsapp-send";
 import { sanitizeBody } from "@/app/api/_lib/parse";
 
 export async function POST(request: NextRequest) {
@@ -46,11 +48,18 @@ export async function POST(request: NextRequest) {
       source: "website",
       stage: "new",
       ...data,
+      // The form sends the literal "on"; store a boolean so records are queryable.
+      whatsappConsent: data.whatsappConsent === "on",
     };
 
     await createRecord("exhibitorEnquiries", record);
 
-    const expos = record.eventSlugs.join(", ");
+    // Resolve editions first: the summary gives both the readable city list and
+    // the dates to render in the confirmation.
+    const events = await summariseEvents(record.eventSlugs);
+    const expos = events.length
+      ? events.map((event) => event.city).join(", ")
+      : record.eventSlugs.join(", ");
 
     // Confirm to the exhibitor before notifying the desk, so the enquiry is
     // acknowledged even if the internal notification fails.
@@ -64,10 +73,12 @@ export async function POST(request: NextRequest) {
       stalls: record.stalls,
       powerLoad: record.powerLoad,
       sponsorship: record.sponsorship,
+      events,
     });
     await sendNotification({
       to: [record.email],
       replyTo: siteConfig.exhibitorEmail,
+      transactional: true,
       ...confirmation,
     });
 
@@ -93,10 +104,31 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    // WhatsApp receipt last and outside the critical path: the email has
+    // already been sent, so a template or credentials problem must not turn a
+    // successful booking into an error.
+    const whatsapp = await sendExhibitorReceipt({
+      phone: record.phone,
+      consented: record.whatsappConsent,
+      contact: record.contactPerson,
+      reference: record.reference,
+      company: record.companyName,
+      stalls: record.stalls,
+      editions: expos,
+      events,
+    });
+    if (whatsapp.outcome === "error") {
+      console.error(
+        `[api/exhibitor-enquiry] whatsapp failed for ${record.reference}`,
+        whatsapp.detail,
+      );
+    }
+
     return Response.json({
       ok: true,
       id: record.id,
       reference: record.reference,
+      whatsapp: whatsapp.outcome,
     });
   } catch (error) {
     console.error("[api/exhibitor-enquiry]", error);

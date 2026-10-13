@@ -1,5 +1,13 @@
 import { siteConfig } from "@/config/site";
 
+/**
+ * Click-to-chat links.
+ *
+ * Deliberately free of "server-only" and of any provider import: this module
+ * is pulled into client components (Footer, not-found, CTA) to build wa.me
+ * deep links. Outbound sending lives in `lib/whatsapp-send.ts`.
+ */
+
 const BASE = `https://wa.me/${siteConfig.whatsappNumber}`;
 
 export function waLink(message: string): string {

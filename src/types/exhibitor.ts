@@ -59,6 +59,8 @@ export interface ExhibitorEnquiry {
   source: string;
   stage: LeadStage;
   notes?: string;
+  /** Explicit opt-in to WhatsApp messaging; stored as a boolean. */
+  whatsappConsent: boolean;
 }
 
 export interface VisitorRegistration {
@@ -77,6 +79,8 @@ export interface VisitorRegistration {
   visitingSchedule?: string[];
   interests: string[];
   stage: LeadStage;
+  /** Explicit opt-in to WhatsApp messaging; stored as a boolean. */
+  whatsappConsent: boolean;
 }
 
 export interface ContactMessage {

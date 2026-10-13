@@ -7,6 +7,8 @@ import { buildVisitorConfirmationEmail, buildVisitorRegistrationEmail, sendNotif
 import { referenceNumber, uniqueId } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { sanitizeBody } from "@/app/api/_lib/parse";
+import { summariseEvents } from "@/lib/event-summary";
+import { sendVisitorReceipt } from "@/lib/whatsapp-send";
 
 export async function POST(request: NextRequest) {
   if (!isSameOrigin(request)) {
@@ -45,6 +47,8 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       stage: "new",
       ...data,
+      // The form sends the literal "on"; store a boolean so records are queryable.
+      whatsappConsent: data.whatsappConsent === "on",
     };
 
     await createRecord("visitorRegistrations", record);
@@ -53,7 +57,10 @@ export async function POST(request: NextRequest) {
     const schedule = (record.visitingSchedule ?? []).join("; ");
 
     // Confirm to the registrant first so a provider hiccup cannot cost them
-    // their receipt, then notify the desk.
+    // their receipt, then notify the desk. Event dates come from the merged
+    // event data so admin date edits reach the email.
+    const events = await summariseEvents(record.interestedExpos);
+
     const confirmation = buildVisitorConfirmationEmail({
       reference: record.reference,
       name: record.fullName,
@@ -61,10 +68,12 @@ export async function POST(request: NextRequest) {
       email: record.email,
       expos,
       schedule,
+      events,
     });
     await sendNotification({
       to: [record.email],
       replyTo: siteConfig.visitorEmail,
+      transactional: true,
       ...confirmation,
     });
 
@@ -81,10 +90,29 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    // WhatsApp receipt last, and deliberately outside the critical path: the
+    // customer already has their email, so a template or credentials problem
+    // must not turn a successful registration into an error.
+    const whatsapp = await sendVisitorReceipt({
+      phone: record.phone,
+      consented: record.whatsappConsent,
+      name: record.fullName,
+      reference: record.reference,
+      editions: expos,
+      events,
+    });
+    if (whatsapp.outcome === "error") {
+      console.error(
+        `[api/visitor-registration] whatsapp failed for ${record.reference}`,
+        whatsapp.detail,
+      );
+    }
+
     return Response.json({
       ok: true,
       id: record.id,
       reference: record.reference,
+      whatsapp: whatsapp.outcome,
     });
   } catch (error) {
     console.error("[api/visitor-registration]", error);

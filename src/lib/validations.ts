@@ -35,8 +35,26 @@ const companySchema = z
   .min(2, "Company name is required")
   .max(120, "Company name is too long");
 
-const consentSchema = z.string().refine((value) => value === "on", {
-  message: "Please accept the privacy policy",
+/**
+ * Checkbox validators.
+ *
+ * `z.literal` is used rather than `z.string().refine()` because `.refine()`
+ * never runs when the field is absent — the user then sees zod's raw
+ * "expected string, received undefined" instead of the message written here.
+ */
+const consentSchema = z.literal("on", {
+  error: "Please accept the privacy policy",
+});
+
+/**
+ * Separate, explicit opt-in for WhatsApp messaging.
+ *
+ * This is deliberately not folded into the privacy-policy checkbox. The
+ * WhatsApp Business Platform requires evidence of opt-in specific to the
+ * channel, and messaging a number that has not agreed can get it blocked.
+ */
+const whatsappConsentSchema = z.literal("on", {
+  error: "Please tick the WhatsApp box, or untick and we will email you instead",
 });
 
 export const waterRequirementSchema = z.enum([
@@ -111,6 +129,7 @@ export const exhibitorEnquirySchema = z.object({
     .max(1000, "Message is too long")
     .transform((value) => value ?? ""),
   consent: consentSchema,
+  whatsappConsent: whatsappConsentSchema,
 });
 
 export type ExhibitorEnquiryInput = z.infer<typeof exhibitorEnquirySchema>;
@@ -137,6 +156,7 @@ export const visitorRegistrationSchema = z.object({
     .min(1, "Select at least one area of interest")
     .max(10, "Select up to 10 areas"),
   consent: consentSchema,
+  whatsappConsent: whatsappConsentSchema,
 });
 
 export type VisitorRegistrationInput = z.infer<typeof visitorRegistrationSchema>;
