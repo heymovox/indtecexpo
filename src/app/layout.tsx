@@ -29,12 +29,25 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = buildMetadata({
-  title: "INDTEC EXPO 2026–2027 | India's Leading B2B Industrial Expo",
-  description:
-    "INDTEC EXPO 2026–2027 — India's leading B2B industrial machine tools, engineering and technology exhibition across Bengaluru, Coimbatore and Hosur. Book a stall or register as a visitor.",
-  path: "/",
-});
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: "INDTEC EXPO 2026–2027 | India's Leading B2B Industrial Expo",
+    description:
+      "INDTEC EXPO 2026–2027 — India's leading B2B industrial machine tools, engineering and technology exhibition across Bengaluru, Coimbatore and Hosur. Book a stall or register as a visitor.",
+    path: "/",
+  }),
+  // app/favicon.ico and app/icon.png are picked up automatically by the file
+  // convention; these fill in the iOS home-screen and Windows shortcut cases,
+  // which read different files.
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico",
+  },
+};
 
 export const viewport: Viewport = {
   themeColor: "#071427",

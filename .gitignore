@@ -33,6 +33,8 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+# Vercel env var export (contains live secrets)
+vercel-env-vars.txt
 
 # local dev / preview logs
 *.log
