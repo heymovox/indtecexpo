@@ -1,7 +1,6 @@
 export const adminConfig = {
   basePath: "/admin",
   loginPath: "/admin/login",
-  defaultEmail: "admin@heymovox.com",
   /**
    * Sidebar groups, in display order. Every section belongs to exactly one.
    * A superadmin sees 14 sections, which is a long flat list, so the nav is

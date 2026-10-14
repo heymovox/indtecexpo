@@ -12,9 +12,9 @@ import { siteConfig } from "@/config/site";
  * Public base URL used to build absolute links inside emails.
  *
  * Email clients have no notion of "current page", so every link must be
- * absolute. During the demo phase this points at demo.heymovox.com; set
- * EMAIL_SITE_URL=https://www.indtcexpo.com once the production domain serves
- * the logo and policy pages, then no code change is needed.
+ * absolute. Defaults to the live site (siteConfig.url) and is overridable so
+ * the sender domain and the link domain can differ: Resend only requires the
+ * From domain to be verified, while links should point at the real host.
  */
 export function emailSiteUrl(): string {
   const configured = process.env.EMAIL_SITE_URL?.trim();

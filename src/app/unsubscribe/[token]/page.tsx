@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { siteConfig } from "@/config/site";
 import { readUnsubscribeToken } from "@/lib/unsubscribe";
 import { UnsubscribeForm } from "./UnsubscribeForm";
 
@@ -72,7 +73,7 @@ export default async function UnsubscribePage({
 
         <p className="mt-6 text-center text-xs text-steel-500">
           <Link href="/" className="underline hover:text-navy-900">
-            www.indtcexpo.com
+            {siteConfig.website}
           </Link>
         </p>
       </div>
