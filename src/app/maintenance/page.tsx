@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getMaintenanceSettings } from "@/lib/db";
 import { contactConfig, siteConfig } from "@/config/site";
@@ -62,18 +62,27 @@ export default async function MaintenancePage({
     "INDTEC EXPO is briefly offline while we carry out scheduled maintenance. Our team is fully reachable in the meantime — for stall bookings, visitor passes or anything else, reach us on any of the channels below.";
 
   return (
-    <main className="relative flex min-h-dvh flex-col overflow-hidden bg-navy-950 text-white">
-      {/* Ambient brand wash + grid so the page reads as INDTEC, not a browser error. */}
+    /*
+     * Pinned to the viewport rather than merely full-height.
+     *
+     * The root layout renders a fixed site header (z-50) and a fixed mobile CTA
+     * bar (z-40) on every route, and the App Router offers no way for a single
+     * route to opt out of the root layout. Covering the viewport from above is
+     * what makes this genuinely fullscreen: the site chrome stays mounted but
+     * is entirely hidden, so no nav or footer is visible. The backdrop layers
+     * are fixed so they hold still while the content scrolls on short screens.
+     */
+    <div className="fixed inset-0 z-[9999] overflow-y-auto bg-navy-950 text-white">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--color-brand-900)_0%,transparent_55%)] opacity-70"
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,var(--color-brand-900)_0%,transparent_55%)] opacity-70"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
+        className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
       />
 
-      <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col px-5 py-10 sm:px-8 sm:py-16">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-10 sm:px-8 sm:py-16">
         <header className="flex flex-col items-center text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -325,6 +334,6 @@ export default async function MaintenancePage({
           </p>
         </footer>
       </div>
-    </main>
+    </div>
   );
 }
