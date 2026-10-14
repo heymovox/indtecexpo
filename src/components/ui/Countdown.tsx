@@ -19,11 +19,14 @@ export function Countdown({
   className,
   size = "md",
   label = "Countdown to next event",
+  completeLabel,
 }: {
   target: string;
   className?: string;
   size?: "sm" | "md" | "lg";
   label?: string;
+  /** Shown instead of the zeroed blocks once the target has passed. */
+  completeLabel?: string;
 }) {
   const [time, setTime] = useState<ReturnType<typeof diff> | null>(null);
 
@@ -58,6 +61,12 @@ export function Countdown({
     { label: "Mins", value: time?.minutes ?? 0 },
     { label: "Secs", value: time?.seconds ?? 0 },
   ];
+
+  // Once the target passes the blocks would just read 00, which reads as a bug
+  // rather than as "this is over". Say so instead.
+  if (completeLabel && time?.complete) {
+    return <p className="text-center text-sm font-medium text-gold-300">{completeLabel}</p>;
+  }
 
   return (
       <div

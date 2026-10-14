@@ -17,6 +17,7 @@ import { StorageManager } from "@/components/admin/StorageManager";
 import { RecordsTable, type RecordsTableRow } from "../RecordsTable";
 import { EventsManager, type EventAdminItem } from "../EventsManager";
 import { SponsorsManager } from "../SponsorsManager";
+import { MaintenancePanel } from "../MaintenancePanel";
 import { GalleryManager } from "../GalleryManager";
 import { FloorPlansManager } from "../FloorPlansManager";
 
@@ -305,50 +306,54 @@ function articlesPanel() {
 
 function settingsPanel(identity: { id: string; email: string; name: string | null; role: string }) {
   return (
-    <div className="card p-5">
-      <h2 className="display-sm mb-4 text-lg text-navy-900">Your Profile</h2>
-      <form action="/api/admin/profile" method="POST" className="space-y-4 max-w-md">
-        <input type="hidden" name="id" value={identity.id} />
-        <div>
-          <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
-            Display Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={identity.name ?? ""}
-            className="w-full rounded-xl border border-steel-200 bg-white px-3 py-2 text-sm text-navy-900 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-200/60"
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={identity.email}
-            disabled
-            className="w-full rounded-xl border border-steel-200 bg-steel-50 px-3 py-2 text-sm text-steel-600"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
-            Role
-          </label>
-          <span className="inline-flex items-center rounded-full border border-steel-200 bg-steel-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-steel-600">
-            {identity.role}
-          </span>
-        </div>
-        <button
-          type="submit"
-          className="btn btn-primary"
-        >
-          Save Changes
-        </button>
-      </form>
+    <div className="space-y-5">
+      <div className="card p-5">
+        <h2 className="display-sm mb-4 text-lg text-navy-900">Your Profile</h2>
+        <form action="/api/admin/profile" method="POST" className="space-y-4 max-w-md">
+          <input type="hidden" name="id" value={identity.id} />
+          <div>
+            <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
+              Display Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={identity.name ?? ""}
+              className="w-full rounded-xl border border-steel-200 bg-white px-3 py-2 text-sm text-navy-900 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-200/60"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={identity.email}
+              disabled
+              className="w-full rounded-xl border border-steel-200 bg-steel-50 px-3 py-2 text-sm text-steel-600"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-steel-500 mb-1">
+              Role
+            </label>
+            <span className="inline-flex items-center rounded-full border border-steel-200 bg-steel-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-steel-600">
+              {identity.role}
+            </span>
+          </div>
+          <button
+            type="submit"
+            className="btn btn-primary"
+          >
+            Save Changes
+          </button>
+        </form>
+      </div>
+
+      <MaintenancePanel readOnly={identity.role !== "superadmin"} />
     </div>
   );
 }

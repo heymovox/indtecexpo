@@ -19,6 +19,12 @@ import type {
   LeadStage,
 } from "@/types/exhibitor";
 import type { ExpoEvent } from "@/types/event";
+import {
+  MAINTENANCE_OFF,
+  MAINTENANCE_RECORD_ID,
+  normaliseMaintenanceSettings,
+  type MaintenanceSettings,
+} from "@/types/maintenance";
 import { encryptPii, decryptPii } from "@/lib/protection";
 import {
   DELETE_BY_ID,
@@ -43,7 +49,8 @@ export type Collection =
   | "gallery"
   | "floorPlans"
   | "emailSuppressions"
-  | "settings";
+  | "settings"
+  | "siteSettings";
 
 export interface StoredRecord {
   id: string;
@@ -588,4 +595,72 @@ export async function suppressEmail(
 
 export async function listEmailSuppressions(): Promise<EmailSuppression[]> {
   return listRecords<EmailSuppression>("emailSuppressions");
+}
+
+/* ------------------------------------------------------------------ */
+/* Site-wide maintenance mode                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A single row toggled from the admin dashboard.
+ *
+ * Read by the edge middleware through lib/maintenance-edge, which cannot import
+ * this module, so the shape lives in types/maintenance and both sides agree.
+ *
+ * Writes bypass createRecord deliberately: that helper stamps a lead `stage` and
+ * runs lib/protection's encryptPii, neither of which means anything here.
+ */
+export async function getMaintenanceSettings(): Promise<MaintenanceSettings> {
+  const existing = await getRecordById<StoredRecord>(
+    "siteSettings",
+    MAINTENANCE_RECORD_ID,
+  );
+  if (!existing) return MAINTENANCE_OFF;
+  return normaliseMaintenanceSettings(existing);
+}
+
+export async function saveMaintenanceSettings(
+  patch: MaintenanceSettings,
+): Promise<MaintenanceSettings> {
+  const settings = normaliseMaintenanceSettings(patch);
+  const stamp = new Date().toISOString();
+
+  const existing = await getRecordById<StoredRecord>(
+    "siteSettings",
+    MAINTENANCE_RECORD_ID,
+  );
+
+  if (existing) {
+    // Deliberately not updateRecord: that runs encryptPii over the row, and
+    // "message" is a PII_FIELDS key. This text is a public banner written by an
+    // admin and rendered on the maintenance page, so storing it encrypted would
+    // only make the raw row unreadable to the edge reader.
+    await sql().query(
+      UPDATE_BY_ID,
+      updateParams(
+        // Merged onto the stored record because UPDATE_BY_ID replaces the whole
+        // data blob; id and createdAt are reasserted in case an older write
+        // dropped them.
+        toColumns("siteSettings", {
+          ...existing,
+          id: MAINTENANCE_RECORD_ID,
+          createdAt:
+            typeof existing.createdAt === "string" ? existing.createdAt : stamp,
+          ...settings,
+          updatedAt: stamp,
+        }),
+        MAINTENANCE_RECORD_ID,
+      ),
+    );
+    return settings;
+  }
+
+  const created = {
+    ...settings,
+    id: MAINTENANCE_RECORD_ID,
+    createdAt: stamp,
+    updatedAt: stamp,
+  };
+  await sql().query(INSERT, insertParams(toColumns("siteSettings", created)));
+  return settings;
 }
