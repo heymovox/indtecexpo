@@ -79,3 +79,24 @@ gateway.
 
 To exercise the public site locally, point `indtecexpo.com` at `127.0.0.1` in
 your hosts file and request it by name.
+
+### Testing public endpoints locally
+
+`localhost` resolves to the **admin** host, so the public form endpoints
+(`/api/visitor-registration`, `/api/contact`, `/api/exhibitor-enquiry`)
+correctly return 404 there. To test them you have to present the public Host,
+either through the hosts file or with curl:
+
+```bash
+# macOS / Linux
+curl -X POST http://localhost:3000/api/visitor-registration \
+  -H 'Host: indtecexpo.com' \
+  -H 'Content-Type: application/json' \
+  -d '{"fullName":"Test", ...}'
+```
+
+Note that `isSameOrigin` still compares `Origin` against the origin Next.js
+saw, which locally is `localhost`. When faking the `Host` header, send
+`Origin: http://localhost:3000` as well or the request is rejected with
+`403 Request blocked`. This only affects local testing; in production both
+headers carry the real domain.
