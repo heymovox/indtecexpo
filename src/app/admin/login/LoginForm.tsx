@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, type FormEvent, type KeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Field, FormAlert, Input } from "@/components/ui/Form";
+import { POST_LOGIN_URL } from "@/config/hosts";
 import { Icon } from "@/components/ui/Icon";
 
 interface LoginResponse {
   ok?: boolean;
   message?: string;
+  /** Absolute URL of the dashboard, chosen by the server. */
+  redirect?: string;
 }
 
 export function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -44,8 +45,11 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/admin");
-      router.refresh();
+      // A full document navigation, not router.push: the session is issued on
+      // the gateway host but the dashboard is on a different origin, and the
+      // App Router cannot navigate across origins. `redirect` is a fixed
+      // absolute URL chosen by the server, never anything from the browser.
+      window.location.assign(data.redirect ?? POST_LOGIN_URL);
     } catch {
       setError("Unable to reach the server. Please try again.");
       setPending(false);

@@ -28,6 +28,7 @@ import {
   revokeSessionsForAdmin,
 } from "@/lib/admin-db";
 import { roleAtLeast, type AdminRole } from "@/lib/db-queries";
+import { ADMIN_COOKIE_DOMAIN } from "@/config/hosts";
 
 export type { AdminRole } from "@/lib/db-queries";
 
@@ -286,10 +287,25 @@ export function canAccess(
   return identity !== null && roleAtLeast(identity.role, minimum);
 }
 
+/**
+ * Session cookie options.
+ *
+ * `domain` is what makes the gateway handover work: login happens on
+ * secure.indtecexpo.com and the dashboard lives on app.indtecexpo.com, so a
+ * host-only cookie would never reach the dashboard. Setting the parent domain
+ * scopes the cookie to INDTEC and its subdomains only.
+ *
+ * The attribute is omitted entirely outside production. A cookie with a domain
+ * that does not match the current host is rejected outright, which would log
+ * every developer out on localhost and admin.localhost.
+ */
+const isProd = process.env.NODE_ENV === "production";
+
 export const sessionCookieOptions = {
   httpOnly: true,
   sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  secure: isProd,
   path: "/",
+  ...(isProd ? { domain: ADMIN_COOKIE_DOMAIN } : {}),
   maxAge: SESSION_TTL_MS / 1000,
 };

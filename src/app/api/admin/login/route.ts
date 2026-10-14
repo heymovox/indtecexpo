@@ -7,6 +7,7 @@ import {
   sessionCookieOptions,
 } from "@/lib/admin-auth";
 import { clientIp, isSameOrigin, rateLimit } from "@/lib/protection";
+import { POST_LOGIN_URL } from "@/config/hosts";
 import { adminLoginSchema, flattenErrors } from "@/lib/validations";
 import { forbidden, serverError, tooManyRequests } from "@/app/api/admin/_lib/auth";
 
@@ -45,17 +46,26 @@ export async function POST(request: NextRequest) {
       });
 
       const jar = await cookies();
-      // Mark the cookie Secure only when the request actually arrived over TLS,
-      // so a local `next start` preview on http://localhost still works.
+      // Secure in production unconditionally, because the gateway and the
+      // dashboard are separate HTTPS origins and the session cookie has to
+      // survive that hop. The protocol check only relaxes it for a local
+      // `next start` preview served over plain http.
       jar.set(ADMIN_SESSION_COOKIE, token, {
         ...sessionCookieOptions,
-        secure: request.nextUrl.protocol === "https:",
+        secure:
+          process.env.NODE_ENV === "production" ||
+          request.nextUrl.protocol === "https:",
         expires: expiresAt,
       });
 
       return Response.json({
         ok: true,
-        redirect: "/admin",
+        // Absolute, and not derived from the request: login runs on
+        // secure.indtecexpo.com but the dashboard is on app.indtecexpo.com, so
+        // a relative "/admin" would bounce the user back to the gateway. It is
+        // a fixed constant rather than a query parameter so the response can
+        // never be turned into an open redirect.
+        redirect: POST_LOGIN_URL,
         admin: { email: admin.email, name: admin.name, role: admin.role },
       });
   } catch (error) {
