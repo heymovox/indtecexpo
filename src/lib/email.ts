@@ -77,7 +77,7 @@ function unsubscribeHeaders(to: string[]): Record<string, string> | undefined {
 function isInternalAddress(address: string): boolean {
   const domain = address.split("@")[1]?.toLowerCase();
   if (!domain) return false;
-  return domain === "indtcexpo.com" || domain.endsWith(".indtcexpo.com");
+  return domain === "indtecexpo.com" || domain.endsWith(".indtecexpo.com");
 }
 
 async function deliverViaResend(

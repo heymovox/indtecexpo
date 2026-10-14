@@ -83,7 +83,7 @@ export const faqs: FaqItem[] = [
     group: "General",
     question: "How do I speak to the exhibitions team?",
     answer:
-      "Call 7406213220, 7406213221, 7406213222 or 7406213223, WhatsApp us, or write to info@indtcexpo.com. Our team is available Mon–Sat, 10:00–19:00 IST.",
+      "Call 7406213220, 7406213221, 7406213222 or 7406213223, WhatsApp us, or write to info@indtecexpo.com. Our team is available Mon–Sat, 10:00–19:00 IST.",
   },
 ];
 

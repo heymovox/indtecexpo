@@ -77,7 +77,7 @@ function contentStream(lines: PdfLine[]): string {
   ops.push(`0.85 0.87 0.9 RG 0.8 w ${MARGIN} ${MARGIN + 8} m ${PAGE_W - MARGIN} ${MARGIN + 8} l S`);
   ops.push(
     `${COLORS.muted} BT /F1 8 Tf ${MARGIN} ${MARGIN - 6} Td (${escape(
-      "INDTEC EXPO 2026-2027 - organised by Konnekt Globe - www.indtcexpo.com",
+      "INDTEC EXPO 2026-2027 - organised by Konnekt Globe - www.indtecexpo.com",
     )}) Tj ET`,
   );
 

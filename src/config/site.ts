@@ -6,10 +6,10 @@ export const siteConfig = {
     "India's Leading B2B Industrial Machine Tools, Engineering & Technology Expo",
   shortDescription:
     "INDTEC EXPO 2026–2027 is a three-city B2B industrial exhibition across Bengaluru, Coimbatore and Hosur, connecting machine tool, automation and engineering manufacturers with buyers, dealers and decision-makers.",
-  url: "https://www.indtcexpo.com",
-  email: "info@indtcexpo.com",
-  exhibitorEmail: "exhibit@indtcexpo.com",
-  visitorEmail: "visit@indtcexpo.com",
+  url: "https://www.indtecexpo.com",
+  email: "info@indtecexpo.com",
+  exhibitorEmail: "exhibit@indtecexpo.com",
+  visitorEmail: "visit@indtecexpo.com",
   phoneNumbers: [
     "7406213220",
     "7406213221",
@@ -18,7 +18,7 @@ export const siteConfig = {
   ] as const,
   primaryPhone: "7406213220",
   whatsappNumber: "917406213220",
-  website: "www.indtcexpo.com",
+  website: "www.indtecexpo.com",
   organizer: {
     name: "Konnekt Globe",
     descriptor: "Exhibitions | Trade Fairs | Business Connect",

@@ -42,7 +42,7 @@ export function isEmailConfigured(): boolean {
  * resolves from the mail client rather than the page.
  */
 export function emailLogoUrl(): string {
-  return emailUrl("/images/brand/logo-indtec-compact-white.png");
+  return emailUrl("/images/brand/indtecexpo-2026-white.png");
 }
 
 /** INDTEC EXPO wordmark in text, used as an alt-text and no-image fallback. */

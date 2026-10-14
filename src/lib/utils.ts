@@ -6,7 +6,7 @@ export function cn(
 
 export function absoluteUrl(path = "/"): string {
   if (path.startsWith("http")) return path;
-  return `https://www.indtcexpo.com${path.startsWith("/") ? path : `/${path}`}`;
+  return `https://www.indtecexpo.com${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export function slugify(input: string): string {
