@@ -172,7 +172,7 @@ export default function AboutPage() {
           <div>
             <SectionHeading
               eyebrow="What Is INDTEC EXPO"
-              title="A Focused B2B Industrial Exhibition"
+              title="Industrial Machine Tools and Engineering Technology Trade Fairs"
               description="INDTEC EXPO is a trade-only exhibition for machine tools, automation, engineering components and industrial technology — staged for the manufacturing belt of South India."
             />
             <div className="space-y-4 text-base leading-relaxed text-steel-600">

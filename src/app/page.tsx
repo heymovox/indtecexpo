@@ -76,8 +76,8 @@ export default function HomePage() {
               </span>
 
               <h1 className="display text-[clamp(2.5rem,7vw,5.25rem)]">
-                India&apos;s B2B Industrial
-                <span className="mt-1 block text-gold-500">&amp; Engineering Expo</span>
+                Industrial Machine Tools
+                <span className="mt-1 block text-gold-500">and Engineering Technology Trade Fairs</span>
               </h1>
 
               <p className="mt-6 max-w-2xl text-base leading-relaxed text-steel-300 sm:text-lg">

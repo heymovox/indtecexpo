@@ -32,9 +32,9 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "INDTEC EXPO 2026–2027 | India's Leading B2B Industrial Expo",
+    title: "INDTEC EXPO 2026–2027 | Industrial Machine Tools and Engineering Technology Trade Fairs",
     description:
-      "INDTEC EXPO 2026–2027 — India's leading B2B industrial machine tools, engineering and technology exhibition across Bengaluru, Coimbatore and Hosur. Book a stall or register as a visitor.",
+      "INDTEC EXPO 2026–2027 — Industrial machine tools and engineering technology trade fairs across Bengaluru, Coimbatore and Hosur. Book a stall or register as a visitor.",
     path: "/",
   }),
   // app/favicon.ico and app/icon.png are picked up automatically by the file
