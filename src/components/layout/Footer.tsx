@@ -336,12 +336,6 @@ export function Footer() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/admin"
-              className="text-[11px] uppercase tracking-[0.12em] transition hover:text-gold-500 lg:text-xs lg:tracking-[0.14em]"
-            >
-              Admin
-            </Link>
           </div>
         </div>
       </div>
