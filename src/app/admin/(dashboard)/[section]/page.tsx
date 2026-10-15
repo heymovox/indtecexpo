@@ -490,6 +490,7 @@ case "exhibitors":
             rows={await exhibitorRows()}
             emptyMessage="No exhibitor enquiries yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            canDelete={identity.role === "superadmin"}
             exportColumns={[
               { header: "Company", key: "Company" },
               { header: "Contact Person", key: "Contact Person" },
@@ -512,6 +513,7 @@ case "bookings":
             )}
             emptyMessage="No bookings in the proposal or won stages yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            canDelete={identity.role === "superadmin"}
             exportColumns={[
               { header: "Company", key: "Company" },
               { header: "Contact Person", key: "Contact Person" },
@@ -532,6 +534,7 @@ case "visitors":
             rows={await visitorRows()}
             emptyMessage="No visitor registrations yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            canDelete={identity.role === "superadmin"}
             exportColumns={[
               { header: "Company", key: "Company" },
               { header: "Designation", key: "Designation" },
@@ -553,6 +556,7 @@ case "enquiries":
             rows={await contactRows()}
             emptyMessage="No enquiries yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            canDelete={identity.role === "superadmin"}
             exportColumns={[
               { header: "Category", key: "Category" },
               { header: "Company", key: "Company" },
@@ -571,6 +575,7 @@ case "enquiries":
             rows={await contactRows()}
             emptyMessage="No contact messages yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
+            canDelete={identity.role === "superadmin"}
             exportColumns={[
               { header: "Category", key: "Category" },
               { header: "Company", key: "Company" },

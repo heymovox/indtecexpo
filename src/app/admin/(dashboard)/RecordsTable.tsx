@@ -42,6 +42,7 @@ export function RecordsTable({
   emptyMessage = "No records yet.",
   exportColumns = [] as ExportColumn[],
   events = [] as { slug: string; name: string }[],
+  canDelete = false,
 }: {
   kind: LeadKind;
   label: string;
@@ -49,13 +50,16 @@ export function RecordsTable({
   emptyMessage?: string;
   exportColumns?: ExportColumn[];
   events?: { slug: string; name: string }[];
+  canDelete?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [stages, setStages] = useState<Record<string, LeadStage>>({});
   const [eventFilter, setEventFilter] = useState<string>("all");
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [localRows, setLocalRows] = useState(rows);
 
   function openDetails(row: RecordsTableRow) {
     if (row.lead) setOpenLeadId(row.id);
@@ -67,7 +71,7 @@ export function RecordsTable({
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return rows.filter((row) => {
+    return localRows.filter((row) => {
       if (!needle) return true;
       const haystack = [
         row.reference,
@@ -81,7 +85,7 @@ export function RecordsTable({
         .toLowerCase();
       return haystack.includes(needle);
     });
-  }, [rows, query]);
+  }, [localRows, query]);
 
   const eventFiltered = useMemo(() => {
     if (eventFilter === "all") return filtered;
@@ -113,6 +117,27 @@ export function RecordsTable({
       setError("Could not save the stage change. Please try again.");
     }
     setSavingId(null);
+  }
+
+  async function handleDelete(row: RecordsTableRow) {
+    if (!canDelete) return;
+    const message = row.lead
+      ? `Delete ${row.lead.fields.companyName ?? row.title}? This cannot be undone.`
+      : `Delete "${row.title}"? This cannot be undone.`;
+    if (!confirm(message)) return;
+    setDeletingId(row.id);
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/leads/${row.id}?type=${kind}`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error("bad-response");
+      setLocalRows((current) => current.filter((entry) => entry.id !== row.id));
+    } catch {
+      setError("Could not delete the record. Please try again.");
+    }
+    setDeletingId(null);
   }
 
   function handleExport(format: "csv" | "xlsx" | "pdf") {
@@ -300,6 +325,18 @@ export function RecordsTable({
                           View details
                         </button>
                       ) : null}
+                      {canDelete ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleDelete(row)}
+                          disabled={deletingId === row.id}
+                          aria-label={`Delete ${row.title}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-signal-600 underline-offset-2 hover:underline disabled:opacity-40"
+                        >
+                          <Icon name="close" size={13} />
+                          {deletingId === row.id ? "Deleting…" : "Delete"}
+                        </button>
+                      ) : null}
                       <time className="text-xs text-steel-500 whitespace-nowrap" dateTime={row.createdAt}>
                         {formatDateTime(row.createdAt)}
                       </time>
@@ -398,6 +435,18 @@ export function RecordsTable({
                             className="text-left text-xs font-semibold text-brand-700 underline-offset-2 hover:underline"
                           >
                             View details
+                          </button>
+                        ) : null}
+                        {canDelete ? (
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(row)}
+                            disabled={deletingId === row.id}
+                            aria-label={`Delete ${row.title}`}
+                            className="inline-flex items-center gap-1 text-left text-xs font-medium text-signal-600 underline-offset-2 hover:underline disabled:opacity-40"
+                          >
+                            <Icon name="close" size={12} />
+                            {deletingId === row.id ? "Deleting…" : "Delete"}
                           </button>
                         ) : null}
                       </div>

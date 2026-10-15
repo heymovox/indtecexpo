@@ -1,12 +1,13 @@
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import {
+  deleteRecord,
   getRecordById,
   updateRecord,
   type StoredRecord,
 } from "@/lib/db";
 import { leadStageSchema } from "@/lib/validations";
-import { requireAdmin, serverError } from "@/app/api/admin/_lib/auth";
+import { requireAdmin, requireRole, serverError } from "@/app/api/admin/_lib/auth";
 import { findLeadById, leadCollections, shapeLead } from "@/app/api/admin/_lib/leads";
 import type { LeadKind } from "@/app/admin/lead-types";
 
@@ -88,6 +89,39 @@ export async function PATCH(
     return Response.json({ ok: true, lead: shapeLead(type, updated) });
   } catch (error) {
     console.error("[api/admin/leads/:id PATCH]", error);
+    return serverError();
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  ctx: { params: Promise<{ id: string }> },
+) {
+  const denied = await requireRole("superadmin");
+  if (denied) return denied;
+
+  try {
+    const { id } = await ctx.params;
+    const kind = leadKind(request.nextUrl.searchParams.get("type"));
+    if (!kind) {
+      return Response.json(
+        { ok: false, message: "Lead type is required." },
+        { status: 400 },
+      );
+    }
+
+    const collection = leadCollections[kind];
+    const deleted = await deleteRecord(collection, id);
+    if (!deleted) {
+      return Response.json(
+        { ok: false, message: "Lead not found." },
+        { status: 404 },
+      );
+    }
+
+    return Response.json({ ok: true });
+  } catch (error) {
+    console.error("[api/admin/leads/:id DELETE]", error);
     return serverError();
   }
 }
