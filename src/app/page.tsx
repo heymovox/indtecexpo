@@ -155,13 +155,13 @@ export default function HomePage() {
 
               {/* Series stats as a single-line box */}
               <div className="mt-9 border border-white/12 bg-white/5 backdrop-blur-sm">
-                <div className="grid grid-cols-5 divide-x divide-white/10">
-                  {seriesStats.map((stat) => (
-                    <div key={stat.label} className="px-3 py-4 text-center">
-                      <div className="display tabular text-xl text-gold-500 sm:text-2xl">
+                <div className="grid grid-cols-2 divide-white/10 sm:grid-cols-5 sm:divide-x">
+                  {seriesStats.map((stat, i) => (
+                    <div key={stat.label} className={`px-3 py-3 text-center ${i > 0 ? "border-l border-white/10" : ""} ${i > 1 ? "border-t border-white/10 sm:border-t-0" : ""}`}>
+                      <div className="display tabular text-lg text-gold-500 sm:text-2xl">
                         {stat.value}
                       </div>
-                      <div className="mt-1 text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-steel-400 sm:text-[10px]">
+                      <div className="mt-1 text-[8px] font-semibold uppercase leading-tight tracking-[0.1em] text-steel-400 sm:text-[10px]">
                         {stat.label}
                       </div>
                     </div>
