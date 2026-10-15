@@ -41,7 +41,6 @@ export function RecordsTable({
   label,
   rows,
   emptyMessage = "No records yet.",
-  exportColumns = [] as ExportColumn[],
   events = [] as { slug: string; name: string }[],
   canDelete = false,
 }: {
@@ -49,7 +48,6 @@ export function RecordsTable({
   label: string;
   rows: RecordsTableRow[];
   emptyMessage?: string;
-  exportColumns?: ExportColumn[];
   events?: { slug: string; name: string }[];
   canDelete?: boolean;
 }) {
@@ -148,28 +146,46 @@ export function RecordsTable({
   }
 
   function handleExport(format: "csv" | "xlsx" | "pdf") {
-    if (exportColumns.length === 0 || eventFiltered.length === 0) return;
-    const data = eventFiltered.map((row) => {
-      const obj: Record<string, unknown> = {
-        Reference: row.reference,
-        Title: row.title,
-        Subtitle: row.subtitle,
-        Stage: row.stage,
-        Received: formatDateTime(row.createdAt),
-        Event: row.eventSlug ? events.find((e) => e.slug === row.eventSlug)?.name ?? row.eventSlug : "",
-      };
-      row.meta.forEach((m, i) => { obj[`Detail ${i + 1}`] = m; });
-      return obj;
-    });
-    const columns: ExportColumn[] = [
+    if (eventFiltered.length === 0) return;
+
+    const baseColumns: ExportColumn[] = [
       { header: "Reference", key: "Reference" },
-      { header: "Title", key: "Title" },
-      { header: "Subtitle", key: "Subtitle" },
-      ...exportColumns.map((c) => ({ header: c.header, key: c.key })),
+      { header: "Type", key: "Type" },
       { header: "Stage", key: "Stage" },
       { header: "Received", key: "Received" },
       { header: "Event", key: "Event" },
     ];
+
+    const allFieldKeys = new Set<string>();
+    eventFiltered.forEach((row) => {
+      if (row.lead) {
+        Object.keys(row.lead.fields).forEach((k) => allFieldKeys.add(k));
+      }
+    });
+
+    const fieldColumns: ExportColumn[] = Array.from(allFieldKeys).map((key) => ({
+      header: key.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()),
+      key: `field_${key}`,
+    }));
+
+    const columns: ExportColumn[] = [...baseColumns, ...fieldColumns];
+
+    const data = eventFiltered.map((row) => {
+      const obj: Record<string, unknown> = {
+        Reference: row.reference,
+        Type: row.lead?.type ?? kind,
+        Stage: row.stage,
+        Received: formatDateTime(row.createdAt),
+        Event: row.eventSlug ? events.find((e) => e.slug === row.eventSlug)?.name ?? row.eventSlug : "",
+      };
+      if (row.lead) {
+        for (const [key, value] of Object.entries(row.lead.fields)) {
+          obj[`field_${key}`] = Array.isArray(value) ? value.join(", ") : String(value ?? "");
+        }
+      }
+      return obj;
+    });
+
     if (format === "csv") {
       const csv = exportCSV({ columns, data });
       downloadText(csv, `${label.toLowerCase().replace(/\s+/g, "-")}-export.csv`);
@@ -218,22 +234,20 @@ export function RecordsTable({
               className="field pl-9"
             />
           </div>
-          {exportColumns.length > 0 && (
-            <>
-              <Button type="button" variant="outline" size="sm" onClick={() => handleExport("csv")} className="hidden sm:inline-flex">
-                <Icon name="download" size={14} /> CSV
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => handleExport("xlsx")} className="hidden sm:inline-flex">
-                <Icon name="download" size={14} /> Excel
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => handleExport("pdf")} className="hidden sm:inline-flex">
-                <Icon name="download" size={14} /> PDF
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => handleExport("csv")} className="inline-flex sm:hidden" aria-label="Export CSV">
-                <Icon name="download" size={14} />
-              </Button>
-            </>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => handleExport("csv")} className="hidden sm:inline-flex">
+              <Icon name="download" size={14} /> CSV
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => handleExport("xlsx")} className="hidden sm:inline-flex">
+              <Icon name="download" size={14} /> Excel
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => handleExport("pdf")} className="hidden sm:inline-flex">
+              <Icon name="download" size={14} /> PDF
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => handleExport("csv")} className="inline-flex sm:hidden" aria-label="Export CSV">
+              <Icon name="download" size={14} />
+            </Button>
+          </div>
         </div>
       </div>
 

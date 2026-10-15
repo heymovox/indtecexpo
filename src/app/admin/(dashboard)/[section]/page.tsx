@@ -491,14 +491,6 @@ case "exhibitors":
             emptyMessage="No exhibitor enquiries yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
             canDelete={identity.role === "superadmin"}
-            exportColumns={[
-              { header: "Company", key: "Company" },
-              { header: "Contact Person", key: "Contact Person" },
-              { header: "Industry", key: "Industry" },
-              { header: "Stall Size", key: "Stall Size" },
-              { header: "Stalls", key: "Stalls" },
-              { header: "Designation", key: "Designation" },
-            ]}
           />
         );
         break;
@@ -514,14 +506,6 @@ case "bookings":
             emptyMessage="No bookings in the proposal or won stages yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
             canDelete={identity.role === "superadmin"}
-            exportColumns={[
-              { header: "Company", key: "Company" },
-              { header: "Contact Person", key: "Contact Person" },
-              { header: "Industry", key: "Industry" },
-              { header: "Stall Size", key: "Stall Size" },
-              { header: "Stalls", key: "Stalls" },
-              { header: "Designation", key: "Designation" },
-            ]}
           />
         );
         break;
@@ -535,15 +519,6 @@ case "visitors":
             emptyMessage="No visitor registrations yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
             canDelete={identity.role === "superadmin"}
-            exportColumns={[
-              { header: "Company", key: "Company" },
-              { header: "Designation", key: "Designation" },
-              { header: "City", key: "City" },
-              { header: "Industry", key: "Industry" },
-              { header: "Interests", key: "Interests" },
-              { header: "Expos", key: "Expos" },
-              { header: "Visiting Schedule", key: "Visiting Schedule" },
-            ]}
           />
         );
         break;
@@ -557,12 +532,6 @@ case "enquiries":
             emptyMessage="No enquiries yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
             canDelete={identity.role === "superadmin"}
-            exportColumns={[
-              { header: "Category", key: "Category" },
-              { header: "Company", key: "Company" },
-              { header: "Phone", key: "Phone" },
-              { header: "Message", key: "Message" },
-            ]}
           />
         );
         break;
@@ -576,12 +545,6 @@ case "enquiries":
             emptyMessage="No contact messages yet."
             events={events.map((e) => ({ slug: e.slug, name: e.name }))}
             canDelete={identity.role === "superadmin"}
-            exportColumns={[
-              { header: "Category", key: "Category" },
-              { header: "Company", key: "Company" },
-              { header: "Phone", key: "Phone" },
-              { header: "Message", key: "Message" },
-            ]}
           />
         );
         break;
