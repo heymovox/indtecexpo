@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { adminConfig } from "@/config/admin";
 import { getAdmin } from "@/app/api/admin/_lib/auth";
+import { shapeLead } from "@/app/api/admin/_lib/leads";
 import {
   listContactMessages,
   listEventOverrides,
@@ -120,7 +121,9 @@ async function exhibitorRows(): Promise<RecordsTableRow[]> {
     id: record.id,
     reference: record.reference,
     title: `${record.companyName} — ${record.contactPerson}`,
-    subtitle: record.email,
+    // Email now renders as a tappable link below, so the subtitle carries
+    // something else rather than repeating it.
+    subtitle: record.productCategory || record.designation,
     meta: compact([
       (record.eventSlugs ?? []).join(", "),
       record.industry,
@@ -129,6 +132,8 @@ async function exhibitorRows(): Promise<RecordsTableRow[]> {
     ]),
     stage: record.stage ?? "new",
     createdAt: record.createdAt,
+    contact: { email: record.email, phone: record.phone },
+    lead: shapeLead("exhibitor", record),
   }));
 }
 
@@ -138,7 +143,7 @@ async function visitorRows(): Promise<RecordsTableRow[]> {
     id: record.id,
     reference: record.reference,
     title: `${record.fullName} — ${record.companyName}`,
-    subtitle: record.email,
+    subtitle: `${record.city} · ${record.industry}`,
     meta: compact([
       record.designation,
       record.city,
@@ -153,6 +158,8 @@ async function visitorRows(): Promise<RecordsTableRow[]> {
     ]),
     stage: record.stage ?? "new",
     createdAt: record.createdAt,
+    contact: { email: record.email, phone: record.phone },
+    lead: shapeLead("visitor", record),
   }));
 }
 
@@ -162,15 +169,18 @@ async function contactRows(): Promise<RecordsTableRow[]> {
     id: record.id,
     reference: record.reference,
     title: `${record.subject} — ${record.name}`,
-    subtitle: record.email,
+    subtitle: record.company
+      ? `${record.category} · ${record.company}`
+      : record.category,
     meta: compact([
       record.category,
       record.company,
-      record.phone,
       record.message.length > 90 ? `${record.message.slice(0, 90)}…` : record.message,
     ]),
     stage: record.stage ?? "new",
     createdAt: record.createdAt,
+    contact: { email: record.email, phone: record.phone ?? "" },
+    lead: shapeLead("contact", record),
   }));
 }
 

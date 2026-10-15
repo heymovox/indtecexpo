@@ -8,7 +8,9 @@ import { StageChip } from "./StageChip";
 import { Button } from "@/components/ui/Button";
 import { exportCSV, exportXLSX, exportPDF, downloadBlob, downloadText } from "@/lib/export";
 import type { LeadKind } from "@/app/admin/lead-types";
+import type { AdminLead } from "@/app/admin/lead-types";
 import type { LeadStage } from "@/types/exhibitor";
+import { LeadDrawer } from "./LeadDrawer";
 
 export interface RecordsTableRow {
   id: string;
@@ -19,6 +21,13 @@ export interface RecordsTableRow {
   stage: LeadStage;
   createdAt: string;
   eventSlug?: string;
+  /**
+   * Kept separate from `meta` so email and phone can render as real
+   * mailto:/tel: links in the list instead of plain text.
+   */
+  contact?: { email: string; phone: string };
+  /** Full detail record, used to open the lead drawer from a row. */
+  lead?: AdminLead;
 }
 
 interface ExportColumn {
@@ -46,6 +55,15 @@ export function RecordsTable({
   const [eventFilter, setEventFilter] = useState<string>("all");
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+
+  function openDetails(row: RecordsTableRow) {
+    if (row.lead) setOpenLeadId(row.id);
+  }
+
+  function applyDrawerUpdate(lead: AdminLead) {
+    setStages((current) => ({ ...current, [lead.id]: lead.stage }));
+  }
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -69,6 +87,9 @@ export function RecordsTable({
     if (eventFilter === "all") return filtered;
     return filtered.filter((row) => row.eventSlug === eventFilter);
   }, [filtered, eventFilter]);
+
+  // Derived after the memos above, so it reflects the active search/filter.
+  const openLead = eventFiltered.find((row) => row.id === openLeadId)?.lead;
 
   async function changeStage(id: string, stage: LeadStage) {
     setSavingId(id);
@@ -199,17 +220,53 @@ export function RecordsTable({
         ) : (
           <div className="grid gap-3 p-4">
             {eventFiltered.map((row) => {
-              const stage = stages[row.id] ?? row.stage;
-              return (
-                <article key={row.id} className="card p-4 border-steel-200 hover:border-brand-300 transition-colors">
+                const stage = stages[row.id] ?? row.stage;
+                return (
+                <article
+                  key={row.id}
+                  className="card p-4 border-steel-200 transition-colors hover:border-brand-300"
+                >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1 min-w-0">
                       <p className="font-mono text-xs text-steel-500 truncate">{row.reference}</p>
-                      <h4 className="mt-1 font-medium text-navy-900">{row.title}</h4>
+                      {row.lead ? (
+                        <button
+                          type="button"
+                          onClick={() => openDetails(row)}
+                          className="mt-1 block text-left font-medium text-navy-900 hover:text-brand-700 hover:underline"
+                        >
+                          {row.title}
+                        </button>
+                      ) : (
+                        <h4 className="mt-1 font-medium text-navy-900">{row.title}</h4>
+                      )}
                       <p className="mt-0.5 text-xs text-steel-500">{row.subtitle}</p>
                     </div>
                     <StageChip stage={stage} />
                   </div>
+
+                  {row.contact && (row.contact.email || row.contact.phone) ? (
+                    <div className="mb-3 flex flex-col gap-1.5 text-xs">
+                      {row.contact.email ? (
+                        <a
+                          href={`mailto:${row.contact.email}`}
+                          onClick={(event) => event.stopPropagation()}
+                          className="break-all text-brand-700 underline-offset-2 hover:underline"
+                        >
+                          {row.contact.email}
+                        </a>
+                      ) : null}
+                      {row.contact.phone ? (
+                        <a
+                          href={`tel:${row.contact.phone.replace(/[^\d+]/g, "")}`}
+                          onClick={(event) => event.stopPropagation()}
+                          className="text-brand-700 underline-offset-2 hover:underline"
+                        >
+                          {row.contact.phone}
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : null}
 
                   <div className="space-y-1.5 mb-3 text-xs text-steel-600">
                     {row.meta.map((item, index) => (
@@ -224,6 +281,7 @@ export function RecordsTable({
                         value={stage}
                         aria-label={`Stage for ${row.reference}`}
                         disabled={savingId === row.id}
+                        onClick={(event) => event.stopPropagation()}
                         onChange={(event) => void changeStage(row.id, event.target.value as LeadStage)}
                         className="field py-1.5 text-xs w-full sm:w-auto"
                       >
@@ -232,9 +290,20 @@ export function RecordsTable({
                         ))}
                       </select>
                     </div>
-                    <time className="text-xs text-steel-500 whitespace-nowrap" dateTime={row.createdAt}>
-                      {formatDateTime(row.createdAt)}
-                    </time>
+                    <div className="flex items-center gap-3">
+                      {row.lead ? (
+                        <button
+                          type="button"
+                          onClick={() => openDetails(row)}
+                          className="text-xs font-semibold text-brand-700 underline-offset-2 hover:underline"
+                        >
+                          View details
+                        </button>
+                      ) : null}
+                      <time className="text-xs text-steel-500 whitespace-nowrap" dateTime={row.createdAt}>
+                        {formatDateTime(row.createdAt)}
+                      </time>
+                    </div>
                   </div>
                 </article>
               );
@@ -269,8 +338,39 @@ export function RecordsTable({
                   <tr key={row.id} className="border-b border-steel-100 align-top last:border-b-0 hover:bg-steel-25">
                     <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-steel-600 sm:px-5">{row.reference}</td>
                     <td className="px-4 py-3 sm:px-5">
-                      <p className="font-medium text-navy-900">{row.title}</p>
+                      {row.lead ? (
+                        <button
+                          type="button"
+                          onClick={() => openDetails(row)}
+                          className="text-left font-medium text-navy-900 hover:text-brand-700 hover:underline"
+                        >
+                          {row.title}
+                        </button>
+                      ) : (
+                        <p className="font-medium text-navy-900">{row.title}</p>
+                      )}
                       <p className="mt-0.5 text-xs text-steel-500">{row.subtitle}</p>
+
+                      {row.contact && (row.contact.email || row.contact.phone) ? (
+                        <div className="mt-1 flex flex-col gap-0.5 text-xs">
+                          {row.contact.email ? (
+                            <a
+                              href={`mailto:${row.contact.email}`}
+                              className="break-all text-brand-700 underline-offset-2 hover:underline"
+                            >
+                              {row.contact.email}
+                            </a>
+                          ) : null}
+                          {row.contact.phone ? (
+                            <a
+                              href={`tel:${row.contact.phone.replace(/[^\d+]/g, "")}`}
+                              className="text-brand-700 underline-offset-2 hover:underline"
+                            >
+                              {row.contact.phone}
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-xs text-steel-600 sm:px-5">
                       {row.meta.map((item, index) => (
@@ -287,10 +387,19 @@ export function RecordsTable({
                           onChange={(event) => void changeStage(row.id, event.target.value as LeadStage)}
                           className="field py-1.5 text-xs"
                         >
-                          {adminConfig.kanbanColumns.map((column) => (
-                            <option key={column.id} value={column.id}>{column.label}</option>
-                          ))}
+{adminConfig.kanbanColumns.map((column) => (
+                          <option key={column.id} value={column.id}>{column.label}</option>
+                        ))}
                         </select>
+                        {row.lead ? (
+                          <button
+                            type="button"
+                            onClick={() => openDetails(row)}
+                            className="text-left text-xs font-semibold text-brand-700 underline-offset-2 hover:underline"
+                          >
+                            View details
+                          </button>
+                        ) : null}
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-xs text-steel-500 sm:px-5">{formatDateTime(row.createdAt)}</td>
@@ -301,6 +410,10 @@ export function RecordsTable({
           </tbody>
         </table>
       </div>
+
+      {openLead ? (
+        <LeadDrawer lead={openLead} onClose={() => setOpenLeadId(null)} onSaved={applyDrawerUpdate} />
+      ) : null}
     </div>
   );
 }
