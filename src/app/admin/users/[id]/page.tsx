@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field, FormAlert, Input, Select } from "@/components/ui/Form";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
+import { useToast } from "@/components/admin/ToastProvider";
 
 interface UserData {
   id: string;
@@ -19,6 +20,7 @@ interface UserData {
 
 export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { confirm } = useToast();
   const [user, setUser] = useState<UserData | null>(null);
   const [form, setForm] = useState({
     name: "",
@@ -95,12 +97,15 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
   async function handleDisable() {
     if (!user) return;
-    const confirmed = window.confirm(
-      user.disabledAt
-        ? "Re-enable this user?"
-        : "Disable this user? They will no longer be able to sign in."
-    );
-    if (!confirmed) return;
+    const ok = await confirm({
+      title: user.disabledAt ? "Re-enable user" : "Disable user",
+      message: user.disabledAt
+        ? "Re-enable this user? They will be able to sign in again."
+        : "Disable this user? They will no longer be able to sign in.",
+      confirmLabel: user.disabledAt ? "Re-enable" : "Disable",
+      variant: user.disabledAt ? "primary" : "danger",
+    });
+    if (!ok) return;
     setError("");
     try {
       const response = await fetch(`/api/admin/admins?id=${user.id}`, {
@@ -119,10 +124,13 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
   async function handleDelete() {
     if (!user) return;
-    const confirmed = window.confirm(
-      "Permanently delete this user? This cannot be undone."
-    );
-    if (!confirmed) return;
+    const ok = await confirm({
+      title: "Delete user",
+      message: "Permanently delete this user? This cannot be undone.",
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     setDeleting(true);
     setError("");
     try {

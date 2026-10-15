@@ -6,6 +6,7 @@ import { Field, Input, Textarea } from "@/components/ui/Form";
 import { Icon } from "@/components/ui/Icon";
 import { UploadField } from "@/components/admin/UploadField";
 import { sponsorTiers as defaultSponsorTiers } from "@/data/sponsors";
+import { useToast } from "@/components/admin/ToastProvider";
 
 export interface SponsorLogo {
   id: string;
@@ -41,6 +42,7 @@ function emptyLogo(): SponsorLogo {
 }
 
 export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
+  const { confirm } = useToast();
   const [tiers, setTiers] = useState<SponsorTier[]>(() => [...defaultTiers].sort((a, b) => a.order - b.order));
   const [editingTier, setEditingTier] = useState<SponsorTier | null>(null);
   const [saving, setSaving] = useState(false);
@@ -106,7 +108,13 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
   }
 
   async function handleDeleteTier(tier: SponsorTier) {
-    if (!confirm(`Delete "${tier.title}" tier? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete tier",
+      message: `Delete "${tier.title}" tier? This cannot be undone.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       setTiers((current) => current.filter((t) => t.id !== tier.id).map((t, i) => ({ ...t, order: i })));
       setMessage({ type: "success", text: "Tier deleted." });

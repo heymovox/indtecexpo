@@ -65,7 +65,10 @@ export type IconName =
   | "refresh"
   | "eye"
   | "play"
-  | "upload";
+  | "upload"
+  | "bell"
+  | "alert"
+  | "question";
 
 const paths: Record<IconName, React.ReactNode> = {
   machine: (
@@ -452,6 +455,26 @@ const paths: Record<IconName, React.ReactNode> = {
     </>
   ),
   play: <path d="M7.5 5 19 12 7.5 19V5Z" />,
+  bell: (
+    <>
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+    </>
+  ),
+  alert: (
+    <>
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+      <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+    </>
+  ),
+  question: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
+      <path d="M12 17h.01" />
+    </>
+  ),
 };
 
 interface IconProps extends Omit<SVGProps<SVGSVGElement>, "name"> {

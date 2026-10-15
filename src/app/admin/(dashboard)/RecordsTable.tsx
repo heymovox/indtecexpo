@@ -11,6 +11,7 @@ import type { LeadKind } from "@/app/admin/lead-types";
 import type { AdminLead } from "@/app/admin/lead-types";
 import type { LeadStage } from "@/types/exhibitor";
 import { LeadDrawer } from "./LeadDrawer";
+import { useToast } from "@/components/admin/ToastProvider";
 
 export interface RecordsTableRow {
   id: string;
@@ -60,6 +61,7 @@ export function RecordsTable({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [localRows, setLocalRows] = useState(rows);
+  const { toast, confirm } = useToast();
 
   function openDetails(row: RecordsTableRow) {
     if (row.lead) setOpenLeadId(row.id);
@@ -121,10 +123,14 @@ export function RecordsTable({
 
   async function handleDelete(row: RecordsTableRow) {
     if (!canDelete) return;
-    const message = row.lead
-      ? `Delete ${row.lead.fields.companyName ?? row.title}? This cannot be undone.`
-      : `Delete "${row.title}"? This cannot be undone.`;
-    if (!confirm(message)) return;
+    const title = row.lead?.fields.companyName ?? row.title;
+    const ok = await confirm({
+      title: "Delete record",
+      message: `Delete "${title}"? This cannot be undone.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     setDeletingId(row.id);
     setError("");
     try {
@@ -134,6 +140,7 @@ export function RecordsTable({
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) throw new Error("bad-response");
       setLocalRows((current) => current.filter((entry) => entry.id !== row.id));
+      toast("success", "Record deleted", `"${title}" has been removed.`);
     } catch {
       setError("Could not delete the record. Please try again.");
     }

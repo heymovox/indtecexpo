@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { adminConfig } from "@/config/admin";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { ToastProvider } from "@/components/admin/ToastProvider";
 
 const STORAGE_KEY = "indtec-admin-nav-groups";
 
@@ -247,6 +248,7 @@ if (loading) {
   return (
     // Cancel the layout's fixed-header and mobile-CTA spacing: AdminShell supplies its own
     // sticky header, while the public Header/Footer/MobileCTABar return null under /admin.
+    <ToastProvider>
     <div className="-mt-[var(--header-height)] min-h-screen w-full bg-steel-50 max-lg:-mb-14">
       <header className="sticky top-0 z-30 border-b border-steel-200 bg-white">
         <div className="flex h-14 items-center gap-3 px-3 sm:px-5">
@@ -333,5 +335,6 @@ if (loading) {
         </main>
       </div>
     </div>
+    </ToastProvider>
   );
 }

@@ -7,6 +7,7 @@ import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/Form"
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { formatDateTime } from "@/lib/utils";
 import { UploadField } from "@/components/admin/UploadField";
+import { useToast } from "@/components/admin/ToastProvider";
 
 export type EventStatus = "upcoming" | "live" | "completed";
 
@@ -100,6 +101,7 @@ interface SaveResponse {
 
 export function EventsManager({ items, readOnly = false }: { items: EventAdminItem[]; readOnly?: boolean }) {
   const router = useRouter();
+  const { confirm } = useToast();
   const [editing, setEditing] = useState<EventAdminItem | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -199,10 +201,13 @@ export function EventsManager({ items, readOnly = false }: { items: EventAdminIt
       });
       return;
     }
-    if (typeof window !== "undefined") {
-      const ok = window.confirm(`Delete ${item.name}? This removes the saved event record.`);
-      if (!ok) return;
-    }
+    const ok = await confirm({
+      title: "Delete event",
+      message: `Delete ${item.name}? This removes the saved event record.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     setMessage(null);
     try {
       const response = await fetch(`/api/admin/events?id=${encodeURIComponent(item.id)}`, {

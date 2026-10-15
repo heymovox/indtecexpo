@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent } 
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Select, Textarea } from "@/components/ui/Form";
 import { Icon } from "@/components/ui/Icon";
+import { useToast } from "@/components/admin/ToastProvider";
 
 const CATEGORIES = [
   "Expo",
@@ -68,6 +69,7 @@ const MAX_BYTES = 10 * 1024 * 1024;
 const ACCEPTED = "image/jpeg,image/png,image/webp,image/avif,image/gif,image/svg+xml";
 
 export function GalleryManager() {
+  const { confirm } = useToast();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -260,7 +262,13 @@ export function GalleryManager() {
   }
 
   async function removeItem(item: GalleryItem) {
-    if (!confirm(`Delete "${item.title}"? This removes it from the website too.`)) return;
+    const ok = await confirm({
+      title: "Delete image",
+      message: `Delete "${item.title}"? This removes it from the website too.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     setBusyId(item.id);
     setMessage(null);
     try {

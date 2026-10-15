@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { UploadField, type UploadResult } from "@/components/admin/UploadField";
 import { StallPlanView } from "@/components/exhibitors/StallPlanView";
+import { useToast } from "@/components/admin/ToastProvider";
 import {
   formatRupees,
   getStallPlan,
@@ -36,6 +37,7 @@ const adminAsset = (key: string) =>
   `/api/admin/object?key=${encodeURIComponent(key)}`;
 
 export function FloorPlansManager() {
+  const { confirm } = useToast();
   const [assets, setAssets] = useState<Record<string, Assets>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<Slug | null>(null);
@@ -88,7 +90,13 @@ export function FloorPlansManager() {
   }
 
   async function reset(slug: Slug) {
-    if (!confirm(`Remove the uploaded plan for ${CITY_LABEL[slug]}?`)) return;
+    const ok = await confirm({
+      title: "Remove floor plan",
+      message: `Remove the uploaded plan for ${CITY_LABEL[slug]}?`,
+      confirmLabel: "Remove",
+      variant: "danger",
+    });
+    if (!ok) return;
     setBusy(slug);
     setMessage(null);
     try {

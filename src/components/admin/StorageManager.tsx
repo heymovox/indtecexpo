@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/admin/ToastProvider";
 
 interface UploadedObject {
   key: string;
@@ -32,6 +33,7 @@ function formatBytes(bytes: number): string {
  * itself can stay private.
  */
 export function StorageManager({ folder, title, hint }: StorageManagerProps) {
+  const { confirm } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [objects, setObjects] = useState<UploadedObject[]>([]);
   const [configured, setConfigured] = useState<boolean | null>(null);
@@ -114,7 +116,13 @@ export function StorageManager({ folder, title, hint }: StorageManagerProps) {
   };
 
   const remove = async (key: string) => {
-    if (!window.confirm(`Delete ${key.split("/").pop()} from storage?`)) return;
+    const ok = await confirm({
+      title: "Delete file",
+      message: `Delete ${key.split("/").pop()} from storage?`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     setError(null);
     try {
       const res = await fetch(
