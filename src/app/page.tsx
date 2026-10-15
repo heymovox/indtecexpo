@@ -5,7 +5,6 @@ import { Accordion } from "@/components/ui/Accordion";
 import { Button } from "@/components/ui/Button";
 import { Countdown } from "@/components/ui/Countdown";
 import { ExhibitorCTA, StatStrip } from "@/components/ui/CTA";
-import { HeroSlider } from "@/components/ui/HeroSlider";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { VideoEmbed } from "@/components/ui/VideoEmbed";
@@ -58,10 +57,15 @@ export default function HomePage() {
       {/* ---------------------------------------------------------- */}
       {/* Hero                                                        */}
       {/* ---------------------------------------------------------- */}
-      <section className="noise-dark relative isolate overflow-hidden text-white">
-        <div className="grid-surface-dark absolute inset-0 opacity-70" />
-        <HeroSlider />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-navy-950 via-navy-950/85 to-navy-950/40" />
+      <section className="relative isolate overflow-hidden text-white">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/hero-industrial-factory.png"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-navy-950/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/90 via-navy-950/70 to-navy-950/30" />
         <div className="hatch-surface absolute inset-x-0 bottom-0 h-1.5" />
 
         <div className="mx-auto w-full max-w-[1280px] px-5 py-16 sm:px-8 sm:py-20 lg:py-28">
