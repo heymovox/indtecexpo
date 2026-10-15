@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Accordion } from "@/components/ui/Accordion";
 import { Button } from "@/components/ui/Button";
 import { Countdown } from "@/components/ui/Countdown";
-import { ExhibitorCTA, StatStrip } from "@/components/ui/CTA";
+import { ExhibitorCTA } from "@/components/ui/CTA";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { VideoEmbed } from "@/components/ui/VideoEmbed";
@@ -153,14 +153,21 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Series stats, moved up from the strip below the hero. The
-                  hero column is too narrow for all five on one line, so this
-                  uses 3 + 2 instead of the full-width 5-across layout. */}
-              <StatStrip
-                items={seriesStats}
-                columns="grid-cols-2 sm:grid-cols-3 sm:divide-x"
-                className="mt-3"
-              />
+              {/* Series stats as a single-line box */}
+              <div className="mt-9 border border-white/12 bg-white/5 backdrop-blur-sm">
+                <div className="grid grid-cols-5 divide-x divide-white/10">
+                  {seriesStats.map((stat) => (
+                    <div key={stat.label} className="px-3 py-4 text-center">
+                      <div className="display tabular text-xl text-gold-500 sm:text-2xl">
+                        {stat.value}
+                      </div>
+                      <div className="mt-1 text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-steel-400 sm:text-[10px]">
+                        {stat.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* All three editions as cards */}
