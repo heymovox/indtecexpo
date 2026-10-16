@@ -77,6 +77,7 @@ export const footerNav = {
   legalLinks: [
     { label: "Privacy Policy", href: "/privacy-policy" },
     { label: "Terms & Conditions", href: "/terms" },
+    { label: "API Documentation", href: "/api-docs" },
   ],
 } as const;
 
