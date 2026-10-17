@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/Form";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { events } from "@/data/events";
 import { industries, interestAreas } from "@/data/industries";
 import {
   flattenErrors,
@@ -24,6 +23,7 @@ import {
   parseSlotKey,
   sortSlotKeys,
 } from "@/lib/visit-slots";
+import type { ExpoEvent } from "@/types/event";
 import { VisitSchedule } from "./VisitSchedule";
 
 const southIndianCities = [
@@ -48,7 +48,7 @@ const southIndianCities = [
   "Other South Indian City",
 ];
 
-const expoLabel = (event: (typeof events)[number]) =>
+const expoLabel = (event: ExpoEvent) =>
   `${event.city} — ${event.dateRangeShort}`;
 
 type FormState = {
@@ -71,7 +71,11 @@ const initialState: FormState = {
   industry: "",
 };
 
-export function VisitorRegistrationForm() {
+/**
+ * `events` arrives resolved from the server page, so the edition picker shows
+ * the dates, labels and venues exactly as they are saved in the dashboard.
+ */
+export function VisitorRegistrationForm({ events }: { events: ExpoEvent[] }) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(initialState);
   const [selectedExpos, setSelectedExpos] = useState<string[]>([]);

@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   deleteRecord,
@@ -63,6 +64,12 @@ export async function PUT(request: NextRequest) {
     }
 
     const event = await upsertEventOverride(result.data);
+
+    // The public site reads these overrides on a timer; invalidate the cache so
+    // the card, detail page and calendar update on the next visit instead of
+    // waiting for the revalidation window.
+    revalidatePath("/", "layout");
+
     return Response.json({ ok: true, event });
   } catch (error) {
     console.error("[api/admin/events PUT]", error);
@@ -89,6 +96,7 @@ export async function DELETE(request: NextRequest) {
         { status: 404 },
       );
     }
+    revalidatePath("/", "layout");
     return Response.json({ ok: true });
   } catch (error) {
     console.error("[api/admin/events DELETE]", error);

@@ -44,6 +44,11 @@ export interface ExpoEvent {
   floorPlanPdf: string;
   highlightImages?: { src: string; alt: string }[];
   status: EventStatus;
+  /**
+   * Publication state managed from the dashboard. Static editions carry no
+   * override, so an edition is published unless an override says otherwise.
+   */
+  published?: boolean;
   sectors: string[];
   highlights: string[];
   stallOptions: StallOption[];

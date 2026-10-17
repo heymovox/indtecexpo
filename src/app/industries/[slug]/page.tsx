@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { EventCard } from "@/components/events/EventCard";
-import { events } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { industries, industryBySlug } from "@/data/industries";
 import {
   breadcrumbJsonLd,
@@ -49,6 +49,9 @@ export default async function IndustryDetailPage({
   const { slug } = await params;
   const industry = industryBySlug(slug);
   if (!industry) notFound();
+
+  // Renders event cards, so the dashboard's edits apply here too.
+  const events = await getPublicEvents();
 
   const relatedEvents = events.filter((event) =>
     event.sectors.includes(industry.name),

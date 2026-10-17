@@ -8,10 +8,8 @@ import { FooterLogo } from "@/components/layout/Logo";
 import { Icon } from "@/components/ui/Icon";
 import { footerNav } from "@/config/navigation";
 import { contactConfig, siteConfig } from "@/config/site";
-import { getSortedEvents } from "@/data/events";
 import { waLink } from "@/lib/whatsapp";
-
-const events = getSortedEvents();
+import type { ExpoEvent } from "@/types/event";
 
 const socialIcons = [
   {
@@ -41,7 +39,11 @@ const socialIcons = [
   },
 ];
 
-export function Footer() {
+/**
+ * The edition calendar is passed in from the root layout, which resolves the
+ * dashboard's saved edits — a client component cannot read the database.
+ */
+export function Footer({ events }: { events: ExpoEvent[] }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);

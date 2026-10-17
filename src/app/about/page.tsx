@@ -7,7 +7,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { EventCard } from "@/components/events/EventCard";
 import { siteConfig } from "@/config/site";
-import { getSortedEvents } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -47,8 +47,10 @@ const southIndiaPoints: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-export default function AboutPage() {
-  const events = getSortedEvents();
+export const revalidate = 60;
+
+export default async function AboutPage() {
+  const events = await getPublicEvents();
 
   const seriesStats = [
     { value: String(events.length), label: "Industrial Cities" },

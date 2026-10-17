@@ -2,20 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Logo } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { mainNav, primaryCta, secondaryCta } from "@/config/navigation";
+import {
+  eventsNavChildren,
+  mainNav,
+  primaryCta,
+  secondaryCta,
+  type NavItem,
+} from "@/config/navigation";
 import { contactConfig, siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import type { ExpoEvent } from "@/types/event";
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function Header() {
+/**
+ * `events` comes resolved from the root layout so the Events dropdown shows the
+ * live city dates; the static config list is only the fallback.
+ */
+export function Header({ events }: { events: ExpoEvent[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [openSub, setOpenSub] = useState<string | null>(null);
@@ -73,6 +84,16 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const navItems = useMemo<NavItem[]>(
+    () =>
+      mainNav.map((item) =>
+        item.href === "/events" && events.length > 0
+          ? { ...item, children: eventsNavChildren(events) }
+          : item,
+      ),
+    [events],
+  );
 
   // The admin dashboard renders its own shell — no public chrome.
   if (pathname.startsWith("/admin")) return null;
@@ -196,7 +217,7 @@ export function Header() {
           />
 
           <nav aria-label="Main" className="hidden items-center gap-0.5 xl:flex">
-            {mainNav.map((item) => {
+            {navItems.map((item) => {
               const active = isActive(pathname, item.href);
               if (!item.children) {
                 return (
@@ -379,7 +400,7 @@ export function Header() {
           <nav aria-label="Mobile" className="mt-6 border-t border-white/10 pt-4">
             <span className="eyebrow eyebrow-light mb-2 block">Menu</span>
             <ul className="space-y-0.5">
-              {mainNav.map((item) => {
+              {navItems.map((item) => {
                 const active = isActive(pathname, item.href);
                 const subOpen = openSub === item.label;
                 return (

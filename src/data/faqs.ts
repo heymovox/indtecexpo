@@ -1,4 +1,5 @@
 import type { FaqItem } from "@/types/content";
+import type { ExpoEvent } from "@/types/event";
 
 export const faqs: FaqItem[] = [
   {
@@ -91,3 +92,26 @@ export const faqGroups = ["Exhibiting", "Visiting", "Events", "General"] as cons
 
 export const faqsByGroup = (group: FaqItem["group"]) =>
   faqs.filter((faq) => faq.group === group);
+
+/**
+ * Rebuilds the calendar answer from the live edition list so the FAQ never
+ * quotes dates the dashboard has since changed. The static answer above is
+ * only the fallback used when no editions could be resolved.
+ */
+export function withLiveCalendar(
+  items: FaqItem[],
+  events: ExpoEvent[],
+): FaqItem[] {
+  if (events.length === 0) return items;
+
+  const places = events.map(
+    (event) => `${event.city} at ${event.venue.name} (${event.dateRangeShort})`,
+  );
+  const list =
+    places.length > 1
+      ? `${places.slice(0, -1).join(", ")} and ${places[places.length - 1]}`
+      : places[0];
+  const answer = `INDTEC EXPO 2026–2027 runs across ${events.length} industrial hub${events.length === 1 ? "" : "s"}: ${list}.`;
+
+  return items.map((item) => (item.id === "faq-9" ? { ...item, answer } : item));
+}

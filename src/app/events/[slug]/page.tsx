@@ -11,7 +11,8 @@ import { ExhibitorCTA, StatStrip } from "@/components/ui/CTA";
 import { Icon } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Badge, Section, SectionHeading } from "@/components/ui/Section";
-import { eventBySlug, eventSlugs, getSortedEvents } from "@/data/events";
+import { eventSlugs } from "@/data/events";
+import { getPublicEvent, getPublicEvents } from "@/data/events.server";
 import { getStallPlan } from "@/data/floorPlans";
 import {
   JsonLd,
@@ -25,13 +26,17 @@ interface EventPageProps {
   params: Promise<{ slug: string }>;
 }
 
+// The static slugs are prerendered; editions created from the dashboard are
+// rendered on first request because dynamicParams stays enabled.
+export const revalidate = 60;
+
 export function generateStaticParams() {
   return eventSlugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: EventPageProps) {
   const { slug } = await params;
-  const event = eventBySlug(slug);
+  const event = await getPublicEvent(slug);
 
   if (!event) {
     return buildMetadata({
@@ -60,11 +65,11 @@ path: `/events/${event.slug}`,
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
-  const event = eventBySlug(slug);
+  const event = await getPublicEvent(slug);
 
   if (!event) notFound();
 
-  const relatedEvents = getSortedEvents().filter(
+  const relatedEvents = (await getPublicEvents()).filter(
     (item) => item.slug !== event.slug,
   );
 
@@ -543,7 +548,11 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             </div>
             <div className="relative min-w-0 bg-white p-4 sm:p-6">
               {plan ? (
-                <StallPlanView plan={plan} />
+                <StallPlanView
+                  plan={plan}
+                  venue={event.venue.name}
+                  dates={event.dateRangeShort}
+                />
               ) : (
                 <p className="text-sm text-steel-500">
                   The floor plan for {event.city} will be published shortly.

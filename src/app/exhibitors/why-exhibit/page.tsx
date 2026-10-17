@@ -5,7 +5,7 @@ import { ExhibitorCTA } from "@/components/ui/CTA";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { IconTile, Section, SectionHeading } from "@/components/ui/Section";
-import { getSortedEvents } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { whyExhibitBenefits } from "@/data/exhibitors";
 import { buildMetadata } from "@/lib/seo";
 
@@ -73,8 +73,10 @@ const benefitDetails: { lead: string; points: string[] }[] = [
   },
 ];
 
-export default function WhyExhibitPage() {
-  const events = getSortedEvents();
+export const revalidate = 60;
+
+export default async function WhyExhibitPage() {
+  const events = await getPublicEvents();
 
   const totalDays = events.reduce((total, event) => total + event.days, 0);
   const sumStat = (label: string) =>

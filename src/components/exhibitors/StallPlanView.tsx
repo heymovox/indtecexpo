@@ -43,6 +43,13 @@ interface StallPlanViewProps {
   onToggle?: (code: string) => void;
   /** Hide the legend when it is already shown nearby. */
   showLegend?: boolean;
+  /**
+   * Caption overrides. The static plan carries its own venue and dates; the
+   * caller passes the live edition's values so an edited date is never
+   * contradicted by the plan header.
+   */
+  venue?: string;
+  dates?: string;
 }
 
 export function StallPlanView({
@@ -50,6 +57,8 @@ export function StallPlanView({
   selected = [],
   onToggle,
   showLegend = true,
+  venue,
+  dates,
 }: StallPlanViewProps) {
   const cols = plan.rows[0].length;
   const selectedSet = new Set(selected);
@@ -89,7 +98,7 @@ export function StallPlanView({
         <div className={cn(fitsScreen ? "mx-auto w-full max-w-[40rem]" : "overflow-x-auto")}>
           <div className={cn("mx-auto", fitsScreen ? "w-full" : "w-max")}>
             <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-steel-400">
-              {plan.venue} · {plan.dates}
+              {venue ?? plan.venue} · {dates ?? plan.dates}
             </p>
             <div
               className={cn("grid", fitsScreen ? "gap-0.5 sm:gap-1" : "gap-1")}
@@ -99,7 +108,7 @@ export function StallPlanView({
                   : `repeat(${cols}, 2.75rem)`,
               }}
               role="group"
-              aria-label={`Stall layout for ${plan.venue}`}
+              aria-label={`Stall layout for ${venue ?? plan.venue}`}
             >
               {plan.rows.flatMap((row, r) =>
                 row.map((code, c) => {

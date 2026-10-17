@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getMaintenanceSettings } from "@/lib/db";
+import { getPublicEvents } from "@/data/events.server";
 import { contactConfig, siteConfig } from "@/config/site";
 import { buildMetadata } from "@/lib/seo";
 import { Countdown } from "@/components/ui/Countdown";
@@ -38,6 +39,17 @@ const editionHighlights = [
   { city: "Hosur", dates: "19–21 February 2027" },
 ] as const;
 
+/** The calendar strip follows the dashboard; the list above is the fallback. */
+async function liveEditions() {
+  const events = await getPublicEvents();
+  return events.length > 0
+    ? events.map((event) => ({
+        city: event.city,
+        dates: event.dateRangeShort,
+      }))
+    : editionHighlights;
+}
+
 const whatsAppHref = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent(
   "Hello INDTEC EXPO, I understand the site is under maintenance. I would like to enquire in the meantime.",
 )}`;
@@ -48,6 +60,7 @@ export default async function MaintenancePage({
   searchParams: Promise<{ preview?: string }>;
 }) {
   const settings = await getMaintenanceSettings();
+  const editions = await liveEditions();
   const { preview } = await searchParams;
 
   // With maintenance off this page has no reason to exist, so send visitors
@@ -290,7 +303,7 @@ export default async function MaintenancePage({
             What you&rsquo;re waiting for
           </h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-3">
-            {editionHighlights.map((edition) => (
+            {editions.map((edition) => (
               <li
                 key={edition.city}
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center"

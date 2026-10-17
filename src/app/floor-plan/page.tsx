@@ -4,7 +4,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { StallPlanView } from "@/components/exhibitors/StallPlanView";
-import { getSortedEvents } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import {
   formatRupees,
   getStallPlan,
@@ -22,7 +22,7 @@ export const metadata = buildMetadata({
     card: "floor-plan",
 });
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 const zoningNotes: { icon: IconName; title: string; text: string }[] = [
   {
@@ -58,7 +58,7 @@ const zoningNotes: { icon: IconName; title: string; text: string }[] = [
 ];
 
 export default async function FloorPlanPage() {
-  const events = getSortedEvents();
+  const events = await getPublicEvents();
   const bengaluruPlan = getStallPlan("bengaluru");
 
   // Uploaded artwork per city. A database outage must not take the page down,
@@ -182,7 +182,11 @@ export default async function FloorPlanPage() {
                     <h3 className="display-sm mb-3 text-base text-navy-900">
                       Bookable stalls
                     </h3>
-                    <StallPlanView plan={plan} />
+                    <StallPlanView
+                      plan={plan}
+                      venue={event.venue.name}
+                      dates={event.dateRangeShort}
+                    />
                   </div>
                 ) : null}
               </div>

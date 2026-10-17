@@ -6,7 +6,8 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { EventCard } from "@/components/events/EventCard";
 import { contactConfig, siteConfig } from "@/config/site";
-import { getSortedEvents, seriesStats } from "@/data/events";
+import { seriesStats } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { faqsByGroup } from "@/data/faqs";
 import { whyVisitBenefits, visitorPrerequisites } from "@/data/exhibitors";
 import { buildMetadata } from "@/lib/seo";
@@ -20,8 +21,10 @@ export const metadata = buildMetadata({
     card: "visitors",
 });
 
-export default function VisitorsPage() {
-  const events = getSortedEvents();
+export const revalidate = 60;
+
+export default async function VisitorsPage() {
+  const events = await getPublicEvents();
   const visitingFaqs = faqsByGroup("Visiting");
 
   const attendanceStats = seriesStats;

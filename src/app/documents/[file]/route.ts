@@ -1,13 +1,13 @@
 import { siteConfig } from "@/config/site";
-import { eventBySlug } from "@/data/events";
+import { getPublicEvent } from "@/data/events.server";
 import { createTextPdf, type PdfLine } from "@/lib/pdf";
 
 export const dynamic = "force-dynamic";
 
 const FILE_PATTERN = /^floor-plan-([a-z0-9-]+)\.pdf$/i;
 
-function buildLines(slug: string): PdfLine[] | null {
-  const event = eventBySlug(slug.toLowerCase());
+async function buildLines(slug: string): Promise<PdfLine[] | null> {
+  const event = await getPublicEvent(slug.toLowerCase());
   if (!event) return null;
 
   const lines: PdfLine[] = [
@@ -71,7 +71,7 @@ export async function GET(
 ) {
   const { file } = await ctx.params;
   const match = FILE_PATTERN.exec(file);
-  const lines = match ? buildLines(match[1]) : null;
+  const lines = match ? await buildLines(match[1]) : null;
 
   if (!lines) {
     return new Response("Not found", { status: 404 });

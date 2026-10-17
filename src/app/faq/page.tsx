@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section } from "@/components/ui/Section";import { contactConfig } from "@/config/site";
-import { faqGroups, faqs, faqsByGroup } from "@/data/faqs";
+import { faqGroups, faqs, withLiveCalendar } from "@/data/faqs";
+import { getPublicEvents } from "@/data/events.server";
 import {
   breadcrumbJsonLd,
   buildMetadata,
@@ -42,7 +43,16 @@ const groupMeta: Record<
   },
 };
 
-export default function FaqPage() {
+// The calendar answer is rebuilt from the dashboard's editions, so revalidate
+// with the rest of the event surfaces.
+export const revalidate = 60;
+
+export default async function FaqPage() {
+  // "Where and when" quotes city dates, so it is rebuilt from the live list.
+  const items = withLiveCalendar(faqs, await getPublicEvents());
+  const byGroup = (group: FaqItem["group"]) =>
+    items.filter((faq) => faq.group === group);
+
   return (
     <>
       <PageHero
@@ -57,8 +67,8 @@ export default function FaqPage() {
       <Section>
         <div className="space-y-14">
           {faqGroups.map((group) => {
-            const items = faqsByGroup(group);
-            if (items.length === 0) return null;
+            const groupItems = byGroup(group);
+            if (groupItems.length === 0) return null;
             const meta = groupMeta[group];
 
             return (
@@ -74,17 +84,17 @@ export default function FaqPage() {
                     <p className="mt-1 text-sm text-steel-600">{meta.blurb}</p>
                   </div>
                   <span className="tabular ml-auto border border-steel-200 px-2.5 py-1 text-xs text-steel-500">
-                    {items.length} {items.length === 1 ? "answer" : "answers"}
+                    {groupItems.length} {groupItems.length === 1 ? "answer" : "answers"}
                   </span>
                 </div>
 
                 <Accordion
-                  items={items.map((faq) => ({
+                  items={groupItems.map((faq) => ({
                     id: faq.id,
                     question: faq.question,
                     answer: faq.answer,
                   }))}
-                  defaultOpenId={items[0]?.id}
+                  defaultOpenId={groupItems[0]?.id}
                 />
               </div>
             );
@@ -144,7 +154,7 @@ export default function FaqPage() {
 
       <JsonLd
         data={faqJsonLd(
-          faqs.map((faq) => ({ question: faq.question, answer: faq.answer })),
+          items.map((faq) => ({ question: faq.question, answer: faq.answer })),
         )}
       />
       <JsonLd

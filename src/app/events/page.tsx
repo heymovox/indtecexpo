@@ -6,7 +6,7 @@ import { ExhibitorCTA } from "@/components/ui/CTA";
 import { Icon } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading } from "@/components/ui/Section";
-import { getSortedEvents } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { JsonLd, buildMetadata, collectionJsonLd } from "@/lib/seo";
 import type { StallOption } from "@/types/event";
 
@@ -38,8 +38,10 @@ const stallsFrom = (options: StallOption[]): string => {
   return sorted[0]?.price ?? "On request";
 };
 
-export default function EventsPage() {
-  const events = getSortedEvents();
+export const revalidate = 60;
+
+export default async function EventsPage() {
+  const events = await getPublicEvents();
   const totalDays = events.reduce((total, event) => total + event.days, 0);
 
   return (

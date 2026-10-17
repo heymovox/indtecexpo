@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section } from "@/components/ui/Section";
 import { contactConfig } from "@/config/site";
-import { getSortedEvents } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { buildMetadata } from "@/lib/seo";
 import type { StallOption } from "@/types/event";
 
@@ -65,12 +65,14 @@ const trustPoints = [
   "Early-bird and association offers available",
 ] as const;
 
+export const revalidate = 60;
+
 export default async function BookYourStallPage({
   searchParams,
 }: {
   searchParams: Promise<{ event?: string | string[] }>;
 }) {
-  const events = getSortedEvents();
+  const events = await getPublicEvents();
   const phone = contactConfig.phones[0];
   // Hero edition cards deep-link here as ?event=<slug> to pre-tick that city.
   const requested = (await searchParams).event;
@@ -124,7 +126,7 @@ export default async function BookYourStallPage({
             </p>
 
             <div className="mt-7">
-              <StallEnquiryForm initialEvent={initialEvent} />
+              <StallEnquiryForm initialEvent={initialEvent} events={events} />
             </div>
           </div>
 

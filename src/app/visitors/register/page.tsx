@@ -2,7 +2,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section } from "@/components/ui/Section";
 import { contactConfig } from "@/config/site";
-import { events } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { interestAreas } from "@/data/industries";
 import { buildMetadata } from "@/lib/seo";
 import { whatsappLinks } from "@/lib/whatsapp";
@@ -15,7 +15,11 @@ export const metadata = buildMetadata({
   path: "/visitors/register",
 });
 
-export default function VisitorRegisterPage() {
+export const revalidate = 60;
+
+export default async function VisitorRegisterPage() {
+  const events = await getPublicEvents();
+
   return (
     <>
       <PageHero
@@ -54,7 +58,7 @@ export default function VisitorRegisterPage() {
               notify you about sessions relevant to your industry.
             </p>
             <div className="mt-7">
-              <VisitorRegistrationForm />
+              <VisitorRegistrationForm events={events} />
             </div>
           </div>
 

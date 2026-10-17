@@ -26,6 +26,7 @@ import {
   type MaintenanceSettings,
 } from "@/types/maintenance";
 import { encryptPii, decryptPii } from "@/lib/protection";
+import { publicMediaUrl } from "@/lib/media";
 import {
   DELETE_BY_ID,
   INSERT,
@@ -261,6 +262,17 @@ export async function listEventOverrides(): Promise<EventOverride[]> {
 export async function upsertEventOverride(
   input: Omit<EventOverride, "id" | "createdAt"> & { id?: string },
 ): Promise<EventOverride> {
+  // Uploaded files come in as presigned R2 URLs or admin-only object links;
+  // store them under their same-origin /uploads path so the public site can
+  // render them after the one-hour signature expires.
+  input = {
+    ...input,
+    bannerImage: publicMediaUrl(input.bannerImage),
+    posterImage: publicMediaUrl(input.posterImage),
+    floorPlanImage: publicMediaUrl(input.floorPlanImage),
+    floorPlanPdf: publicMediaUrl(input.floorPlanPdf),
+  };
+
   const existing = input.id
     ? await getRecordById<EventOverride>("events", input.id)
     : await findEventOverrideBySlug(String(input.slug));
@@ -310,9 +322,10 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
 
   const merged = defaults.map((event) => {
     const override = overrides.find((item) => item.slug === event.slug);
-    if (!override) return event;
+    if (!override) return { ...event, published: true };
     return {
       ...event,
+      published: override.published !== false,
       name: override.name || event.name,
       dateLabel: override.dateLabel || event.dateLabel,
       dateRangeShort: override.dateRangeShort || event.dateRangeShort,
@@ -352,6 +365,7 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
       ...base,
       id: override.id,
       slug: override.slug,
+      published: override.published !== false,
       name: override.name,
       city: override.city ?? "",
       state: override.state ?? "",

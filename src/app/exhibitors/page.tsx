@@ -5,7 +5,8 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { contactConfig } from "@/config/site";
-import { getSortedEvents, seriesStats } from "@/data/events";
+import { seriesStats } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { whyExhibitBenefits } from "@/data/exhibitors";
 import { faqsByGroup } from "@/data/faqs";
 import { faqJsonLd, JsonLd, buildMetadata } from "@/lib/seo";
@@ -51,8 +52,10 @@ const bookingSteps = [
   },
 ] as const;
 
-export default function ExhibitorsPage() {
-  const events = getSortedEvents();
+export const revalidate = 60;
+
+export default async function ExhibitorsPage() {
+  const events = await getPublicEvents();
   const exhibitingFaqs = faqsByGroup("Exhibiting");
 
   const audienceStats = seriesStats;

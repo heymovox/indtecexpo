@@ -7,7 +7,13 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MobileCTABar } from "@/components/layout/MobileCTABar";
 import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
+import { getPublicEvents } from "@/data/events.server";
 import { buildMetadata, JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+
+// The footer carries the edition calendar, so the layout reads the live list.
+// The time-based revalidation is the backstop; saving an event in the
+// dashboard also revalidates the public site on demand.
+export const revalidate = 60;
 
 const barlow = Barlow_Condensed({
   subsets: ["latin"],
@@ -56,11 +62,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const events = await getPublicEvents();
+
   return (
     <html
       lang="en"
@@ -93,7 +101,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           Skip to main content
         </a>
 
-        <Header />
+        <Header events={events} />
 
         <main
           id="main-content"
@@ -103,7 +111,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           {children}
         </main>
 
-        <Footer />
+        <Footer events={events} />
         <MobileCTABar />
         <ServiceWorkerRegister />
 

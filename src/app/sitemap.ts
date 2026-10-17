@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { absoluteUrl } from "@/lib/utils";
-import { getSortedEvents } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { mediaArticles } from "@/data/media";
 import { industries } from "@/data/industries";
 
@@ -36,10 +36,12 @@ const SUPPORTING = [
   "/blog",
 ];
 
-export const dynamic = "force-static";
+// Rebuilt hourly so an edition added or renamed in the dashboard is picked up.
+export const revalidate = 3600;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const events = await getPublicEvents();
 
   const entry = (
     path: string,
@@ -54,7 +56,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...LANDING.map((path) => entry(path, 1, "weekly" as const)),
-    ...getSortedEvents().map((event) =>
+    ...events.map((event) =>
       entry(`/events/${event.slug}`, 0.9, "monthly"),
     ),
     ...industries.map((industry) =>

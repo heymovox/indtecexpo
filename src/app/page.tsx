@@ -16,7 +16,8 @@ import {
   whyVisitBenefits,
 } from "@/data/exhibitors";
 import { faqs } from "@/data/faqs";
-import { getSortedEvents, getUpcomingEvents, seriesStats } from "@/data/events";
+import { seriesStats } from "@/data/events";
+import { getPublicEvents, getUpcomingFrom } from "@/data/events.server";
 import { floorPhotos } from "@/data/floorPhotos";
 import { faqJsonLd, JsonLd } from "@/lib/seo";
 
@@ -47,9 +48,11 @@ const showcaseVideos = [
   },
 ];
 
-export default function HomePage() {
-  const events = getSortedEvents();
-  const upcomingEvents = getUpcomingEvents(events.length);
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const events = await getPublicEvents();
+  const upcomingEvents = getUpcomingFrom(events, events.length);
   const featuredFaqs = faqs.filter((item) => item.group === "Exhibiting").slice(0, 5);
 
   return (

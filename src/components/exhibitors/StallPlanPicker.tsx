@@ -25,6 +25,9 @@ interface StallPlanPickerProps {
   onReplace: (codes: string[]) => void;
   /** Shown under the summary; set when selection is optional. */
   hint?: string;
+  /** Live edition caption, overriding the plan's own venue and dates. */
+  venue?: string;
+  dates?: string;
 }
 
 /**
@@ -37,6 +40,8 @@ export function StallPlanPicker({
   onToggle,
   onReplace,
   hint,
+  venue,
+  dates,
 }: StallPlanPickerProps) {
   const [schemeIndex, setSchemeIndex] = useState(0);
   const scheme = plan.schemes[schemeIndex];
@@ -52,7 +57,13 @@ export function StallPlanPicker({
 
   return (
     <div className="min-w-0">
-      <StallPlanView plan={plan} selected={selected} onToggle={onToggle} />
+      <StallPlanView
+        plan={plan}
+        selected={selected}
+        onToggle={onToggle}
+        venue={venue}
+        dates={dates}
+      />
 
       {/* Selection summary --------------------------------------------- */}
       <div className="mt-4 border border-steel-200 bg-steel-25 p-4">

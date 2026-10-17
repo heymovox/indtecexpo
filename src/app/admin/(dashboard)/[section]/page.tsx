@@ -12,6 +12,7 @@ import {
   listVisitorRegistrations,
 } from "@/lib/db";
 import { events } from "@/data/events";
+import { publicMediaUrl } from "@/lib/media";
 import { mediaArticles } from "@/data/media";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { StorageManager } from "@/components/admin/StorageManager";
@@ -184,6 +185,10 @@ async function contactRows(): Promise<RecordsTableRow[]> {
   }));
 }
 
+// Uploads are stored as object keys or (historically) as expiring presigned
+// URLs; both preview correctly only through the same-origin uploads route.
+const eventMedia = publicMediaUrl;
+
 async function eventsPanel(readOnly = false) {
       const overrides = await listEventOverrides();
     const overrideSlugs = new Set(overrides.map((item) => item.slug));
@@ -210,10 +215,11 @@ async function eventsPanel(readOnly = false) {
         highlights: override?.highlights?.length
           ? override.highlights
           : [...event.highlights],
-        bannerImage: override?.bannerImage || event.heroImage,
-        posterImage: override?.posterImage || event.posterImage,
-        floorPlanImage: override?.floorPlanImage || event.floorPlanImage,
-        floorPlanPdf: override?.floorPlanPdf || event.floorPlanPdf,
+        bannerImage: eventMedia(override?.bannerImage || event.heroImage),
+        posterImage: eventMedia(override?.posterImage || event.posterImage),
+        floorPlanImage:
+          eventMedia(override?.floorPlanImage || event.floorPlanImage),
+        floorPlanPdf: eventMedia(override?.floorPlanPdf || event.floorPlanPdf),
         startDate: override?.startDate || event.startDate,
         endDate: override?.endDate || event.endDate,
         days: override?.days ?? event.days,
@@ -244,10 +250,10 @@ async function eventsPanel(readOnly = false) {
         description: override.description ?? [],
         sectors: override.sectors ?? [],
         highlights: override.highlights ?? [],
-        bannerImage: override.bannerImage ?? "",
-        posterImage: override.posterImage ?? "",
-        floorPlanImage: override.floorPlanImage ?? "",
-        floorPlanPdf: override.floorPlanPdf ?? "",
+        bannerImage: eventMedia(override.bannerImage),
+        posterImage: eventMedia(override.posterImage),
+        floorPlanImage: eventMedia(override.floorPlanImage),
+        floorPlanPdf: eventMedia(override.floorPlanPdf),
         startDate: override.startDate ?? "",
         endDate: override.endDate ?? "",
         days: override.days ?? 3,

@@ -1,7 +1,6 @@
 import "server-only";
 
-import { events } from "@/data/events";
-import { mergeEventOverrides } from "@/lib/db";
+import { getPublicEvents } from "@/data/events.server";
 import type { ExpoEvent } from "@/types/event";
 
 /**
@@ -24,16 +23,12 @@ function matches(event: ExpoEvent, value: string): boolean {
 
 /**
  * Resolves the event list, preferring admin-managed overrides so a date edited
- * in the dashboard reaches the email. A database outage falls back to the
- * static data rather than dropping the section from the email.
+ * in the dashboard reaches the email. `getPublicEvents` falls back to the
+ * static data on a database outage rather than dropping the section from the
+ * email.
  */
 async function resolveEvents(): Promise<ExpoEvent[]> {
-  try {
-    return await mergeEventOverrides<ExpoEvent>([...events]);
-  } catch (error) {
-    console.error("[email] could not merge event overrides", error);
-    return [...events];
-  }
+  return getPublicEvents();
 }
 
 export interface EventSummary {

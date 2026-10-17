@@ -8,12 +8,12 @@ import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/Form"
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { StallPlanPicker } from "@/components/exhibitors/StallPlanPicker";
 import { contactConfig } from "@/config/site";
-import { getSortedEvents } from "@/data/events";
 import { getStallPlan, getStallType } from "@/data/floorPlans";
 import { industries, productCategories } from "@/data/industries";
 import { cn } from "@/lib/utils";
 import { exhibitorEnquirySchema, flattenErrors } from "@/lib/validations";
 import { waLinkForEnquiry } from "@/lib/whatsapp";
+import type { ExpoEvent } from "@/types/event";
 
 type FormState = {
   companyName: string;
@@ -43,8 +43,6 @@ interface EnquiryResponse {
   errors?: FieldErrors;
   message?: string;
 }
-
-const events = getSortedEvents();
 
 const steps: { label: string; short: string; icon: IconName }[] = [
   { label: "Company & Contact", short: "Details", icon: "building" },
@@ -115,7 +113,14 @@ const fieldId = (name: string) => `exhibitor-${name}`;
  * with that edition already ticked, e.g.
  * /exhibitors/book-your-stall?event=bengaluru
  */
-export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
+export function StallEnquiryForm({
+  initialEvent,
+  events,
+}: {
+  initialEvent?: string;
+  /** Resolved on the server page so the picker shows live dashboard dates. */
+  events: ExpoEvent[];
+}) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>({
     ...initialState,
@@ -134,7 +139,7 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
 
   const selectedEvents = useMemo(
     () => events.filter((event) => form.eventSlugs.includes(event.slug)),
-    [form.eventSlugs],
+    [events, form.eventSlugs],
   );
 
   const planEvent =
@@ -432,6 +437,8 @@ export function StallEnquiryForm({ initialEvent }: { initialEvent?: string }) {
           {plan ? (
             <StallPlanPicker
               plan={plan}
+              venue={planEvent?.venue.name}
+              dates={planEvent?.dateRangeShort}
               selected={form.stallCodes}
               onToggle={(code) =>
                 setForm((prev) => {

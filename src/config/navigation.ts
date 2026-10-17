@@ -1,3 +1,5 @@
+import type { ExpoEvent } from "@/types/event";
+
 export interface NavChild {
   label: string;
   href: string;
@@ -10,10 +12,33 @@ export interface NavItem {
   children?: NavChild[];
 }
 
+/**
+ * The edition links under "Events" in the header. Generated from the live
+ * calendar instead of the static list above so the dates shown in the menu
+ * always match the dashboard, whatever city or edition is saved there.
+ */
+export function eventsNavChildren(
+  events: Pick<
+    ExpoEvent,
+    "city" | "slug" | "dateRangeShort" | "venue"
+  >[],
+): NavChild[] {
+  return [
+    ...events.map((event) => ({
+      label: event.city,
+      href: `/events/${event.slug}`,
+      description: `${event.dateRangeShort} · ${event.venue.name}`,
+    })),
+    { label: "All Events", href: "/events", description: "Full 2026–2027 calendar" },
+  ];
+}
+
 export const mainNav: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   {
+    // The children here are only the fallback rendered when the live calendar
+    // cannot be resolved; see `eventsNavChildren` above.
     label: "Events",
     href: "/events",
     children: [
