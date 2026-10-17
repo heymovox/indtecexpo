@@ -13,6 +13,7 @@ import {
 import { buildMetadata } from "@/lib/seo";
 import { whatsappLinks } from "@/lib/whatsapp";
 import { listFloorPlanAssets, type FloorPlanAssets } from "@/lib/db";
+import { objectExists } from "@/lib/r2";
 
 export const metadata = buildMetadata({
   title: "Floor Plan & Stall Layout",
@@ -66,7 +67,24 @@ export default async function FloorPlanPage() {
   let assets: Record<string, FloorPlanAssets> = {};
   try {
     const rows = await listFloorPlanAssets();
-    assets = Object.fromEntries(rows.map((row) => [row.slug, row]));
+    // A record can outlive its object — an asset removed while another field
+    // was saved, or a file deleted from the storage manager. Confirm each key
+    // still resolves and drop the ones that do not, so the section falls back
+    // to the built-in plan instead of rendering a figure or download that 404s.
+    const checked = await Promise.all(
+      rows.map(async (row) => {
+        const [imageOk, pdfOk] = await Promise.all([
+          row.imageKey ? objectExists(row.imageKey) : Promise.resolve(false),
+          row.pdfKey ? objectExists(row.pdfKey) : Promise.resolve(false),
+        ]);
+        return {
+          ...row,
+          imageKey: imageOk ? row.imageKey : undefined,
+          pdfKey: pdfOk ? row.pdfKey : undefined,
+        };
+      }),
+    );
+    assets = Object.fromEntries(checked.map((row) => [row.slug, row]));
   } catch (error) {
     console.error("[floor-plan] could not load uploaded assets", error);
   }

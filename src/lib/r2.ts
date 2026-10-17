@@ -210,6 +210,24 @@ export async function getObject(key: string): Promise<{
   };
 }
 
+/**
+ * True when the object is still in the bucket.
+ *
+ * Records can outlive their objects (an asset cleared while another field was
+ * being saved, or a file removed from the storage manager). Pages use this to
+ * fall back to their built-in content instead of rendering a link that 404s.
+ * Never throws: a lookup failure reads as "missing" so the fallback still wins.
+ */
+export async function objectExists(key: string): Promise<boolean> {
+  try {
+    const config = requireR2Config();
+    const response = await signedFetch(config, { method: "HEAD", key });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function deleteObject(key: string): Promise<void> {
   const config = requireR2Config();
   const response = await signedFetch(config, { method: "DELETE", key });

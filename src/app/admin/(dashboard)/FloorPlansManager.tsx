@@ -26,6 +26,18 @@ interface Assets {
   updatedAt?: string;
 }
 
+/**
+ * What the form may send. `null` clears a field — JSON drops `undefined`, so a
+ * cleared asset has to travel as `null` for the server to see the difference
+ * between "remove it" and "leave it as it is".
+ */
+type AssetPatch = {
+  imageKey?: string | null;
+  pdfKey?: string | null;
+  imageAlt?: string;
+  pdfLabel?: string;
+};
+
 const CITY_LABEL: Record<Slug, string> = {
   bengaluru: "Bengaluru",
   coimbatore: "Coimbatore",
@@ -63,7 +75,7 @@ export function FloorPlansManager() {
     };
   }, []);
 
-  async function save(slug: Slug, patch: Partial<Assets>) {
+  async function save(slug: Slug, patch: AssetPatch) {
     setBusy(slug);
     setMessage(null);
     try {
@@ -195,7 +207,7 @@ function CityPlan({
   plan: StallPlan | null;
   assets?: Assets;
   busy: boolean;
-  onSave: (patch: Partial<Assets>) => Promise<boolean>;
+  onSave: (patch: AssetPatch) => Promise<boolean>;
   onReset: () => void;
 }) {
   const hasUpload = Boolean(assets?.imageKey || assets?.pdfKey);
@@ -286,7 +298,7 @@ function CityPlan({
           label="Official floor plan artwork"
           value={assets?.imageKey ? adminAsset(assets.imageKey) : ""}
           onChange={(url) => {
-            if (!url) void onSave({ imageKey: undefined, imageAlt: "" });
+            if (!url) void onSave({ imageKey: null, imageAlt: "" });
           }}
           onUploaded={(result: UploadResult) => void onSave({ imageKey: result.key })}
           folder="floor-plans"
@@ -308,7 +320,7 @@ function CityPlan({
           label="Floor plan PDF"
           value={assets?.pdfKey ? adminAsset(assets.pdfKey) : ""}
           onChange={(url) => {
-            if (!url) void onSave({ pdfKey: undefined, pdfLabel: "" });
+            if (!url) void onSave({ pdfKey: null, pdfLabel: "" });
           }}
           onUploaded={(result: UploadResult) =>
             void onSave({ pdfKey: result.key, pdfLabel: `${CITY_LABEL[slug]} floor plan` })

@@ -72,13 +72,25 @@ export async function PUT(request: NextRequest) {
     const { slug, ...patch } = result.data;
 
     // Replacing an asset removes the object it supersedes so the bucket does
-    // not accumulate orphans. A failure here must not fail the save.
+    // not accumulate orphans. A key that is simply absent from the patch means
+    // "leave it alone" — treating omission as a replacement deleted the paired
+    // artwork every time a PDF was uploaded, while the record kept pointing at
+    // the object it had just lost. Only an explicit new key or an explicit
+    // `null` (clear) may supersede the stored one.
     const previous = await getFloorPlanAssets(slug);
     const superseded: string[] = [];
-    if (previous?.imageKey && previous.imageKey !== patch.imageKey) {
+    if (
+      previous?.imageKey &&
+      patch.imageKey !== undefined &&
+      previous.imageKey !== patch.imageKey
+    ) {
       superseded.push(previous.imageKey);
     }
-    if (previous?.pdfKey && previous.pdfKey !== patch.pdfKey) {
+    if (
+      previous?.pdfKey &&
+      patch.pdfKey !== undefined &&
+      previous.pdfKey !== patch.pdfKey
+    ) {
       superseded.push(previous.pdfKey);
     }
 
