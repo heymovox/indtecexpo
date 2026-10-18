@@ -1,12 +1,26 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Textarea } from "@/components/ui/Form";
 import { Icon } from "@/components/ui/Icon";
 import { UploadField } from "@/components/admin/UploadField";
-import { sponsorTiers as defaultSponsorTiers } from "@/data/sponsors";
 import { useToast } from "@/components/admin/ToastProvider";
+
+/**
+ * Sponsor tier editor.
+ *
+ * The tiers shipped in data/sponsors.ts are the base; saves go through
+ * /api/admin/sponsors, which merges them over the source and revalidates the
+ * public page — a tier, logo or listing change reaches /sponsors on the next
+ * visit instead of waiting for a deploy.
+ */
 
 export interface SponsorLogo {
   id: string;
@@ -14,54 +28,234 @@ export interface SponsorLogo {
   logo: string;
 }
 
+/** One tier as the API returns it: source data with dashboard edits applied. */
 export interface SponsorTier {
   id: string;
   title: string;
   description: string;
   logos: SponsorLogo[];
   order: number;
+  published: boolean;
+  /** "static" = shipped in data/sponsors.ts, "dashboard" = created in admin. */
+  source: "static" | "dashboard";
 }
 
-const defaultTiers: SponsorTier[] = defaultSponsorTiers.map((t, i) => ({
-  ...t,
-  order: i,
-}));
+type Message = { type: "success" | "error"; text: string };
 
 function emptyTier(): SponsorTier {
   return {
-    id: "",
+    id: `tier-${Date.now().toString(36)}`,
     title: "",
     description: "",
     logos: [],
     order: 0,
+    published: true,
+    source: "dashboard",
   };
 }
 
 function emptyLogo(): SponsorLogo {
-  return { id: "", name: "", logo: "" };
+  return { id: `logo-${Date.now().toString(36)}`, name: "", logo: "" };
 }
 
 export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
   const { confirm } = useToast();
-  const [tiers, setTiers] = useState<SponsorTier[]>(() => [...defaultTiers].sort((a, b) => a.order - b.order));
+  const [tiers, setTiers] = useState<SponsorTier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
   const [editingTier, setEditingTier] = useState<SponsorTier | null>(null);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<Message | null>(null);
+
+  /** Fetches the merged list without touching state, so an effect may call it. */
+  const fetchTiers = useCallback(async (): Promise<SponsorTier[]> => {
+    const res = await fetch("/api/admin/sponsors", {
+      cache: "no-store",
+      credentials: "include",
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+      throw new Error(data?.message ?? "Could not load sponsor tiers.");
+    }
+    return (data.tiers ?? []) as SponsorTier[];
+  }, []);
+
+  // Initial load: state is only touched from the promise callbacks, never
+  // synchronously in the effect body (matches the other dashboard managers).
+  useEffect(() => {
+    let cancelled = false;
+    fetchTiers()
+      .then((tiers) => {
+        if (!cancelled) setTiers(tiers);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setMessage({
+            type: "error",
+            text:
+              error instanceof Error
+                ? error.message
+                : "Could not load sponsor tiers.",
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchTiers]);
+
+  /** Refresh after a mutation, from event handlers. */
+  const load = useCallback(async () => {
+    try {
+      setTiers(await fetchTiers());
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text:
+          error instanceof Error ? error.message : "Could not load sponsor tiers.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchTiers]);
+
+  /** Persists one tier and refreshes from the merged view (normalised URLs, order). */
+  async function save(tier: SponsorTier, successText: string): Promise<boolean> {
+    setBusy(tier.id);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/sponsors", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tier),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.message ?? "Could not save the tier.");
+      }
+      await load();
+      setMessage({ type: "success", text: successText });
+      return true;
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Could not save the tier.",
+      });
+      return false;
+    } finally {
+      setBusy(null);
+    }
+  }
 
   function openCreateTier() {
-    const newTier = { ...emptyTier(), id: `tier-${Date.now()}`, order: tiers.length };
-    setEditingTier(newTier);
+    setMessage(null);
+    setEditingTier(emptyTier());
   }
 
   function openEditTier(tier: SponsorTier) {
-    setEditingTier({ ...tier });
+    setMessage(null);
+    setEditingTier({ ...tier, logos: tier.logos.map((logo) => ({ ...logo })) });
   }
 
-  function updateLogo(tierId: string, logoId: string, key: keyof SponsorLogo, value: string) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingTier || saving) return;
+    const title = editingTier.title.trim();
+    if (!title) {
+      setMessage({ type: "error", text: "Give the tier a title first." });
+      return;
+    }
+    setSaving(true);
+    const tier = { ...editingTier, title };
+    const ok = await save(
+      tier,
+      `“${title}” saved — it is live on /sponsors now.`,
+    );
+    setSaving(false);
+    if (ok) setEditingTier(null);
+  }
+
+  async function togglePublish(tier: SponsorTier) {
+    await save(
+      { ...tier, published: !tier.published },
+      tier.published
+        ? `“${tier.title}” hidden from /sponsors.`
+        : `“${tier.title}” shown on /sponsors again.`,
+    );
+  }
+
+  async function handleDeleteTier(tier: SponsorTier) {
+    const isShipped = tier.source === "static";
+    const ok = await confirm(
+      isShipped
+        ? {
+            title: "Revert tier",
+            message: `Discard the dashboard edits on “${tier.title}” and restore the version shipped with the site?`,
+            confirmLabel: "Revert",
+            variant: "danger",
+          }
+        : {
+            title: "Delete tier",
+            message: `Delete “${tier.title}” from /sponsors? This cannot be undone.`,
+            confirmLabel: "Delete",
+            variant: "danger",
+          },
+    );
+    if (!ok) return;
+
+    setBusy(tier.id);
+    setMessage(null);
+    try {
+      const res = await fetch(
+        `/api/admin/sponsors?id=${encodeURIComponent(tier.id)}`,
+        { method: "DELETE" },
+      );
+      const data = await res.json().catch(() => null);
+      if (res.status === 404) {
+        setMessage({
+          type: "success",
+          text: "No dashboard edits on that tier — the source version is already showing.",
+        });
+        return;
+      }
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.message ?? "Could not update the tier.");
+      }
+      await load();
+      setMessage({
+        type: "success",
+        text: isShipped
+          ? `“${tier.title}” reverted to the source version.`
+          : `“${tier.title}” deleted from /sponsors.`,
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Could not update the tier.",
+      });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function updateLogo(
+    tierId: string,
+    logoId: string,
+    key: keyof SponsorLogo,
+    value: string,
+  ) {
     setTiers((current) =>
       current.map((tier) =>
         tier.id === tierId
-          ? { ...tier, logos: tier.logos.map((l) => (l.id === logoId ? { ...l, [key]: value } : l)) }
+          ? {
+              ...tier,
+              logos: tier.logos.map((logo) =>
+                logo.id === logoId ? { ...logo, [key]: value } : logo,
+              ),
+            }
           : tier,
       ),
     );
@@ -71,7 +265,7 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
     setTiers((current) =>
       current.map((tier) =>
         tier.id === tierId
-          ? { ...tier, logos: [...tier.logos, { ...emptyLogo(), id: `logo-${Date.now()}` }] }
+          ? { ...tier, logos: [...tier.logos, { ...emptyLogo() }] }
           : tier,
       ),
     );
@@ -80,47 +274,20 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
   function removeLogo(tierId: string, logoId: string) {
     setTiers((current) =>
       current.map((tier) =>
-        tier.id === tierId ? { ...tier, logos: tier.logos.filter((l) => l.id !== logoId) } : tier,
+        tier.id === tierId
+          ? { ...tier, logos: tier.logos.filter((logo) => logo.id !== logoId) }
+          : tier,
       ),
     );
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!editingTier || saving) return;
-    setSaving(true);
-    setMessage(null);
-    try {
-      setTiers((current) => {
-        const exists = current.some((t) => t.id === editingTier.id);
-        if (exists) {
-          return current.map((t) => (t.id === editingTier.id ? { ...editingTier, order: t.order } : t));
-        } else {
-          return [...current, { ...editingTier, order: current.length }].sort((a, b) => a.order - b.order);
-        }
-      });
-      setEditingTier(null);
-      setMessage({ type: "success", text: "Sponsor tier saved." });
-    } catch {
-      setMessage({ type: "error", text: "Could not save. Please try again." });
-    }
-    setSaving(false);
-  }
-
-  async function handleDeleteTier(tier: SponsorTier) {
-    const ok = await confirm({
-      title: "Delete tier",
-      message: `Delete "${tier.title}" tier? This cannot be undone.`,
-      confirmLabel: "Delete",
-      variant: "danger",
-    });
-    if (!ok) return;
-    try {
-      setTiers((current) => current.filter((t) => t.id !== tier.id).map((t, i) => ({ ...t, order: i })));
-      setMessage({ type: "success", text: "Tier deleted." });
-    } catch {
-      setMessage({ type: "error", text: "Could not delete." });
-    }
+  if (loading) {
+    return (
+      <div className="card flex items-center gap-2 p-6 text-sm text-steel-600">
+        <Icon name="refresh" size={16} className="animate-spin" />
+        Loading sponsor tiers…
+      </div>
+    );
   }
 
   function renderEmptyState() {
@@ -130,8 +297,16 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
         <p className="mt-3 text-sm font-medium text-navy-900">No sponsor tiers yet</p>
         {!readOnly && (
           <>
-            <p className="mt-1 max-w-sm text-xs text-steel-600">Press &ldquo;Add Tier&rdquo; to create a sponsorship level.</p>
-            <Button type="button" variant="outline" size="sm" onClick={openCreateTier} className="mt-4">
+            <p className="mt-1 max-w-sm text-xs text-steel-600">
+              Press &ldquo;Add Tier&rdquo; to create a sponsorship level.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={openCreateTier}
+              className="mt-4"
+            >
               <span className="flex items-center gap-2">
                 <Icon name="plus" size={14} />
                 Add Tier
@@ -144,6 +319,7 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
   }
 
   function renderTier(tier: SponsorTier) {
+    const isBusy = busy === tier.id;
     return (
       <li key={tier.id} className="card p-4 border-steel-200 hover:border-brand-300 transition-colors">
         <div className="flex items-center justify-between gap-3 mb-3">
@@ -153,18 +329,48 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
                 {tier.id}
               </span>
               <h3 className="display-sm font-semibold text-navy-900">{tier.title}</h3>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
+                  tier.published
+                    ? "bg-emerald-600 text-white"
+                    : "bg-steel-100 text-steel-600"
+                }`}
+              >
+                {tier.published ? "Live" : "Hidden"}
+              </span>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${
+                  tier.source === "static"
+                    ? "bg-steel-100 text-steel-500"
+                    : "bg-brand-50 text-brand-700"
+                }`}
+              >
+                {tier.source === "static" ? "Source file" : "Dashboard"}
+              </span>
             </div>
             <p className="mt-0.5 text-xs text-steel-500">{tier.description}</p>
           </div>
           {!readOnly && (
             <div className="flex items-center gap-1.5">
-              <Button type="button" variant="outline" size="sm" onClick={() => openEditTier(tier)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => openEditTier(tier)}
+                disabled={isBusy}
+              >
                 <Icon name="gear" size={13} /> Edit
               </Button>
               <button
                 type="button"
-                onClick={() => handleDeleteTier(tier)}
-                className="border border-steel-200 p-1.5 text-steel-500 transition hover:border-signal-300 hover:text-signal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-300"
+                onClick={() => void handleDeleteTier(tier)}
+                disabled={isBusy}
+                className="border border-steel-200 p-1.5 text-steel-500 transition hover:border-signal-300 hover:text-signal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-300 disabled:opacity-40"
+                aria-label={
+                  tier.source === "static"
+                    ? `Revert ${tier.title}`
+                    : `Delete ${tier.title}`
+                }
               >
                 <Icon name="close" size={13} />
               </button>
@@ -243,15 +449,37 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
             </button>
           )}
         </div>
-      </li>
-    );
-  }
 
-  function renderTiersList() {
-    return (
-      <ul className="space-y-4" role="list">
-        {tiers.map((tier) => renderTier(tier))}
-      </ul>
+        {!readOnly && (
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-steel-100 pt-3">
+            <span className="text-[11px] text-steel-500">
+              {tier.published
+                ? "Shown on the public /sponsors page."
+                : "Hidden from the public /sponsors page."}
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isBusy}
+                onClick={() => void save(tier, `${tier.title} saved — live on /sponsors now.`)}
+              >
+                <Icon name="refresh" size={13} /> Save changes
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isBusy}
+                onClick={() => void togglePublish(tier)}
+              >
+                {tier.published ? "Hide from site" : "Show on site"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </li>
     );
   }
 
@@ -262,17 +490,28 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
           <span className="eyebrow mb-1.5">Sponsors</span>
           <h2 className="display-sm text-lg text-navy-900 sm:text-xl">Sponsor Tiers</h2>
           <p className="mt-1 text-xs text-steel-600 sm:text-sm">
-            Manage sponsorship tiers and partner logos
+            Manage sponsorship tiers and partner logos — saves go live on the
+            public site immediately.
           </p>
         </div>
-        {!readOnly && (
-          <Button type="button" onClick={openCreateTier} className="shrink-0">
-            <span className="flex items-center gap-2">
-              <Icon name="plus" size={16} strokeWidth={2} />
-              Add Tier
-            </span>
-          </Button>
-        )}
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Link
+            href="/sponsors"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 border border-steel-200 px-3 py-2 text-xs font-medium text-steel-700 transition hover:border-brand-400 hover:text-navy-900"
+          >
+            <Icon name="external" size={13} />
+            View public page
+          </Link>
+          {!readOnly && (
+            <Button type="button" onClick={openCreateTier} size="sm">
+              <span className="flex items-center gap-2">
+                <Icon name="plus" size={16} strokeWidth={2} />
+                Add Tier
+              </span>
+            </Button>
+          )}
+        </div>
       </div>
 
       {message ? (
@@ -282,7 +521,7 @@ export function SponsorsManager({ readOnly = false }: { readOnly?: boolean }) {
       ) : null}
 
       <div className="space-y-4">
-        {tiers.length === 0 ? renderEmptyState() : renderTiersList()}
+        {tiers.length === 0 ? renderEmptyState() : tiers.map((tier) => renderTier(tier))}
       </div>
 
       {editingTier ? (
@@ -309,12 +548,12 @@ function TierFormModal({
 }: {
   tier: SponsorTier;
   saving: boolean;
-  message: { type: "success" | "error"; text: string } | null;
+  message: Message | null;
   onChange: (next: SponsorTier) => void;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
-  function set<K extends keyof typeof tier>(key: K, value: typeof tier[K]) {
+  function set<K extends keyof SponsorTier>(key: K, value: SponsorTier[K]) {
     onChange({ ...tier, [key]: value });
   }
 
@@ -324,8 +563,10 @@ function TierFormModal({
       <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
         <header className="flex items-start justify-between gap-3 border-b border-steel-200 px-4 py-3.5 sm:px-5">
           <div className="min-w-0">
-            <p className="font-mono text-xs text-steel-500">{tier.id || "New tier"}</p>
-            <h3 className="display-sm mt-1 truncate text-lg text-navy-900">{tier.id ? "Edit tier" : "Add tier"}</h3>
+            <p className="font-mono text-xs text-steel-500">{tier.id}</p>
+            <h3 className="display-sm mt-1 truncate text-lg text-navy-900">
+              {tier.source === "static" ? "Edit tier" : "Add tier"}
+            </h3>
             <p className="mt-0.5 text-xs text-steel-600">Tier title, description and display order.</p>
           </div>
           <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 border border-steel-200 p-2 text-steel-500 transition hover:text-navy-900">
@@ -346,10 +587,19 @@ function TierFormModal({
             <Field label="Description" htmlFor="tier-description">
               <Textarea id="tier-description" rows={3} value={tier.description} onChange={(e) => set("description", e.target.value)} placeholder="What this tier represents…" />
             </Field>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-steel-700">
+              <input
+                type="checkbox"
+                checked={tier.published}
+                onChange={(e) => set("published", e.target.checked)}
+                className="h-4 w-4 accent-[#0f5fbf]"
+              />
+              Show this tier on the public /sponsors page
+            </label>
           </div>
           <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-steel-200 bg-steel-25 px-4 py-3 sm:px-5">
             <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
-            <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving…" : tier.id ? "Save changes" : "Create tier"}</Button>
+            <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving…" : "Save changes"}</Button>
           </footer>
         </form>
       </div>

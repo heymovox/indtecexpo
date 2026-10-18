@@ -13,7 +13,6 @@ import {
 } from "@/lib/db";
 import { events } from "@/data/events";
 import { publicMediaUrl } from "@/lib/media";
-import { mediaArticles } from "@/data/media";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { StorageManager } from "@/components/admin/StorageManager";
 import { RecordsTable, type RecordsTableRow } from "../RecordsTable";
@@ -22,6 +21,7 @@ import { SponsorsManager } from "../SponsorsManager";
 import { MaintenancePanel } from "../MaintenancePanel";
 import { GalleryManager } from "../GalleryManager";
 import { FloorPlansManager } from "../FloorPlansManager";
+import { ArticlesManager } from "../ArticlesManager";
 
 export const dynamic = "force-dynamic";
 
@@ -105,14 +105,6 @@ function SectionHeading({
         INDTEC EXPO 2026–2027
       </span>
     </header>
-  );
-}
-
-function ReadOnlyNote() {
-  return (
-    <p className="border border-steel-200 bg-white px-4 py-3 text-xs text-steel-500">
-      Read-only section — content is maintained in the source files.
-    </p>
   );
 }
 
@@ -268,57 +260,6 @@ async function eventsPanel(readOnly = false) {
 
     return <EventsManager items={items} readOnly={readOnly} />;
   }
-
-function articlesPanel() {
-  return (
-    <div className="card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-steel-200 bg-steel-50 text-[11px] uppercase tracking-[0.12em] text-steel-500">
-              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">
-                Title
-              </th>
-              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">
-                Category
-              </th>
-              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">
-                Date
-              </th>
-              <th scope="col" className="px-4 py-2.5 font-semibold sm:px-5">
-                Read time
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {mediaArticles.map((article) => (
-              <tr
-                key={article.slug}
-                className="border-b border-steel-100 last:border-b-0"
-              >
-                <td className="px-4 py-3 font-medium text-navy-900 sm:px-5">
-                  {article.title}
-                  <span className="block max-w-xl truncate text-xs font-normal text-steel-500">
-                    {article.excerpt}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-steel-600 sm:px-5">
-                  {article.category}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-xs text-steel-500 sm:px-5">
-                  {article.dateLabel}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-xs text-steel-500 sm:px-5">
-                  {article.readTime}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
 
 function settingsPanel(identity: { id: string; email: string; name: string | null; role: string }) {
   return (
@@ -577,19 +518,13 @@ case "sponsors":
             title="Upload media artwork"
             hint="Press images, posters and article artwork are stored in Cloudflare R2. Copy a link to use it anywhere on the site."
           />
-          <ReadOnlyNote />
-          {articlesPanel()}
+          <ArticlesManager />
         </div>
       );
       break;
     case "blog":
       description = "Articles and expo updates.";
-      body = (
-        <div className="space-y-4">
-          <ReadOnlyNote />
-          {articlesPanel()}
-        </div>
-      );
+      body = <ArticlesManager />;
       break;
 case "settings":
         description = "Manage your profile and preferences.";

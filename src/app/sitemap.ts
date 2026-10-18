@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { absoluteUrl } from "@/lib/utils";
 import { getPublicEvents } from "@/data/events.server";
-import { mediaArticles } from "@/data/media";
+import { getPublicArticles } from "@/data/articles.server";
 import { industries } from "@/data/industries";
 
 /**
@@ -42,6 +42,7 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const events = await getPublicEvents();
+  const articles = await getPublicArticles();
 
   const entry = (
     path: string,
@@ -63,7 +64,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entry(`/industries/${industry.slug}`, 0.7, "monthly"),
     ),
     ...SUPPORTING.map((path) => entry(path, 0.6, "monthly")),
-    ...mediaArticles.map((article) => entry(`/media/${article.slug}`, 0.6, "monthly")),
+    ...articles.map((article) => entry(`/blog/${article.slug}`, 0.6, "monthly")),
+    ...articles.map((article) => entry(`/media/${article.slug}`, 0.6, "monthly")),
   ];
 }
 

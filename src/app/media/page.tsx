@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
-import { mediaArticles, mediaCategories, featuredArticle } from "@/data/media";
+import { mediaCategories } from "@/data/media";
+import { getPublicArticles } from "@/data/articles.server";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -15,9 +16,16 @@ export const metadata = buildMetadata({
   path: "/media",
 });
 
-export default function MediaPage() {
-  const featured = featuredArticle;
-  const remaining = mediaArticles.filter((article) => article.slug !== featured.slug);
+// Dashboard edits are merged over data/media.ts; a save reaches this page
+// within the revalidation window (and immediately after the save itself).
+export const revalidate = 60;
+
+export default async function MediaPage() {
+  const articles = await getPublicArticles();
+  const featured = articles.find((article) => article.featured) ?? articles[0];
+  const remaining = featured
+    ? articles.filter((article) => article.slug !== featured.slug)
+    : [];
 
   return (
     <>

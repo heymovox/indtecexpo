@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { siteConfig } from "@/config/site";
-import { sponsorTiers } from "@/data/sponsors";
+import { getPublicSponsorTiers } from "@/data/sponsors.server";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -49,7 +49,13 @@ const partnershipBenefits: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-export default function SponsorsPage() {
+// Dashboard edits are merged over data/sponsors.ts; a save reaches this page
+// within the revalidation window (and immediately after the save itself).
+export const revalidate = 60;
+
+export default async function SponsorsPage() {
+  const sponsorTiers = await getPublicSponsorTiers();
+
   return (
     <>
       <PageHero

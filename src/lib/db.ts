@@ -20,6 +20,13 @@ import type {
 } from "@/types/exhibitor";
 import type { ExpoEvent } from "@/types/event";
 import {
+  isArticleCategory,
+  type ArticleCategory,
+  type MediaArticle,
+  type SponsorLogo,
+  type SponsorTier,
+} from "@/types/content";
+import {
   MAINTENANCE_OFF,
   MAINTENANCE_RECORD_ID,
   normaliseMaintenanceSettings,
@@ -49,6 +56,8 @@ export type Collection =
   | "events"
   | "gallery"
   | "floorPlans"
+  | "sponsors"
+  | "articles"
   | "emailSuppressions"
   | "settings"
   | "siteSettings";
@@ -560,6 +569,326 @@ export async function upsertFloorPlanAssets(
 export async function clearFloorPlanAssets(slug: string): Promise<boolean> {
   if (!isFloorPlanSlug(slug)) return false;
   return deleteRecord("floorPlans", slug);
+}
+
+/* ------------------------------------------------------------------ */
+/* Sponsor tiers managed from the admin dashboard                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * An edit saved on top of one tier in `data/sponsors.ts`, or a whole tier
+ * created in the dashboard (which has no static counterpart).
+ *
+ * Rows are written with the full tier payload, but every field stays optional
+ * so a row created only to flip `published` still merges cleanly onto the
+ * shipped tier underneath it.
+ */
+export interface SponsorTierOverride extends StoredRecord {
+  id: string;
+  title?: string;
+  description?: string;
+  logos?: SponsorLogo[];
+  order?: number;
+  published?: boolean;
+}
+
+/** One tier as the public site and the dashboard see it after merging. */
+export interface ManagedSponsorTier {
+  id: string;
+  title: string;
+  description: string;
+  logos: SponsorLogo[];
+  order: number;
+  published: boolean;
+  /** "static" = shipped in data/sponsors.ts, "dashboard" = created in admin. */
+  source: "static" | "dashboard";
+}
+
+export async function listSponsorTierOverrides(): Promise<SponsorTierOverride[]> {
+  return listRecords<SponsorTierOverride>("sponsors");
+}
+
+/**
+ * Applies dashboard overrides on top of the shipped sponsor tiers.
+ *
+ * Fields fall back to the static tier with `??` rather than `||`, so an
+ * explicit empty value typed in the dashboard (a cleared description, an
+ * emptied logo list) survives the merge while a flag-only row — one written
+ * just to unpublish a tier — inherits everything else from the source file.
+ * Tiers with no static counterpart are appended after the shipped ones, then
+ * everything is ordered by the editable display order.
+ */
+export function applySponsorTierOverrides(
+  defaults: SponsorTier[],
+  overrides: SponsorTierOverride[],
+): ManagedSponsorTier[] {
+  const pending = new Map(overrides.map((item) => [item.id, item]));
+
+  const merged: ManagedSponsorTier[] = defaults.map((tier, index) => {
+    const override = pending.get(tier.id);
+    pending.delete(tier.id);
+    return {
+      id: tier.id,
+      title: override?.title ?? tier.title,
+      description: override?.description ?? tier.description,
+      logos: override?.logos ?? tier.logos,
+      order: override?.order ?? index,
+      published: override?.published !== false,
+      source: "static",
+    };
+  });
+
+  const created = [...pending.values()]
+    // Partial rows written only to flag a shipped tier are already merged above.
+    .filter((override) => Boolean(override.title))
+    .map((override, index): ManagedSponsorTier => ({
+      id: override.id,
+      title: override.title as string,
+      description: override.description ?? "",
+      logos: override.logos ?? [],
+      order: override.order ?? defaults.length + index,
+      published: override.published !== false,
+      source: "dashboard",
+    }));
+
+  return [...merged, ...created].sort((a, b) => a.order - b.order);
+}
+
+/**
+ * Write payload for a tier save. Deliberately not derived from
+ * SponsorTierOverride with Omit: that interface carries StoredRecord's
+ * `[key: string]: unknown` index signature, which Pick would spread over the
+ * specific fields and erase them back to `unknown`.
+ */
+export interface SponsorTierInput {
+  id: string;
+  title?: string;
+  description?: string;
+  logos?: SponsorLogo[];
+  order?: number;
+  published?: boolean;
+}
+
+export async function upsertSponsorTier(
+  input: SponsorTierInput,
+): Promise<SponsorTierOverride> {
+  // Logos uploaded in the dashboard arrive as presigned R2 URLs (1 hour).
+  // Store them under the same-origin /uploads path so /sponsors renders them
+  // long after the signature expires.
+  input = {
+    ...input,
+    logos: (input.logos ?? []).map((logo) => ({
+      ...logo,
+      logo: publicMediaUrl(logo.logo),
+    })),
+  };
+
+  const existing = await getRecordById<SponsorTierOverride>("sponsors", input.id);
+  const stamp = new Date().toISOString();
+
+  if (existing) {
+    const merged = {
+      ...existing,
+      ...input,
+      id: input.id,
+      updatedAt: stamp,
+    } as SponsorTierOverride;
+    const encrypted = encryptPii(merged as unknown as Record<string, unknown>);
+    await sql().query(
+      UPDATE_BY_ID,
+      updateParams(toColumns("sponsors", encrypted), input.id),
+    );
+    return merged;
+  }
+
+  const created = { ...input, createdAt: stamp } as SponsorTierOverride;
+  await createRecord<SponsorTierOverride>("sponsors", created);
+  return created;
+}
+
+/**
+ * Removes the dashboard row for a tier. For a shipped tier that reverts it to
+ * data/sponsors.ts; for a dashboard-created tier it deletes it outright.
+ */
+export async function deleteSponsorTier(id: string): Promise<boolean> {
+  return deleteRecord("sponsors", id);
+}
+
+/* ------------------------------------------------------------------ */
+/* Blog & media articles managed from the admin dashboard              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * An edit saved on top of an article in `data/media.ts`, or a whole article
+ * written in the dashboard. As with sponsor tiers every field is optional so
+ * a row created only to un-feature or unpublish an article still merges onto
+ * the shipped article underneath it.
+ */
+export interface ArticleOverride extends StoredRecord {
+  slug: string;
+  title?: string;
+  category?: string;
+  date?: string;
+  dateLabel?: string;
+  image?: string;
+  excerpt?: string;
+  body?: string[];
+  readTime?: string;
+  featured?: boolean;
+  published?: boolean;
+}
+
+/** One article with dashboard edits applied — the shape every page renders. */
+export interface ManagedArticle {
+  slug: string;
+  title: string;
+  category: ArticleCategory;
+  date: string;
+  dateLabel: string;
+  image: string;
+  excerpt: string;
+  body: string[];
+  readTime: string;
+  featured: boolean;
+  published: boolean;
+  /** "static" = shipped in data/media.ts, "dashboard" = written in admin. */
+  source: "static" | "dashboard";
+}
+
+export async function listArticleOverrides(): Promise<ArticleOverride[]> {
+  return listRecords<ArticleOverride>("articles");
+}
+
+/**
+ * Applied when a dashboard article has no header image — next/image throws on
+ * an empty src, and an image-less post should still render everywhere.
+ */
+const DEFAULT_ARTICLE_IMAGE = "/images/hero/hero-media.svg";
+
+/**
+ * Applies dashboard overrides on top of the shipped articles.
+ *
+ * Shipped articles keep their source order (it is what both public listings
+ * treat as editorial order); articles created in the dashboard are appended
+ * after them, newest first. `??` fallbacks keep a flag-only row — one written
+ * to unpublish an article — inheriting the shipped copy underneath it.
+ */
+export function applyArticleOverrides(
+  defaults: MediaArticle[],
+  overrides: ArticleOverride[],
+): ManagedArticle[] {
+  const pending = new Map(overrides.map((item) => [item.slug, item]));
+
+  const merged: ManagedArticle[] = defaults.map((article) => {
+    const override = pending.get(article.slug);
+    pending.delete(article.slug);
+    return {
+      slug: article.slug,
+      title: override?.title ?? article.title,
+      category: isArticleCategory(override?.category)
+        ? override.category
+        : article.category,
+      date: override?.date ?? article.date,
+      dateLabel: override?.dateLabel ?? article.dateLabel,
+      // `||` (not `??`) for the image, plus a floor: next/image throws on an
+      // empty src, so a cleared or missing header image must never surface.
+      image: publicMediaUrl(override?.image || article.image) || DEFAULT_ARTICLE_IMAGE,
+      excerpt: override?.excerpt ?? article.excerpt,
+      body: override?.body ?? article.body,
+      readTime: override?.readTime ?? article.readTime,
+      featured: override?.featured ?? article.featured ?? false,
+      published: override?.published !== false,
+      source: "static",
+    };
+  });
+
+  const created: ManagedArticle[] = [...pending.values()]
+    .filter((override) => Boolean(override.title))
+    .map((override): ManagedArticle => ({
+      slug: override.slug,
+      title: override.title as string,
+      category: isArticleCategory(override.category)
+        ? override.category
+        : "Latest News",
+      date: override.date ?? "",
+      dateLabel: override.dateLabel ?? override.date ?? "",
+      image: publicMediaUrl(override.image ?? "") || DEFAULT_ARTICLE_IMAGE,
+      excerpt: override.excerpt ?? "",
+      body: override.body ?? [],
+      readTime: override.readTime ?? "",
+      featured: override.featured ?? false,
+      published: override.published !== false,
+      source: "dashboard",
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  return [...merged, ...created];
+}
+
+export async function mergeArticles(
+  defaults: MediaArticle[],
+): Promise<ManagedArticle[]> {
+  return applyArticleOverrides(defaults, await listArticleOverrides());
+}
+
+/**
+ * Write payload for an article save. As with SponsorTierInput this is spelled
+ * out rather than derived from ArticleOverride, whose StoredRecord index
+ * signature would erase the field types through Omit.
+ */
+export interface ArticleInput {
+  slug: string;
+  title?: string;
+  category?: string;
+  date?: string;
+  dateLabel?: string;
+  image?: string;
+  excerpt?: string;
+  body?: string[];
+  readTime?: string;
+  featured?: boolean;
+  published?: boolean;
+}
+
+export async function upsertArticle(
+  input: ArticleInput,
+): Promise<ArticleOverride> {
+  // Same presigned-URL trap as sponsor logos: store uploads under the
+  // same-origin /uploads path so /blog and /media render them permanently.
+  input = { ...input, image: publicMediaUrl(input.image ?? "") };
+
+  const existing = await getRecordById<ArticleOverride>("articles", input.slug);
+  const stamp = new Date().toISOString();
+
+  if (existing) {
+    const merged = {
+      ...existing,
+      ...input,
+      // The slug is the row id — without this the stored id would be blank
+      // and every article would collide into one row (and be undeletable).
+      id: input.slug,
+      slug: input.slug,
+      updatedAt: stamp,
+    } as ArticleOverride;
+    const encrypted = encryptPii(merged as unknown as Record<string, unknown>);
+    await sql().query(
+      UPDATE_BY_ID,
+      updateParams(toColumns("articles", encrypted), input.slug),
+    );
+    return merged;
+  }
+
+  const created = { ...input, id: input.slug, createdAt: stamp } as ArticleOverride;
+  await createRecord<ArticleOverride>("articles", created);
+  return created;
+}
+
+/**
+ * Removes the dashboard row for an article. For a shipped article that reverts
+ * every field to data/media.ts; for a dashboard-written one it deletes it.
+ */
+export async function deleteArticle(slug: string): Promise<boolean> {
+  return deleteRecord("articles", slug);
 }
 
 /* ------------------------------------------------------------------ */

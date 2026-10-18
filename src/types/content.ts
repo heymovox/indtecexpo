@@ -30,10 +30,30 @@ export type GalleryCategory =
   | "Networking"
   | "Events";
 
+/**
+ * Article categories, kept as a runtime value so the admin API schema, the
+ * dashboard select and the public badges all agree on one list.
+ */
+export const ARTICLE_CATEGORIES = [
+  "Latest News",
+  "Press Releases",
+  "Expo Updates",
+  "Industry Insights",
+] as const;
+
+export type ArticleCategory = (typeof ARTICLE_CATEGORIES)[number];
+
+export function isArticleCategory(value: unknown): value is ArticleCategory {
+  return (
+    typeof value === "string" &&
+    (ARTICLE_CATEGORIES as readonly string[]).includes(value)
+  );
+}
+
 export interface MediaArticle {
   slug: string;
   title: string;
-  category: "Latest News" | "Press Releases" | "Expo Updates" | "Industry Insights";
+  category: ArticleCategory;
   date: string;
   dateLabel: string;
   image: string;

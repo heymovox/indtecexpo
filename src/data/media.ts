@@ -1,4 +1,4 @@
-import type { MediaArticle } from "@/types/content";
+import { ARTICLE_CATEGORIES, type MediaArticle } from "@/types/content";
 
 export const mediaArticles: MediaArticle[] = [
   {
@@ -109,12 +109,7 @@ export const mediaArticles: MediaArticle[] = [
   },
 ];
 
-export const mediaCategories = [
-  "Latest News",
-  "Press Releases",
-  "Expo Updates",
-  "Industry Insights",
-] as const;
+export const mediaCategories = ARTICLE_CATEGORIES;
 
 export const articleBySlug = (slug: string) =>
   mediaArticles.find((article) => article.slug === slug);

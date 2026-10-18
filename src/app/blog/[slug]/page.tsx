@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Section, Badge } from "@/components/ui/Section";
-import { mediaArticles, articleBySlug } from "@/data/media";
+import { mediaArticles } from "@/data/media";
+import { getPublicArticle, getPublicArticles } from "@/data/articles.server";
 import { absoluteUrl } from "@/lib/utils";
 import {
   breadcrumbJsonLd,
@@ -13,6 +14,15 @@ import {
   JsonLd,
 } from "@/lib/seo";
 import { waLink } from "@/lib/whatsapp";
+
+/**
+ * Shipped articles are prerendered at build; posts written in the dashboard
+ * render on demand (dynamicParams) and re-read the merged data every
+ * `revalidate` seconds — and immediately after each dashboard save.
+ */
+export const dynamicParams = true;
+
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return mediaArticles.map((article) => ({ slug: article.slug }));
@@ -24,7 +34,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = articleBySlug(slug);
+  const article = await getPublicArticle(slug);
   if (!article) {
     return buildMetadata({
       title: "Article Not Found",
@@ -48,9 +58,10 @@ export default async function BlogArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = articleBySlug(slug);
+  const article = await getPublicArticle(slug);
   if (!article) notFound();
 
+  const articles = await getPublicArticles();
   const url = absoluteUrl(`/blog/${article.slug}`);
   const waShare = waLink(`Read “${article.title}” — ${url}`);
   const linkedInShare = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
@@ -58,10 +69,10 @@ export default async function BlogArticlePage({
   const facebookShare = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
 
   const related = [
-    ...mediaArticles.filter(
+    ...articles.filter(
       (item) => item.slug !== article.slug && item.category === article.category,
     ),
-    ...mediaArticles.filter(
+    ...articles.filter(
       (item) => item.slug !== article.slug && item.category !== article.category,
     ),
   ].slice(0, 3);
@@ -176,7 +187,7 @@ export default async function BlogArticlePage({
             <div className="border border-steel-200 p-6">
               <h2 className="display-sm text-lg text-navy-900">More Insights</h2>
               <ul className="mt-4 space-y-3.5">
-                {mediaArticles
+                {articles
                   .filter((item) => item.slug !== article.slug)
                   .slice(0, 4)
                   .map((item) => (
