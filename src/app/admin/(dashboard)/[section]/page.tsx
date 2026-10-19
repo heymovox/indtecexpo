@@ -182,8 +182,11 @@ async function contactRows(): Promise<RecordsTableRow[]> {
 const eventMedia = publicMediaUrl;
 
 async function eventsPanel(readOnly = false) {
-      const overrides = await listEventOverrides();
-    const overrideSlugs = new Set(overrides.map((item) => item.slug));
+    const overrides = await listEventOverrides();
+    // Editions created in the dashboard have no static counterpart; skip only
+    // the slugs that come from the source files, mirroring mergeEventOverrides
+    // in lib/db.ts, so dashboard-created editions are appended below.
+    const staticSlugs = new Set(events.map((event) => event.slug));
 
     const items: EventAdminItem[] = events.map((event) => {
       const override = overrides.find((item) => item.slug === event.slug);
@@ -225,7 +228,7 @@ async function eventsPanel(readOnly = false) {
     });
 
     for (const override of overrides) {
-      if (overrideSlugs.has(override.slug)) continue;
+      if (staticSlugs.has(override.slug)) continue;
       items.push({
         id: override.id,
         slug: override.slug,
