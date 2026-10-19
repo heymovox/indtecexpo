@@ -499,8 +499,14 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
             <address className="mt-4 not-italic text-sm leading-relaxed text-steel-600">
               {event.venue.address}
-              <br />
-              {event.venue.locality}, {event.venue.city}, {event.venue.state}
+              {event.venue.locality || event.venue.city ? (
+                <>
+                  <br />
+                  {[event.venue.locality, event.venue.city, event.venue.state]
+                    .filter(Boolean)
+                    .join(", ")}
+                </>
+              ) : null}
             </address>
 
             <dl className="mt-6 divide-y divide-steel-100 border-y border-steel-100">

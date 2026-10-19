@@ -370,14 +370,23 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
     if (staticSlugs.has(override.slug)) continue;
     const base = defaults[0];
     if (!base) break;
+    // An admin-created edition has no static base to inherit locality, city,
+    // state or map links from — only the override's own values describe it.
+    // Rebuilding the venue (instead of spreading `base.venue`) stops a new
+    // edition from displaying another city's locality and map links.
+    const city = override.city ?? "";
+    const state = override.state ?? "";
+    const venueQuery = [override.venueName, override.venueAddress, city, state]
+      .filter(Boolean)
+      .join(" ");
     const synthetic = {
       ...base,
       id: override.id,
       slug: override.slug,
       published: override.published !== false,
       name: override.name,
-      city: override.city ?? "",
-      state: override.state ?? "",
+      city,
+      state,
       edition: override.edition ?? "",
       positioning: override.positioning,
       summary: override.summary,
@@ -396,9 +405,13 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
       highlights: override.highlights?.length ? override.highlights : [],
       description: override.description?.length ? override.description : [],
       venue: {
-        ...base.venue,
         name: override.venueName,
-        address: override.venueAddress ?? base.venue.address,
+        address: override.venueAddress ?? "",
+        locality: "",
+        city,
+        state,
+        mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venueQuery)}`,
+        directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(venueQuery)}`,
       },
     } as unknown as T;
     created.push(synthetic);
