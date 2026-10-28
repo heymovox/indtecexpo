@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FooterLogo } from "@/components/layout/Logo";
 import { Icon } from "@/components/ui/Icon";
-import { MovoXBranding } from "@/components/layout/MovoXBranding";
 import { footerNav } from "@/config/navigation";
 import { contactConfig, siteConfig } from "@/config/site";
 import { waLink } from "@/lib/whatsapp";
@@ -49,6 +48,25 @@ export function Footer({ events }: { events: ExpoEvent[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
+  const movoxRef = useRef<HTMLSpanElement>(null);
+
+  // Inject the MovoX branding widget script once the footer mounts. The
+  // external script (branding.js) renders and positions the badge itself; this
+  // only fetches it and hands it the small-label config.
+  useEffect(() => {
+    if (movoxRef.current?.querySelector("script")) return;
+    const cfg = { size: "sm" as const, showLabel: true };
+    const init = { size: cfg.size, showLabel: cfg.showLabel };
+    const s = document.createElement("script");
+    s.src = "https://movox-admin-api.srinaththedudes.workers.dev/branding.js";
+    s.async = true;
+    s.onload = () => {
+      type Branding = { init: (cfg: { size: "sm"; showLabel: boolean }) => void };
+      const w = window as unknown as { MovoXBranding?: Branding };
+      w.MovoXBranding?.init(init);
+    };
+    movoxRef.current?.appendChild(s);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 600);
@@ -316,10 +334,9 @@ export function Footer({ events }: { events: ExpoEvent[] }) {
               © {new Date().getFullYear()} {siteConfig.legalName} · Organised by{" "}
               {siteConfig.organizer.name}. All rights reserved.
             </p>
+            {/* MovoX branding widget mounts here, just below the copyright */}
+            <span ref={movoxRef} />
           </div>
-
-          {/* MovoX branding widget — replaces the static "Developed by" credit */}
-          <MovoXBranding />
 
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 lg:justify-end lg:gap-x-5">
             {footerNav.legalLinks.map((link) => (
