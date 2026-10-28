@@ -14,11 +14,15 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      // GTM and the MovoX branding widget load external scripts; 'unsafe-inline'
+      // is kept for GTM snippet injection and the framework's runtime.
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://movox-admin-api.srinaththedudes.workers.dev",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob:",
-      "connect-src 'self'",
+      // GTM's <noscript> fallback uses a tracking pixel from its own domain.
+      "img-src 'self' data: blob: https://www.googletagmanager.com",
+      // GTM / dataLayer pings and the branding widget both phone home.
+      "connect-src 'self' https://www.googletagmanager.com https://movox-admin-api.srinaththedudes.workers.dev",
       "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
