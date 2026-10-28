@@ -334,8 +334,13 @@ export function Footer({ events }: { events: ExpoEvent[] }) {
               © {new Date().getFullYear()} {siteConfig.legalName} · Organised by{" "}
               {siteConfig.organizer.name}. All rights reserved.
             </p>
-            {/* MovoX branding widget mounts here, just below the copyright */}
-            <span ref={movoxRef} />
+            {/* MovoX branding — a small card sitting just below the copyright */}
+            <div className="mt-1 inline-flex items-center gap-2 self-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 lg:self-start">
+              <span className="text-[10px] uppercase tracking-[0.14em] text-steel-400">
+                Developed &amp; maintained by
+              </span>
+              <span ref={movoxRef} className="flex items-center" />
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 lg:justify-end lg:gap-x-5">
