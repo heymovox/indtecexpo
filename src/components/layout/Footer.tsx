@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FooterLogo } from "@/components/layout/Logo";
 import { Icon } from "@/components/ui/Icon";
+import { MovoXBranding } from "@/components/layout/MovoXBranding";
 import { footerNav } from "@/config/navigation";
 import { contactConfig, siteConfig } from "@/config/site";
 import { waLink } from "@/lib/whatsapp";
@@ -315,18 +316,10 @@ export function Footer({ events }: { events: ExpoEvent[] }) {
               © {new Date().getFullYear()} {siteConfig.legalName} · Organised by{" "}
               {siteConfig.organizer.name}. All rights reserved.
             </p>
-            <p className="leading-relaxed">
-              Developed &amp; maintained by{" "}
-              <a
-                href="https://www.heymovox.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="link-underline font-semibold text-steel-300 transition hover:text-gold-500"
-              >
-                MovoX Digital Growth
-              </a>
-            </p>
           </div>
+
+          {/* MovoX branding widget — replaces the static "Developed by" credit */}
+          <MovoXBranding />
 
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 lg:justify-end lg:gap-x-5">
             {footerNav.legalLinks.map((link) => (
