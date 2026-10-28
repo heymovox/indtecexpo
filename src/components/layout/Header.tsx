@@ -23,6 +23,20 @@ function isActive(pathname: string, href: string) {
 }
 
 /**
+ * Builds the mobile topbar booking strip — a repeating chain of the booking
+ * headline and each edition's city + short date. `gold` items render in the
+ * accent colour so the booking callout reads against the edition list.
+ */
+function bookingStrip(events: ExpoEvent[]) {
+  const items = [{ text: "Bookings Open for Visitor & Exhibitor", gold: true }];
+  for (const event of events) {
+    items.push({ text: `${event.city} · ${event.dateRangeShort}`, gold: false });
+  }
+  items.push({ text: "Response within one working day", gold: true });
+  return items;
+}
+
+/**
  * `events` comes resolved from the root layout so the Events dropdown shows the
  * live city dates; the static config list is only the fallback.
  */
@@ -112,48 +126,32 @@ export function Header({ events }: { events: ExpoEvent[] }) {
             compact ? "max-h-0 opacity-0" : "max-h-10 opacity-100",
           )}
         >
-          <div className="mx-auto flex h-8 w-full max-w-[1280px] items-center justify-between gap-3 px-4 text-[10px] uppercase tracking-[0.14em] sm:px-8 sm:text-[11.5px] sm:tracking-[0.16em]">
-            <span className="min-w-0 truncate text-gold-500">
-              {siteConfig.organizer.mission}
-            </span>
-            <div className="flex shrink-0 items-center gap-3">
-              <a
-                href={`tel:+91${siteConfig.primaryPhone}`}
-                aria-label={`Call +91 ${siteConfig.primaryPhone}`}
-                className="flex items-center gap-1.5 transition hover:text-gold-500 sm:hidden"
-              >
-                <Icon name="phone" size={12} />
-                {siteConfig.primaryPhone}
-              </a>
-              <span className="hidden items-center gap-2 sm:flex">
-                <Icon name="phone" size={12} className="text-gold-500" />
-                {contactConfig.phones.map((phone, index) => (
-                  <span key={phone.tel} className="flex items-center gap-2">
-                    {index > 0 ? (
-                      <span aria-hidden className="text-steel-600">
-                        ·
-                      </span>
-                    ) : null}
-                    <a
-                      href={`tel:${phone.tel}`}
-                      aria-label={`Call ${phone.display}`}
-                      className="transition hover:text-gold-500"
-                    >
-                      {phone.number}
-                    </a>
-                  </span>
-                ))}
-              </span>
-              <a
-                href={contactConfig.phones[0].wa}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Chat on WhatsApp"
-                className="flex items-center gap-1.5 transition hover:text-gold-500"
-              >
-                <Icon name="whatsapp" size={12} />
-                <span className="hidden md:inline">WhatsApp</span>
-              </a>
+          <div className="mx-auto flex h-8 w-full max-w-[1280px] items-center overflow-hidden px-4 sm:px-8">
+            {/* Auto-scrolling booking strip — pauses on touch, mirrors for a
+                seamless loop. Duplicated once so the marquee never shows a gap. */}
+            <div className="flex w-max animate-marquee items-center gap-8 whitespace-nowrap text-[10px] uppercase tracking-[0.16em] sm:text-[11.5px]">
+              {bookingStrip(events).map((item, i) => (
+                <span key={`a-${i}`} className="flex items-center gap-2">
+                  {item.gold ? (
+                    <span className="font-semibold text-gold-500">{item.text}</span>
+                  ) : (
+                    <span className="text-steel-300">{item.text}</span>
+                  )}
+                  <span aria-hidden className="text-steel-600">•</span>
+                </span>
+              ))}
+            </div>
+            <div aria-hidden className="flex w-max animate-marquee items-center gap-8 whitespace-nowrap text-[10px] uppercase tracking-[0.16em] sm:text-[11.5px]">
+              {bookingStrip(events).map((item, i) => (
+                <span key={`b-${i}`} className="flex items-center gap-2">
+                  {item.gold ? (
+                    <span className="font-semibold text-gold-500">{item.text}</span>
+                  ) : (
+                    <span className="text-steel-300">{item.text}</span>
+                  )}
+                  <span aria-hidden className="text-steel-600">•</span>
+                </span>
+              ))}
             </div>
           </div>
         </div>
