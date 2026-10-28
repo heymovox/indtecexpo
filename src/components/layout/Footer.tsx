@@ -48,25 +48,6 @@ export function Footer({ events }: { events: ExpoEvent[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
-  const movoxRef = useRef<HTMLSpanElement>(null);
-
-  // Inject the MovoX branding widget script once the footer mounts. The
-  // external script (branding.js) renders and positions the badge itself; this
-  // only fetches it and hands it the small-label config.
-  useEffect(() => {
-    if (movoxRef.current?.querySelector("script")) return;
-    const cfg = { size: "sm" as const, showLabel: true };
-    const init = { size: cfg.size, showLabel: cfg.showLabel };
-    const s = document.createElement("script");
-    s.src = "https://movox-admin-api.srinaththedudes.workers.dev/branding.js";
-    s.async = true;
-    s.onload = () => {
-      type Branding = { init: (cfg: { size: "sm"; showLabel: boolean }) => void };
-      const w = window as unknown as { MovoXBranding?: Branding };
-      w.MovoXBranding?.init(init);
-    };
-    movoxRef.current?.appendChild(s);
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 600);
@@ -335,11 +316,13 @@ export function Footer({ events }: { events: ExpoEvent[] }) {
               {siteConfig.organizer.name}. All rights reserved.
             </p>
             {/* MovoX branding — a small card sitting just below the copyright */}
-            <div className="mt-1 inline-flex items-center gap-2 self-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 lg:self-start">
+            <div className="mt-1 inline-flex items-center gap-1.5 self-center rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 lg:self-start">
               <span className="text-[10px] uppercase tracking-[0.14em] text-steel-400">
                 Developed &amp; maintained by
               </span>
-              <span ref={movoxRef} className="flex items-center" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-500">
+                MovoX
+              </span>
             </div>
           </div>
 
