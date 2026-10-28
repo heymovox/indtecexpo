@@ -9,6 +9,8 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { VideoEmbed } from "@/components/ui/VideoEmbed";
 import { EventCard } from "@/components/events/EventCard";
+import { AutoSlideList } from "@/components/home/AutoSlideList";
+import { HeroMediaSlider } from "@/components/home/HeroMediaSlider";
 import { contactConfig, siteConfig } from "@/config/site";
 import { industries } from "@/data/industries";
 import {
@@ -48,6 +50,25 @@ const showcaseVideos = [
   },
 ];
 
+/**
+ * Mobile-hero imagery. Auto-advances above the edition cards; the desktop hero
+ * keeps the single full-bleed background image.
+ */
+const heroSlides = [
+  {
+    src: "/images/hero/slides/precision-milling.webp",
+    alt: "Precision milling in action on a CNC machining centre",
+  },
+  {
+    src: "/images/hero/slides/workshop-torch-sparks.webp",
+    alt: "Welding torch throwing sparks across a workshop floor",
+  },
+  {
+    src: "/images/hero/slides/robotic-welding-cell.webp",
+    alt: "Robotic welding cell working on an automotive component",
+  },
+];
+
 export const revalidate = 60;
 
 export default async function HomePage() {
@@ -61,14 +82,16 @@ export default async function HomePage() {
       {/* Hero                                                        */}
       {/* ---------------------------------------------------------- */}
       <section className="relative isolate overflow-hidden text-white">
+        {/* Background layers sit at -z-10 so the hero copy and cards paint
+            above them; without it the overlays tint the text itself. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/hero-industrial-factory.png"
           alt=""
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-navy-950/60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/90 via-navy-950/70 to-navy-950/30" />
+        <div className="absolute inset-0 -z-10 bg-navy-950/60" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-navy-950/90 via-navy-950/70 to-navy-950/30" />
         <div className="hatch-surface absolute inset-x-0 bottom-0 h-1.5" />
 
         <div className="mx-auto w-full max-w-[1280px] px-5 py-16 sm:px-8 sm:py-20 lg:py-28">
@@ -175,6 +198,12 @@ export default async function HomePage() {
 
             {/* All three editions as cards */}
             <aside className="order-1 min-w-0 lg:order-2">
+              {/* Mobile only: the floor imagery auto-advances above the cards. */}
+              <HeroMediaSlider
+                slides={heroSlides}
+                className="mb-4 lg:hidden"
+              />
+
               <div className="flex items-center justify-between gap-3">
                 <span className="eyebrow eyebrow-light mb-0 text-[11px]">
                   Three Editions · 2026–2027
@@ -184,7 +213,10 @@ export default async function HomePage() {
                 </span>
               </div>
 
-              <ul className="mt-4 grid gap-3">
+              <AutoSlideList
+                intervalMs={5200}
+                className="mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] lg:grid lg:overflow-visible [&::-webkit-scrollbar]:hidden"
+              >
                 {events.map((event) => {
                   // Every edition that has not finished yet gets a live
                   // countdown; once one has run, the next takes over the "Next"
@@ -201,7 +233,10 @@ export default async function HomePage() {
                         ? "Then"
                         : "Later";
                   return (
-                    <li key={event.slug}>
+                    <li
+                      key={event.slug}
+                      className="w-[86%] shrink-0 snap-start sm:w-[70%] lg:w-auto lg:shrink"
+                    >
                       {/* A plain container, not a Link: the card now holds two
                           separate links (view edition + book a stall) and
                           anchors cannot be nested. */}
@@ -282,7 +317,7 @@ export default async function HomePage() {
                     </li>
                   );
                 })}
-              </ul>
+              </AutoSlideList>
             </aside>
           </div>
         </div>

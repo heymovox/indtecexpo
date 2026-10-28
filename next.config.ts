@@ -28,6 +28,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  /**
+   * The public site is normally exercised locally by pointing
+   * indtecexpo.com at 127.0.0.1 (see src/config/hosts.ts). Next dev blocks
+   * cross-origin dev resources such as HMR by default, which leaves the page
+   * server-rendered but never hydrated. Allowlisting the real hostnames keeps
+   * that workflow usable; it has no effect on a production build.
+   */
+  allowedDevOrigins: ["indtecexpo.com", "www.indtecexpo.com"],
   turbopack: {
     rules: {
       "*.css": {
