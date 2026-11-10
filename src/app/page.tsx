@@ -454,7 +454,7 @@ export default async function HomePage() {
       <Section>
         <SectionHeading
           eyebrow="Industries We Serve"
-              title="3 Industrial Hubs. 50+ Industrial Associations."
+              title={`${liveEventsCount} Industrial Hubs. 50+ Industrial Associations.`}
           description="From CNC machine tools to Industry 4.0 platforms, INDTEC EXPO covers the full industrial value chain."
           align="center"
           action={
