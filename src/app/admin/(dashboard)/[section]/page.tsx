@@ -20,6 +20,7 @@ import { EventsManager, type EventAdminItem } from "../EventsManager";
 import { SponsorsManager } from "../SponsorsManager";
 import { MaintenancePanel } from "../MaintenancePanel";
 import { GalleryManager } from "../GalleryManager";
+import { IndustriesManager } from "../IndustriesManager";
 import { FloorPlansManager } from "../FloorPlansManager";
 import { ArticlesManager } from "../ArticlesManager";
 
@@ -31,6 +32,7 @@ type SectionId =
   | "bookings"
   | "visitors"
   | "enquiries"
+  | "industries"
   | "sponsors"
   | "gallery"
   | "floor-plans"
@@ -502,6 +504,12 @@ case "sponsors":
         description = "Sponsorship tiers and partners.";
         body = (
           <SponsorsManager readOnly={identity.role !== "superadmin"} />
+        );
+        break;
+    case "industries":
+        description = "Industry sectors shown on /industries. Edit names, descriptions, images and product groups.";
+        body = (
+          <IndustriesManager readOnly={identity.role !== "superadmin"} />
         );
         break;
     case "gallery":

@@ -22,7 +22,13 @@ interface UploadFieldProps {
    * that expires in an hour, whereas `key` stays valid forever.
    */
   onUploaded?: (result: UploadResult) => void;
-  folder: "floor-plans" | "posters" | "gallery" | "media" | "logos";
+  folder:
+    | "floor-plans"
+    | "posters"
+    | "gallery"
+    | "media"
+    | "logos"
+    | "industries";
   guidelines?: {
     recommendedDimensions?: string;
     acceptedTypes?: string;

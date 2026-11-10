@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { EventCard } from "@/components/events/EventCard";
-import { getPublicEvents } from "@/data/events.server";
-import { industries, industryBySlug } from "@/data/industries";
+import { industries } from "@/data/industries";
+import { getPublicIndustry } from "@/lib/industries.server";
 import {
   breadcrumbJsonLd,
   buildMetadata,
@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const industry = industryBySlug(slug);
+  const industry = await getPublicIndustry(slug);
   if (!industry) {
     return buildMetadata({
       title: "Industry Not Found",
@@ -35,9 +35,9 @@ export async function generateMetadata({
   return buildMetadata({
     title: `${industry.name} — Industry Sector`,
     description: `${industry.description} Explore ${industry.name} exhibitors, product groups and editions at INDTEC EXPO 2026–2027.`,
-path: `/industries/${industry.slug}`,
-      card: "industries",
-      ogTitle: industry.name,
+    path: `/industries/${industry.slug}`,
+    card: "industries",
+    ogTitle: industry.name,
   });
 }
 
@@ -47,11 +47,11 @@ export default async function IndustryDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const industry = industryBySlug(slug);
+  const industry = await getPublicIndustry(slug);
   if (!industry) notFound();
 
   // Renders event cards, so the dashboard's edits apply here too.
-  const events = await getPublicEvents();
+  const events = await getPublicIndustries();
 
   const relatedEvents = events.filter((event) =>
     event.sectors.includes(industry.name),

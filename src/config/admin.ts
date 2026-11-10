@@ -29,6 +29,7 @@ export const adminConfig = {
     { id: "enquiries", label: "Enquiries", group: "leads", href: "/admin/enquiries", icon: "inbox", roles: ["admin", "superadmin"] },
     { id: "sponsors", label: "Sponsors", group: "content", href: "/admin/sponsors", icon: "award", roles: ["superadmin"] },
     { id: "gallery", label: "Gallery", group: "media", href: "/admin/gallery", icon: "image", roles: ["superadmin"] },
+    { id: "industries", label: "Industries", group: "content", href: "/admin/industries", icon: "factory", roles: ["superadmin"] },
     { id: "floor-plans", label: "Floor Plans", group: "media", href: "/admin/floor-plans", icon: "map", roles: ["superadmin"] },
     { id: "media", label: "Media", group: "media", href: "/admin/media", icon: "news", roles: ["superadmin"] },
     { id: "blog", label: "Blog", group: "content", href: "/admin/blog", icon: "pen", roles: ["superadmin"] },

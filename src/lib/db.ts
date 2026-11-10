@@ -56,6 +56,7 @@ export type Collection =
   | "events"
   | "gallery"
   | "floorPlans"
+  | "industries"
   | "sponsors"
   | "articles"
   | "emailSuppressions"
@@ -734,6 +735,161 @@ export async function upsertSponsorTier(
  */
 export async function deleteSponsorTier(id: string): Promise<boolean> {
   return deleteRecord("sponsors", id);
+}
+
+/* ------------------------------------------------------------------ */
+/* Industries managed from the admin dashboard                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * An edit saved on top of an industry in `data/industries.ts`, or a whole
+ * industry created in the dashboard (which has no static counterpart).
+ *
+ * Rows are written with the full industry payload, but every field stays
+ * optional so a row created only to flip `featured` still merges cleanly
+ * onto the shipped industry underneath it.
+ */
+export interface IndustryOverride extends StoredRecord {
+  slug: string;
+  name?: string;
+  shortName?: string;
+  description?: string;
+  icon?: string;
+  image?: string;
+  sectors?: string[];
+  featured?: boolean;
+}
+
+/** One industry as the public site and the dashboard see it after merging. */
+export interface ManagedIndustry {
+  id: string;
+  slug: string;
+  name: string;
+  shortName: string;
+  description: string;
+  icon: string;
+  image: string;
+  sectors: string[];
+  featured: boolean;
+  /** "static" = shipped in data/industries.ts, "dashboard" = created in admin. */
+  source: "static" | "dashboard";
+}
+
+export async function listIndustryOverrides(): Promise<IndustryOverride[]> {
+  return listRecords<IndustryOverride>("industries");
+}
+
+/**
+ * Applies dashboard overrides on top of the shipped industries.
+ *
+ * Fields fall back to the static industry with `??` rather than `||`, so an
+ * explicit empty value typed in the dashboard survives the merge while a
+ * flag-only row — one written just to unfeature an industry — inherits
+ * everything else from the source file. Industries with no static
+ * counterpart are appended after the shipped ones, then everything is
+ * ordered by slug.
+ */
+export function applyIndustryOverrides(
+  defaults: Industry[],
+  overrides: IndustryOverride[],
+): ManagedIndustry[] {
+  const pending = new Map(overrides.map((item) => [item.slug, item]));
+
+  const merged: ManagedIndustry[] = defaults.map((industry) => {
+    const override = pending.get(industry.slug);
+    pending.delete(industry.slug);
+    return {
+      id: industry.id,
+      slug: industry.slug,
+      name: override?.name ?? industry.name,
+      shortName: override?.shortName ?? industry.shortName ?? industry.name,
+      description: override?.description ?? industry.description,
+      icon: override?.icon ?? industry.icon,
+      image: override?.image ?? industry.image,
+      sectors: override?.sectors ?? industry.sectors,
+      featured: override?.featured ?? industry.featured ?? false,
+      source: "static",
+    };
+  });
+
+  const created = [...pending.values()]
+    // Partial rows written only to flag a shipped industry are already merged above.
+    .filter((override) => Boolean(override.name))
+    .map(
+      (override): ManagedIndustry => ({
+        id: override.id,
+        slug: override.slug,
+        name: override.name as string,
+        shortName: override.shortName ?? override.name,
+        description: override.description ?? "",
+        icon: override.icon ?? "factory",
+        image: override.image ?? "",
+        sectors: override.sectors ?? [],
+        featured: override.featured ?? false,
+        source: "dashboard",
+      }),
+    );
+
+  return [...merged, ...created].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Write payload for an industry save. */
+export interface IndustryInput {
+  id: string;
+  slug: string;
+  name?: string;
+  shortName?: string;
+  description?: string;
+  icon?: string;
+  image?: string;
+  sectors?: string[];
+  featured?: boolean;
+}
+
+export async function upsertIndustry(
+  input: IndustryInput,
+): Promise<IndustryOverride> {
+  // Images uploaded in the dashboard arrive as presigned R2 URLs (1 hour).
+  // Store them under the same-origin /uploads path so /industries renders them
+  // long after the signature expires.
+  input = {
+    ...input,
+    image: publicMediaUrl(input.image),
+  };
+
+  const existing = await getRecordById<IndustryOverride>(
+    "industries",
+    input.id,
+  );
+  const stamp = new Date().toISOString();
+
+  if (existing) {
+    const merged = {
+      ...existing,
+      ...input,
+      id: input.id,
+      updatedAt: stamp,
+    } as IndustryOverride;
+    const encrypted = encryptPii(merged as unknown as Record<string, unknown>);
+    await sql().query(
+      UPDATE_BY_ID,
+      updateParams(toColumns("industries", encrypted), input.id),
+    );
+    return merged;
+  }
+
+  const created = { ...input, createdAt: stamp } as IndustryOverride;
+  await createRecord<IndustryOverride>("industries", created);
+  return created;
+}
+
+/**
+ * Removes the dashboard row for an industry. For a shipped industry that
+ * reverts it to data/industries.ts; for a dashboard-created industry it
+ * deletes it outright.
+ */
+export async function deleteIndustry(id: string): Promise<boolean> {
+  return deleteRecord("industries", id);
 }
 
 /* ------------------------------------------------------------------ */

@@ -20,6 +20,7 @@ export const UPLOAD_FOLDERS = [
   "floor-plans",
   "posters",
   "logos",
+  "industries",
 ] as const;
 
 const ADMIN_OBJECT_PATH = "/api/admin/object";

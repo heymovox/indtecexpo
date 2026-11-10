@@ -23,7 +23,7 @@ const ALLOWED: Record<string, string> = {
   "application/pdf": ".pdf",
 };
 
-const FOLDERS = ["media", "gallery", "floor-plans", "posters", "logos"] as const;
+const FOLDERS = ["media", "gallery", "floor-plans", "posters", "logos", "industries"] as const;
 
 function badRequest(message: string, status = 400): Response {
   return Response.json({ ok: false, message }, { status });

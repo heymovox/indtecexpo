@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
-import { industries, productCategories } from "@/data/industries";
+import { productCategories } from "@/data/industries";
+import { getPublicIndustries } from "@/lib/industries.server";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -15,7 +16,8 @@ export const metadata = buildMetadata({
     card: "industries",
 });
 
-export default function IndustriesPage() {
+export default async function IndustriesPage() {
+  const industryList = await getPublicIndustries();
   return (
     <>
       <PageHero
@@ -41,7 +43,7 @@ export default function IndustriesPage() {
         />
 
         <div className="grid gap-6 md:grid-cols-2">
-          {industries.map((industry) => (
+          {industryList.map((industry) => (
             <article
               key={industry.id}
               className="card card-hover group flex h-full flex-col overflow-hidden sm:flex-row"
