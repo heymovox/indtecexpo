@@ -6,7 +6,6 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading, Badge } from "@/components/ui/Section";
 import { EventCard } from "@/components/events/EventCard";
 import { contactConfig, siteConfig } from "@/config/site";
-import { seriesStats } from "@/data/events";
 import { getPublicEvents } from "@/data/events.server";
 import { faqsByGroup } from "@/data/faqs";
 import { whyVisitBenefits, visitorPrerequisites } from "@/data/exhibitors";
@@ -27,14 +26,20 @@ export default async function VisitorsPage() {
   const events = await getPublicEvents();
   const visitingFaqs = faqsByGroup("Visiting");
 
-  const attendanceStats = seriesStats;
+  const attendanceStats = [
+    { value: String(events.length), label: "Industrial Hubs" },
+    { value: "500+", label: "Exhibitors" },
+    { value: "800+", label: "Stalls" },
+    { value: "30,000+", label: "Industrial Visitors" },
+    { value: "50+", label: "Industrial Associations" },
+  ];
 
   return (
     <>
       <PageHero
         eyebrow="For Visitors"
         title="Where South India Comes to Source Technology"
-        description="INDTEC EXPO brings the factory floor to you — running machinery, new releases and the engineers behind them, across three industrial hubs. Trade entry is free when you pre-register."
+        description={`INDTEC EXPO brings the factory floor to you — running machinery, new releases and the engineers behind them, across ${events.length} industrial hubs. Trade entry is free when you pre-register.`}
         image="/images/hero/hero-register.svg"
         crumbs={[{ label: "Visitors" }]}
       >

@@ -585,7 +585,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         <SectionHeading
           eyebrow="Continue the Circuit"
           title="Other INDTEC EXPO Editions"
-          description="Two more industrial hubs, one exhibitor relationship. Compare the calendar and build a multi-city programme."
+          description={`${relatedEvents.length} more industrial hubs, one exhibitor relationship. Compare the calendar and build a multi-city programme.`}
           action={
             <Button href="/events" variant="outline" withArrow>
               All Events

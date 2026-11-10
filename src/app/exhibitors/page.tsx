@@ -5,7 +5,6 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { contactConfig } from "@/config/site";
-import { seriesStats } from "@/data/events";
 import { getPublicEvents } from "@/data/events.server";
 import { whyExhibitBenefits } from "@/data/exhibitors";
 import { faqsByGroup } from "@/data/faqs";
@@ -58,14 +57,20 @@ export default async function ExhibitorsPage() {
   const events = await getPublicEvents();
   const exhibitingFaqs = faqsByGroup("Exhibiting");
 
-  const audienceStats = seriesStats;
+  const audienceStats = [
+    { value: String(events.length), label: "Industrial Hubs" },
+    { value: "500+", label: "Exhibitors" },
+    { value: "800+", label: "Stalls" },
+    { value: "30,000+", label: "Industrial Visitors" },
+    { value: "50+", label: "Industrial Associations" },
+  ];
 
   return (
     <>
       <PageHero
         eyebrow="Exhibitor Programme"
         title="Put Your Products in Front of the Buyers Who Matter"
-        description="INDTEC EXPO connects machine tool, automation, electrical and engineering manufacturers with factory owners, procurement heads and channel partners across three South India industrial hubs — in person, over focused business days."
+        description={`INDTEC EXPO connects machine tool, automation, electrical and engineering manufacturers with factory owners, procurement heads and channel partners across ${events.length} South India industrial hubs — in person, over focused business days.`}
         image="/images/hero/hero-about.svg"
         crumbs={[{ label: "Exhibitors" }]}
       >

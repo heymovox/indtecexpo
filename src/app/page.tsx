@@ -112,9 +112,9 @@ export default async function HomePage() {
               </h1>
 
               <p className="mt-6 max-w-2xl text-base leading-relaxed text-steel-300 sm:text-lg">
-                Three strategic industrial hubs. One powerful business network.
-                Meet 500+ exhibitors, see live machinery and connect with the
-                buyers who move manufacturing forward.
+                {liveEventsCount} strategic industrial hubs. One powerful
+                business network. Meet 500+ exhibitors, see live machinery
+                and connect with the buyers who move manufacturing forward.
               </p>
 
               {/* Two equal columns on mobile so the CTAs sit on one row;
@@ -365,7 +365,7 @@ export default async function HomePage() {
 
             <ul className="grid gap-5 sm:grid-cols-2">
               {[
-                { icon: "/images/about/icons/factory.png", title: "Three Industrial Hubs", text: "Bengaluru, Coimbatore and Hosur editions across one focused season." },
+                { icon: "/images/about/icons/factory.png", title: `${liveEventsCount} Industrial Hubs`, text: "Bengaluru, Coimbatore and Hosur editions across one focused season." },
                 { icon: "/images/about/icons/decision-makers.png", title: "Decision-Maker Audience", text: "Factory owners, procurement heads, plant engineers and dealers." },
                 { icon: "/images/about/icons/technology.png", title: "Live Technology on Floor", text: "Running machinery, demonstrations and new product releases." },
                 { icon: "/images/about/icons/outcomes.png", title: "Structured B2B Outcomes", text: "Pre-scheduled buyer meetings, delegations and networking sessions." },

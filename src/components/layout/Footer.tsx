@@ -103,8 +103,8 @@ export function Footer({ events }: { events: ExpoEvent[] }) {
           <div className="sm:col-span-2 lg:col-span-1 xl:col-span-1">
             <FooterLogo />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-steel-400">
-              {siteConfig.tagline}. Three strategic industrial hubs. One
-              powerful business network for machine tools, automation and
+              {siteConfig.tagline}. {events.length} strategic industrial hubs.
+              One powerful business network for machine tools, automation and
               engineering technology.
             </p>
 

@@ -31,7 +31,7 @@ export default async function IndustriesPage() {
         <div className="flex flex-wrap gap-2">
           <Badge tone="outline">10 Sectors</Badge>
           <Badge tone="outline">{productCategories.length} Product Categories</Badge>
-          <Badge tone="outline">3 Industrial Hubs</Badge>
+          <Badge tone="outline">{industryList.length} Industrial Hubs</Badge>
         </div>
       </PageHero>
 

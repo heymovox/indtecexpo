@@ -53,7 +53,7 @@ export default async function AboutPage() {
   const events = await getPublicEvents();
 
   const seriesStats = [
-    { value: String(events.length), label: "Industrial Cities" },
+    { value: String(events.length), label: "Industrial Hubs" },
     { value: "10", label: "Sectors Covered" },
     { value: String(events.reduce((sum, e) => sum + e.days, 0)), label: "Business Days" },
     { value: "40+", label: "Product Categories" },
@@ -97,11 +97,12 @@ export default async function AboutPage() {
               </p>
               <p>
                 The {siteConfig.fullName} calendar was designed around the
-                geography of South Indian manufacturing: three industrial hubs,
-                each with a distinct buyer identity, reachable within a single
-                season. Exhibitors get repeated, structured access to the same
-                extended market. Visitors get a world-class technology floor
-                within driving distance of their plant.
+                geography of South Indian manufacturing:{" "}
+                {events.length} industrial hubs, each with a distinct buyer
+                identity, reachable within a single season. Exhibitors get
+                repeated, structured access to the same extended market.
+                Visitors get a world-class technology floor within driving
+                distance of their plant.
               </p>
             </div>
 

@@ -2,9 +2,10 @@ import Image from "next/image";
 import { Container } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { seriesStats } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { cn } from "@/lib/utils";
 
-export function ExhibitorCTA({
+export async function ExhibitorCTA({
   headline = "Powering Industries for a Stronger Tomorrow",
   supportingText = "Showcase your products. Connect with decision-makers. Generate business opportunities.",
   highlight = "Special Exhibitor Offers Available",
@@ -23,6 +24,11 @@ export function ExhibitorCTA({
   secondaryHref?: string;
   image?: string;
 }) {
+  const events = await getPublicEvents();
+  const stats = [
+    { value: String(events.length), label: "Industrial Hubs" },
+    ...seriesStats.slice(1),
+  ];
   return (
     <section className="relative isolate overflow-hidden bg-navy-950 text-white">
       <Image
@@ -70,7 +76,7 @@ export function ExhibitorCTA({
           </div>
 
           <ul className="grid gap-3 border-l border-white/10 pl-0 lg:pl-10">
-            {seriesStats.map(({ value, label }) => (
+            {stats.map(({ value, label }) => (
               <li
                 key={label}
                 className="flex items-baseline gap-4 border-b border-white/10 pb-3 last:border-0"

@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { StatStrip } from "@/components/ui/CTA";
-import { seriesStats } from "@/data/events";
+import { getPublicEvents } from "@/data/events.server";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -33,7 +33,15 @@ const clientValues: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-export default function ClientsPage() {
+export default async function ClientsPage() {
+  const events = await getPublicEvents();
+  const clientStats = [
+    { value: String(events.length), label: "Industrial Hubs" },
+    { value: "500+", label: "Exhibitors" },
+    { value: "800+", label: "Stalls" },
+    { value: "30,000+", label: "Industrial Visitors" },
+    { value: "50+", label: "Industrial Associations" },
+  ];
   return (
     <>
       <PageHero
@@ -133,7 +141,7 @@ export default function ClientsPage() {
               By the numbers
             </p>
             <StatStrip
-              items={seriesStats}
+              items={clientStats}
               columns="grid-cols-2 sm:grid-cols-3 lg:grid-cols-2"
             />
           </div>
