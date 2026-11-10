@@ -359,6 +359,15 @@ export async function mergeEventOverrides<T extends ExpoEvent>(
         ...event.venue,
         name: override.venueName || event.venue.name,
         address: override.venueAddress || event.venue.address,
+        locality: override.city || event.venue.locality,
+        city: override.city || event.venue.city,
+        state: override.state || event.venue.state,
+        mapUrl: override.city
+          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([override.venueName, override.venueAddress, override.city, override.state].filter(Boolean).join(" "))}`
+          : event.venue.mapUrl,
+        directionsUrl: override.city
+          ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([override.venueName, override.venueAddress, override.city, override.state].filter(Boolean).join(" "))}`
+          : event.venue.directionsUrl,
       },
     };
   });

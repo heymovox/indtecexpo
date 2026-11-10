@@ -74,6 +74,7 @@ export const revalidate = 60;
 export default async function HomePage() {
   const events = await getPublicEvents();
   const upcomingEvents = getUpcomingFrom(events, events.length);
+  const liveEventsCount = events.length;
   const featuredFaqs = faqs.filter((item) => item.group === "Exhibiting").slice(0, 5);
 
   return (
@@ -182,17 +183,22 @@ export default async function HomePage() {
               {/* Series stats as a single-line box */}
               <div className="mt-9 border border-white/12 bg-white/5 backdrop-blur-sm">
                 <div className="grid grid-cols-2 divide-white/10 sm:grid-cols-5 sm:divide-x">
-                  {seriesStats.map((stat, i) => (
+                {seriesStats.map((stat, i) => {
+                  // The first stat is no longer a fixed number: it reflects the
+                  // live published event count pulled from the dashboard DB.
+                  const isLiveCount = i === 0;
+                  return (
                     <div key={stat.label} className={`px-3 py-3 text-center ${i > 0 ? "border-l border-white/10" : ""} ${i > 1 ? "border-t border-white/10 sm:border-t-0" : ""}`}>
                       <div className="display tabular text-lg text-gold-500 sm:text-2xl">
-                        {stat.value}
+                        {isLiveCount ? String(liveEventsCount) : stat.value}
                       </div>
                       <div className="mt-1 text-[8px] font-semibold uppercase leading-tight tracking-[0.1em] text-steel-400 sm:text-[10px]">
-                        {stat.label}
+                        {isLiveCount ? "Live Events" : stat.label}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
               </div>
             </div>
 

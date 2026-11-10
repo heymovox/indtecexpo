@@ -8,8 +8,8 @@ export const siteConfig = {
     "INDTEC EXPO 2026–2027 is a three-city industrial machine tools and engineering technology trade fair across Bengaluru, Coimbatore and Hosur, connecting machine tool, automation and engineering manufacturers with buyers, dealers and decision-makers.",
   url: "https://www.indtecexpo.com",
   email: "info@indtecexpo.com",
-  exhibitorEmail: "exhibit@indtecexpo.com",
-  visitorEmail: "visit@indtecexpo.com",
+  exhibitorEmail: "info@indtecexpo.com",
+  visitorEmail: "indtecexpo@gmail.com",
   phoneNumbers: [
     "7406213220",
     "7406213221",
