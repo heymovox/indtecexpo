@@ -19,6 +19,7 @@ import type {
   LeadStage,
 } from "@/types/exhibitor";
 import type { ExpoEvent } from "@/types/event";
+import type { Industry } from "@/types/industry";
 import {
   isArticleCategory,
   type ArticleCategory,
@@ -820,7 +821,7 @@ export function applyIndustryOverrides(
         id: override.id,
         slug: override.slug,
         name: override.name as string,
-        shortName: override.shortName ?? override.name,
+        shortName: override.shortName ?? override.name ?? "",
         description: override.description ?? "",
         icon: override.icon ?? "factory",
         image: override.image ?? "",

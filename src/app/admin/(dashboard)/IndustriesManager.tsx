@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -120,8 +119,6 @@ export function IndustriesManager({ readOnly = false }: { readOnly?: boolean }) 
       });
     }
   }, [fetchIndustries]);
-
-  const sectorsInputRef = useRef<HTMLTextAreaElement>(null);
 
   function parseSectors(value: string): string[] {
     return value
@@ -347,10 +344,12 @@ export function IndustriesManager({ readOnly = false }: { readOnly?: boolean }) 
           <form onSubmit={(e) => save(editing, e)} className="space-y-4">
             <Field
               label="Slug"
+              htmlFor="industry-slug"
               hint="URL-friendly identifier, e.g. machine-tools-cnc"
               required
             >
               <Input
+                id="industry-slug"
                 value={editing.slug}
                 onChange={(e) =>
                   setEditing({
@@ -362,8 +361,9 @@ export function IndustriesManager({ readOnly = false }: { readOnly?: boolean }) 
               />
             </Field>
 
-            <Field label="Name" required>
+            <Field label="Name" htmlFor="industry-name" required>
               <Input
+                id="industry-name"
                 value={editing.name}
                 onChange={(e) =>
                   setEditing({ ...editing, name: e.target.value })}
@@ -371,8 +371,9 @@ export function IndustriesManager({ readOnly = false }: { readOnly?: boolean }) 
               />
             </Field>
 
-            <Field label="Short name (displayed on cards)">
+            <Field label="Short name (displayed on cards)" htmlFor="industry-shortname">
               <Input
+                id="industry-shortname"
                 value={editing.shortName}
                 onChange={(e) =>
                   setEditing({ ...editing, shortName: e.target.value })}
@@ -380,19 +381,20 @@ export function IndustriesManager({ readOnly = false }: { readOnly?: boolean }) 
               />
             </Field>
 
-            <Field label="Description">
+            <Field label="Description" htmlFor="industry-description">
               <Textarea
+                id="industry-description"
                 value={editing.description}
                 onChange={(e) =>
                   setEditing({ ...editing, description: e.target.value })}
                 rows={3}
                 disabled={saving}
-                ref={sectorsInputRef}
               />
             </Field>
 
-            <Field label="Icon name">
+            <Field label="Icon name" htmlFor="industry-icon">
               <Select
+                id="industry-icon"
                 value={editing.icon}
                 onChange={(e) =>
                   setEditing({ ...editing, icon: e.target.value })}
@@ -410,8 +412,9 @@ export function IndustriesManager({ readOnly = false }: { readOnly?: boolean }) 
               </p>
             </Field>
 
-            <Field label="Sectors (comma-separated)">
+            <Field label="Sectors (comma-separated)" htmlFor="industry-sectors">
               <Textarea
+                id="industry-sectors"
                 value={editing.sectors.join(", ")}
                 onChange={(e) =>
                   setEditing({
@@ -426,9 +429,10 @@ export function IndustriesManager({ readOnly = false }: { readOnly?: boolean }) 
               </p>
             </Field>
 
-            <Field label="Featured">
+            <Field label="Featured" htmlFor="industry-featured">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
+                  id="industry-featured"
                   type="checkbox"
                   checked={editing.featured}
                   onChange={(e) =>
