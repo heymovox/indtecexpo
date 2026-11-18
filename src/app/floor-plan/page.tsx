@@ -9,6 +9,8 @@ import {
   formatRupees,
   getStallPlan,
   listStallCodes,
+  REGULAR_STALL_SIZES,
+  SPONSORSHIP_STALLS,
 } from "@/data/floorPlans";
 import { buildMetadata } from "@/lib/seo";
 import { whatsappLinks } from "@/lib/whatsapp";
@@ -18,7 +20,7 @@ import { objectExists } from "@/lib/r2";
 export const metadata = buildMetadata({
   title: "Floor Plan & Stall Layout",
   description:
-    "View the INDTEC EXPO 2026–2027 floor plans for Bengaluru, Coimbatore and Hosur. Every stall position, its dimensions and the pricing for each edition.",
+    "View the INDTEC EXPO 2027 floor plans for Bengaluru, Coimbatore and Hosur. Every stall position, its dimensions and the pricing for each edition.",
   path: "/floor-plan",
     card: "floor-plan",
 });
@@ -214,17 +216,60 @@ export default async function FloorPlanPage() {
                 Stall Dimensions & Pricing
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-steel-600">
-                All configurations below are available for the {event.city}{" "}
-                edition. Customised inline and island layouts are quoted on
-                request.
+                Regular stall rates for the {event.city} edition. Customised
+                inline and island layouts are quoted on request.
               </p>
 
-              <div className="mt-5 overflow-x-auto border border-steel-200 bg-white">
+              <h4 className="mt-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-steel-500">
+                Regular Stall Prices (V, R, H &amp; Y only)
+              </h4>
+              <div className="mt-3 overflow-x-auto border border-steel-200 bg-white">
                 <table className="w-full min-w-[520px] border-collapse text-left text-sm">
                   <thead>
                     <tr className="bg-navy-900 text-white">
                       <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
-                        Configuration
+                        Size
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                        Fabricated @ ₹10,000/sqm
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                        Bare @ ₹9,000/sqm
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-steel-100">
+                    {REGULAR_STALL_SIZES.map((row) => (
+                      <tr key={row.label}>
+                        <td className="px-4 py-3.5">
+                          <span className="display-sm text-base text-navy-900">
+                            {row.label}
+                          </span>
+                          <span className="mt-0.5 block text-xs text-steel-500">
+                            {row.area} m²
+                          </span>
+                        </td>
+                        <td className="tabular px-4 py-3.5 font-semibold text-navy-800">
+                          {formatRupees(row.fabricated)}
+                        </td>
+                        <td className="tabular px-4 py-3.5 font-semibold text-navy-800">
+                          {formatRupees(row.bare)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <h4 className="mt-6 text-[11px] font-semibold uppercase tracking-[0.14em] text-steel-500">
+                Sponsorship
+              </h4>
+              <div className="mt-3 overflow-x-auto border border-steel-200 bg-white">
+                <table className="w-full min-w-[520px] border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="bg-navy-900 text-white">
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                        Tier
                       </th>
                       <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
                         Size
@@ -232,38 +277,21 @@ export default async function FloorPlanPage() {
                       <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
                         Price
                       </th>
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em]">
-                        Includes
-                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-steel-100">
-                    {event.stallOptions.map((option) => (
-                      <tr key={option.id} className="align-top">
+                    {SPONSORSHIP_STALLS.map((stall) => (
+                      <tr key={stall.name}>
                         <td className="px-4 py-3.5">
                           <span className="display-sm text-base text-navy-900">
-                            {option.name}
+                            {stall.name}
                           </span>
                         </td>
                         <td className="tabular px-4 py-3.5 text-steel-600">
-                          {option.size}
+                          {stall.size}
                         </td>
                         <td className="tabular px-4 py-3.5 font-semibold text-navy-800">
-                          {option.price}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <ul className="space-y-1 text-xs text-steel-600">
-                            {option.includes.map((item) => (
-                              <li key={item} className="flex items-start gap-1.5">
-                                <Icon
-                                  name="check"
-                                  size={13}
-                                  className="mt-0.5 shrink-0 text-success-500"
-                                />
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
+                          {stall.price}
                         </td>
                       </tr>
                     ))}

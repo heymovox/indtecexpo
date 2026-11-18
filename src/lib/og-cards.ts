@@ -20,7 +20,7 @@ export interface OgCardSpec {
 export const OG_CARDS = {
   brand: {
     eyebrow: "Invitation",
-    title: "INDTEC EXPO 2026-2027",
+    title: "INDTEC EXPO 2027",
     description:
       "India's leading B2B industrial machine tools, engineering and technology expo across Bengaluru, Coimbatore and Hosur.",
     chips: ["Bengaluru", "Coimbatore", "Hosur"],

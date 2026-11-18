@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Sponsors & Partners",
   description:
-    "Title sponsors, industry partners, media partners and technology partners of INDTEC EXPO 2026–2027. Explore partnership tiers and become an INDTEC EXPO partner.",
+    "Title sponsors, industry partners, media partners and technology partners of INDTEC EXPO 2027. Explore partnership tiers and become an INDTEC EXPO partner.",
   path: "/sponsors",
     card: "sponsors",
 });
@@ -68,7 +68,7 @@ export default async function SponsorsPage() {
       >
         <div className="flex flex-wrap gap-3">
           <Button
-            href={`mailto:${siteConfig.exhibitorEmail}?subject=${encodeURIComponent("Partnership enquiry — INDTEC EXPO 2026–2027")}`}
+            href={`mailto:${siteConfig.exhibitorEmail}?subject=${encodeURIComponent("Partnership enquiry — INDTEC EXPO 2027")}`}
             variant="primary"
             size="lg"
             withArrow
@@ -164,13 +164,13 @@ export default async function SponsorsPage() {
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-steel-300">
               Title, industry, media, technology and association partnership
-              slots are open for the 2026–2027 calendar. Write to us with your
+              slots are open for the 2027 calendar. Write to us with your
               preferred tier and editions — our team responds within one working
               day with the partnership deck and commercial terms.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button
-                href={`mailto:${siteConfig.exhibitorEmail}?subject=${encodeURIComponent("Partnership enquiry — INDTEC EXPO 2026–2027")}`}
+                href={`mailto:${siteConfig.exhibitorEmail}?subject=${encodeURIComponent("Partnership enquiry — INDTEC EXPO 2027")}`}
                 variant="primary"
                 size="lg"
                 withArrow

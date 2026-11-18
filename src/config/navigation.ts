@@ -29,7 +29,7 @@ export function eventsNavChildren(
       href: `/events/${event.slug}`,
       description: `${event.dateRangeShort} · ${event.venue.name}`,
     })),
-    { label: "All Events", href: "/events", description: "Full 2026–2027 calendar" },
+    { label: "All Events", href: "/events", description: "Full 2027 calendar" },
   ];
 }
 
@@ -57,7 +57,7 @@ export const mainNav: NavItem[] = [
         href: "/events/hosur",
         description: "12–15 Mar 2027 · Hills Exhibition Center",
       },
-      { label: "All Events", href: "/events", description: "Full 2026–2027 calendar" },
+      { label: "All Events", href: "/events", description: "Full 2027 calendar" },
     ],
   },
   {

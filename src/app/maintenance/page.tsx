@@ -99,11 +99,11 @@ export default async function MaintenancePage({
         <header className="flex flex-col items-center text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/brand/indtec-expo-2026-white.png"
+            src="/images/brand/indtec-logo-2027.png"
             alt={siteConfig.name}
             width={220}
-            height={48}
-            className="h-11 w-auto sm:h-14"
+            height={102}
+            className="h-11 w-auto [filter:brightness(0)_invert(1)] sm:h-14"
           />
 
           <span className="mt-8 inline-flex items-center gap-2 rounded-full border border-gold-300/30 bg-gold-300/10 px-3 py-1 text-[0.65rem] font-semibold tracking-[0.2em] text-gold-300 uppercase">

@@ -16,7 +16,7 @@ export function waLink(message: string): string {
 
 export const whatsappLinks = {
   general: waLink(
-    "Hello INDTEC EXPO, I would like to know more about the 2026–2027 editions.",
+    "Hello INDTEC EXPO, I would like to know more about the 2027 editions.",
   ),
   exhibitor: waLink(
     "Hello INDTEC EXPO, I would like to enquire about booking a stall.",

@@ -1,11 +1,11 @@
 export const siteConfig = {
   name: "INDTEC EXPO",
-  fullName: "INDTEC EXPO 2026–2027",
+  fullName: "INDTEC EXPO 2027",
   legalName: "INDTEC Expo",
   tagline:
     "Industrial Machine Tools and Engineering Technology Trade Fairs",
   shortDescription:
-    "INDTEC EXPO 2026–2027 is a three-city industrial machine tools and engineering technology trade fair across Bengaluru, Coimbatore and Hosur, connecting machine tool, automation and engineering manufacturers with buyers, dealers and decision-makers.",
+    "INDTEC EXPO 2027 is a three-city industrial machine tools and engineering technology trade fair across Bengaluru, Coimbatore and Hosur, connecting machine tool, automation and engineering manufacturers with buyers, dealers and decision-makers.",
   url: "https://www.indtecexpo.com",
   email: "info@indtecexpo.com",
   exhibitorEmail: "info@indtecexpo.com",

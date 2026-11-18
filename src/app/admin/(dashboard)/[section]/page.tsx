@@ -104,7 +104,7 @@ function SectionHeading({
         <p className="mt-2 max-w-2xl text-sm text-steel-600">{description}</p>
       </div>
       <span className="text-xs uppercase tracking-[0.14em] text-steel-500">
-        INDTEC EXPO 2026–2027
+        INDTEC EXPO 2027
       </span>
     </header>
   );

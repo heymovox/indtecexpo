@@ -11,9 +11,9 @@ import { faqsByGroup } from "@/data/faqs";
 import { faqJsonLd, JsonLd, buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Exhibitors | Exhibit at INDTEC EXPO 2026–2027",
+  title: "Exhibitors | Exhibit at INDTEC EXPO 2027",
   description:
-    "Exhibit at INDTEC EXPO 2026–2027 across Bengaluru, Coimbatore and Hosur. Stall configurations, four-step booking process, qualified industrial visitor profile and exhibitor FAQs.",
+    "Exhibit at INDTEC EXPO 2027 across Bengaluru, Coimbatore and Hosur. Stall configurations, four-step booking process, qualified industrial visitor profile and exhibitor FAQs.",
   path: "/exhibitors",
     card: "exhibitors",
   keywords: [

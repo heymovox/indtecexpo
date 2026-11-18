@@ -90,7 +90,7 @@ export function organizationJsonLd() {
     name: siteConfig.name,
     legalName: siteConfig.legalName,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/images/brand/indtec-expo-2026-colored.png"),
+    logo: absoluteUrl("/images/brand/indtec-logo-2027.png"),
     slogan: siteConfig.tagline,
     description: siteConfig.shortDescription,
     email: `mailto:${siteConfig.email}`,
@@ -178,7 +178,7 @@ export function collectionJsonLd(
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "INDTEC EXPO 2026–2027 Editions",
+    name: "INDTEC EXPO 2027 Editions",
     numberOfItems: events.length,
     itemListElement: events.map((event, index) => ({
       "@type": "ListItem",

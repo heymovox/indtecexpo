@@ -18,12 +18,15 @@ export function Logo({
       className={cn("relative block shrink-0", className)}
     >
       <Image
-        src={light ? "/images/brand/indtec-expo-2026-white.png" : "/images/brand/indtec-expo-2026-colored.png"}
+        src="/images/brand/indtec-logo-2027.png"
         alt="INDTEC EXPO"
-        width={985}
-        height={432}
+        width={978}
+        height={452}
         priority={priority}
-        className="h-[44px] w-auto sm:h-[52px]"
+        className={cn(
+          "h-[44px] w-auto sm:h-[52px]",
+          light && "[filter:brightness(0)_invert(1)]",
+        )}
         sizes="(max-width: 640px) 100px, 119px"
       />
     </Link>
@@ -38,11 +41,11 @@ export function FooterLogo({ className }: { className?: string }) {
       className={cn("block w-fit shrink-0", className)}
     >
       <Image
-        src="/images/brand/indtec-expo-2026-white.png"
-        alt="INDTEC EXPO 2026–2027"
-        width={985}
-        height={432}
-        className="h-[68px] w-auto sm:h-[80px]"
+        src="/images/brand/indtec-logo-2027.png"
+        alt="INDTEC EXPO"
+        width={978}
+        height={452}
+        className="h-[68px] w-auto [filter:brightness(0)_invert(1)] sm:h-[80px]"
         sizes="(max-width: 640px) 155px, 182px"
       />
     </Link>

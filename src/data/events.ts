@@ -27,7 +27,7 @@ export const events: ExpoEvent[] = [
     summary:
       "India's technology capital hosts the season opener of INDTEC EXPO, bringing together machine tool, automation and engineering buyers from across Karnataka and beyond.",
     description: [
-      "Bengaluru opens the INDTEC EXPO 2026–2027 calendar at KLE Ground, Rajajinagar — a well-connected venue at the centre of one of India's most dynamic industrial markets.",
+      "Bengaluru opens the INDTEC EXPO 2027 calendar at KLE Ground, Rajajinagar — a well-connected venue at the centre of one of India's most dynamic industrial markets.",
       "The edition is positioned as the Industrial Business Hub of the series, designed for exhibitors who want direct access to OEMs, tier-1 suppliers, engineering buyers, factory owners and procurement teams from Karnataka, Andhra Pradesh, Telangana and Kerala.",
       "Three focused business days combine a concentrated exhibition floor with scheduled buyer meetings, live machinery demonstrations and networking sessions engineered for serious B2B outcomes.",
     ],

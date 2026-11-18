@@ -4,7 +4,7 @@ export const mediaArticles: MediaArticle[] = [
   {
     slug: "indtec-expo-2026-2027-three-city-calendar-announced",
     title:
-      "INDTEC EXPO 2026–2027 three-city industrial calendar announced",
+      "INDTEC EXPO 2027 three-city industrial calendar announced",
     category: "Press Releases",
     date: "2026-08-18",
     dateLabel: "18 August 2026",
@@ -12,7 +12,7 @@ export const mediaArticles: MediaArticle[] = [
     excerpt:
       "Konnekt Globe confirms Bengaluru, Coimbatore and Hosur editions, extending INDTEC EXPO across South India's key industrial hubs.",
     body: [
-      "Konnekt Globe today announced the INDTEC EXPO 2026–2027 calendar, covering three strategic industrial hubs over a four-month window.",
+      "Konnekt Globe today announced the INDTEC EXPO 2027 calendar, covering three strategic industrial hubs over a four-month window.",
       "The series opens at KLE Ground, Rajajinagar, Bengaluru from 24–26 December 2026, followed by the Coimbatore edition at Codessia Road from 12–14 February 2027 and the four-day Hosur edition at Hills Exhibition Center from 12–15 March 2027.",
       "Each edition is positioned around a specific industrial identity — the Industrial Business Hub, the Manufacturing Hub and the Industrial Growth Corridor — giving exhibitors a differentiated route into three distinct buyer pools.",
       "Stall bookings for all three editions are now open. Exhibitors can submit an enquiry through the official website to receive availability and pricing within one working day.",

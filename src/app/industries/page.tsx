@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Industries We Serve",
   description:
-    "Explore the 10 industrial sectors at INDTEC EXPO 2026–2027 — machine tools, automation, Industry 4.0, electricals, instrumentation, material handling, components and more.",
+    "Explore the 10 industrial sectors at INDTEC EXPO 2027 — machine tools, automation, Industry 4.0, electricals, instrumentation, material handling, components and more.",
   path: "/industries",
     card: "industries",
 });
@@ -32,6 +32,14 @@ export default async function IndustriesPage() {
           <Badge tone="outline">10 Sectors</Badge>
           <Badge tone="outline">{productCategories.length} Product Categories</Badge>
           <Badge tone="outline">{industryList.length} Industrial Hubs</Badge>
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button href="/exhibitors/book-your-stall" variant="gold" size="lg">
+            Book a Stall
+          </Button>
+          <Button href="/floor-plan" variant="outline-light" size="lg">
+            View Floor Plan
+          </Button>
         </div>
       </PageHero>
 

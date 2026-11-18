@@ -212,7 +212,7 @@ export default async function HomePage() {
 
               <div className="flex items-center justify-between gap-3">
                 <span className="eyebrow eyebrow-light mb-0 text-[11px]">
-                  Three Editions · 2026–2027
+                  Three Editions · 2027
                 </span>
                 <span className="border border-success-500/45 bg-success-500/15 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-success-500">
                   Bookings Open
@@ -431,7 +431,7 @@ export default async function HomePage() {
       {/* ---------------------------------------------------------- */}
       <Section tone="light">
         <SectionHeading
-          eyebrow="2026–2027 Calendar"
+          eyebrow="2027 Calendar"
           title="Three Editions. One Industrial Network."
           description="Each INDTEC EXPO edition is positioned around a specific industrial identity, giving exhibitors a differentiated route into three distinct buyer pools."
           action={

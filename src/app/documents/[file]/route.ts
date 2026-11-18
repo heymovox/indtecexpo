@@ -11,7 +11,7 @@ async function buildLines(slug: string): Promise<PdfLine[] | null> {
   if (!event) return null;
 
   const lines: PdfLine[] = [
-    { text: "INDTEC EXPO 2026-2027", size: 20, bold: true, color: "navy" },
+    { text: "INDTEC EXPO 2027", size: 20, bold: true, color: "navy" },
     {
       text: `${event.city} Edition - ${event.positioning}`,
       size: 13,

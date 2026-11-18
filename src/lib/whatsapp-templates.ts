@@ -51,7 +51,7 @@ export const WHATSAPP_TEMPLATES: Record<
       "Please carry a photo ID. Entry is free for trade visitors.",
       "Reference the number above if you need to reach the visitor desk.",
       "",
-      "Konnekt Globe — INDTEC EXPO 2026-2027",
+      "Konnekt Globe — INDTEC EXPO 2027",
     ].join("\n"),
   },
   [WHATSAPP_TEMPLATE_NAMES.exhibitorReceipt]: {
@@ -70,7 +70,7 @@ export const WHATSAPP_TEMPLATES: Record<
       "Your stall preference is recorded, not held. The position is confirmed",
       "once you accept the proforma invoice.",
       "",
-      "Konnekt Globe — INDTEC EXPO 2026-2027",
+      "Konnekt Globe — INDTEC EXPO 2027",
     ].join("\n"),
   },
 };

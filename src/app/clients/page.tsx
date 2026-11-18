@@ -124,7 +124,7 @@ export default async function ClientsPage() {
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-steel-300">
               Stall bookings, sponsorship slots and partnership tiers are open
-              for the 2026–2027 calendar across Bengaluru, Coimbatore and Hosur.
+              for the 2027 calendar across Bengaluru, Coimbatore and Hosur.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button href="/exhibitors/book-your-stall" variant="primary" size="lg" withArrow>

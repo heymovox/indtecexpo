@@ -11,9 +11,9 @@ import { JsonLd, buildMetadata, collectionJsonLd } from "@/lib/seo";
 import type { StallOption } from "@/types/event";
 
 export const metadata = buildMetadata({
-  title: "Events | INDTEC EXPO 2026–2027 Industrial Expo Calendar",
+  title: "Events | INDTEC EXPO 2027 Industrial Expo Calendar",
   description:
-    "The complete INDTEC EXPO 2026–2027 calendar — Bengaluru, Coimbatore and Hosur. Compare dates, venues, positioning and stall pricing across three South India B2B industrial expos.",
+    "The complete INDTEC EXPO 2027 calendar — Bengaluru, Coimbatore and Hosur. Compare dates, venues, positioning and stall pricing across three South India B2B industrial expos.",
   path: "/events",
     card: "events",
   keywords: [
@@ -47,7 +47,7 @@ export default async function EventsPage() {
   return (
     <>
       <PageHero
-        eyebrow="2026–2027 Calendar"
+        eyebrow="2027 Calendar"
         title="Three Editions. One Industrial Network."
         description="INDTEC EXPO runs across South India's three most productive industrial belts — each edition positioned for a distinct buyer pool, each built for serious B2B outcomes."
         image="/images/hero/hero-industrial.svg"

@@ -63,7 +63,7 @@ export const faqs: FaqItem[] = [
     group: "Events",
     question: "Where and when is INDTEC EXPO held?",
     answer:
-      "INDTEC EXPO 2026–2027 runs across three industrial hubs: Bengaluru at KLE Ground (24–26 Dec 2026), Coimbatore at Codessia Road (12–14 Feb 2027) and Hosur at Hills Exhibition Center (12–15 Mar 2027).",
+      "INDTEC EXPO 2027 runs across three industrial hubs: Bengaluru at KLE Ground (24–26 Dec 2026), Coimbatore at Codessia Road (12–14 Feb 2027) and Hosur at Hills Exhibition Center (12–15 Mar 2027).",
   },
   {
     id: "faq-10",
@@ -111,7 +111,7 @@ export function withLiveCalendar(
     places.length > 1
       ? `${places.slice(0, -1).join(", ")} and ${places[places.length - 1]}`
       : places[0];
-  const answer = `INDTEC EXPO 2026–2027 runs across ${events.length} industrial hub${events.length === 1 ? "" : "s"}: ${list}.`;
+  const answer = `INDTEC EXPO 2027 runs across ${events.length} industrial hub${events.length === 1 ? "" : "s"}: ${list}.`;
 
   return items.map((item) => (item.id === "faq-9" ? { ...item, answer } : item));
 }

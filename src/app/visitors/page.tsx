@@ -15,7 +15,7 @@ import { whatsappLinks } from "@/lib/whatsapp";
 export const metadata = buildMetadata({
   title: "Why Visit",
   description:
-    "Free trade entry to INDTEC EXPO 2026–2027 — discover live machinery, meet 900+ exhibitors and connect with industrial decision-makers across Bengaluru, Coimbatore and Hosur.",
+    "Free trade entry to INDTEC EXPO 2027 — discover live machinery, meet 900+ exhibitors and connect with industrial decision-makers across Bengaluru, Coimbatore and Hosur.",
   path: "/visitors",
     card: "visitors",
 });
@@ -146,7 +146,7 @@ export default async function VisitorsPage() {
       {/* Expo calendar */}
       <Section tone="light" id="expos">
         <SectionHeading
-          eyebrow="2026–2027 Calendar"
+          eyebrow="2027 Calendar"
           title="Choose Your Expo"
           description="Three editions. Three distinct industrial buyer pools. Register for one — or plan a circuit across all three."
           action={

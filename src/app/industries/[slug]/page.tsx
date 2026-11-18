@@ -35,7 +35,7 @@ export async function generateMetadata({
   }
   return buildMetadata({
     title: `${industry.name} — Industry Sector`,
-    description: `${industry.description} Explore ${industry.name} exhibitors, product groups and editions at INDTEC EXPO 2026–2027.`,
+    description: `${industry.description} Explore ${industry.name} exhibitors, product groups and editions at INDTEC EXPO 2027.`,
     path: `/industries/${industry.slug}`,
     card: "industries",
     ogTitle: industry.name,

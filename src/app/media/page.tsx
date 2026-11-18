@@ -12,7 +12,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Media & Press",
   description:
-    "Press releases, expo updates and industry insights from INDTEC EXPO 2026–2027 — announcements, stall booking windows, association partnerships and South India manufacturing analysis.",
+    "Press releases, expo updates and industry insights from INDTEC EXPO 2027 — announcements, stall booking windows, association partnerships and South India manufacturing analysis.",
   path: "/media",
 });
 

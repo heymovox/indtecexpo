@@ -10,9 +10,9 @@ import type { StallOption } from "@/types/event";
 import { StallEnquiryForm } from "./StallEnquiryForm";
 
 export const metadata = buildMetadata({
-  title: "Book Your Stall | INDTEC EXPO 2026–2027 Exhibitor Enquiry",
+  title: "Book Your Stall | INDTEC EXPO 2027 Exhibitor Enquiry",
   description:
-    "Book your stall at INDTEC EXPO 2026–2027 — Bengaluru, Coimbatore or Hosur. Send your city, stall size and product category; receive availability, pricing and a proforma within one working day.",
+    "Book your stall at INDTEC EXPO 2027 — Bengaluru, Coimbatore or Hosur. Send your city, stall size and product category; receive availability, pricing and a proforma within one working day.",
   path: "/exhibitors/book-your-stall",
   keywords: [
     "book stall industrial expo",

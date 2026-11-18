@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
           </h1>
           <p className="mt-4 text-base leading-relaxed text-steel-300">
             Lead pipeline, stall bookings, visitor registrations and event
-            overrides for the 2026–2027 three-city expo series.
+            overrides for the 2027 three-city expo series.
           </p>
         </div>
         <p className="relative text-xs uppercase tracking-[0.18em] text-steel-500">

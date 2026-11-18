@@ -12,7 +12,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Why Exhibit | Exhibitor Benefits at INDTEC EXPO",
   description:
-    "A detailed look at the six exhibitor benefits at INDTEC EXPO 2026–2027 — decision-maker access, quality leads, channel networks, live product showcases, partnerships and brand strength across three cities.",
+    "A detailed look at the six exhibitor benefits at INDTEC EXPO 2027 — decision-maker access, quality leads, channel networks, live product showcases, partnerships and brand strength across three cities.",
   path: "/exhibitors/why-exhibit",
   keywords: [
     "why exhibit industrial expo",
@@ -338,7 +338,7 @@ export default async function WhyExhibitPage() {
       </Section>
 
       <ExhibitorCTA
-        headline="Special Exhibitor Offers for the 2026–2027 Season"
+        headline="Special Exhibitor Offers for the 2027 Season"
         supportingText="Early bookings, multi-city participation and association members unlock special offers. Send your enquiry and ask the team what applies to your company."
         secondaryLabel="Exhibitor Profile"
         secondaryHref="/exhibitors/exhibitor-profile"

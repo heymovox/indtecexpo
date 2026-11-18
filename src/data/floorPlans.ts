@@ -318,6 +318,52 @@ export const stallPlans: Record<string, StallPlan> = {
   hosur: hosurStallPlan,
 };
 
+/* ------------------------------------------------------------------ */
+/* Published stall pricing                                             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Regular stall pricing, shared by every edition.
+ *
+ * Rates are per square metre; the prices below are the rate multiplied by
+ * each available plot size. `V`, `R`, `H` and `Y` are the organiser's
+ * regular-stall codes — sponsorship plots (T and C) are sold as packages and
+ * are listed separately.
+ */
+export const REGULAR_STALL_RATE = {
+  fabricated: 10000,
+  bare: 9000,
+} as const;
+
+export interface RegularStallSize {
+  /** Plot dimensions as shown to visitors. */
+  label: string;
+  /** Area in square metres. */
+  area: number;
+  /** Fabricated (shell) price at ₹10,000 / m². */
+  fabricated: number;
+  /** Bare space price at ₹9,000 / m². */
+  bare: number;
+}
+
+export const REGULAR_STALL_SIZES: RegularStallSize[] = [
+  { label: "6 m × 6 m", area: 36, fabricated: 360000, bare: 324000 },
+  { label: "9 m × 3 m", area: 27, fabricated: 270000, bare: 243000 },
+  { label: "3 m × 6 m", area: 18, fabricated: 180000, bare: 162000 },
+  { label: "3 m × 3 m", area: 9, fabricated: 90000, bare: 81000 },
+];
+
+export interface SponsorshipStall {
+  name: string;
+  size: string;
+  price: string;
+}
+
+export const SPONSORSHIP_STALLS: SponsorshipStall[] = [
+  { name: "Title Sponsor", size: "6 m × 12 m", price: "₹25,00,000" },
+  { name: "Co-Sponsor", size: "6 m × 9 m", price: "₹15,00,000" },
+];
+
 export function getStallPlan(slug: string): StallPlan | null {
   return stallPlans[slug] ?? null;
 }

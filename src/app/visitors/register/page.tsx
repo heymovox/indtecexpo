@@ -11,7 +11,7 @@ import { VisitorRegistrationForm } from "./VisitorRegistrationForm";
 export const metadata = buildMetadata({
   title: "Register as Visitor",
   description:
-    "Register free for INDTEC EXPO 2026–2027 in Bengaluru, Coimbatore or Hosur. Get your trade visitor e-pass, skip the queue and access live machinery demos and the Industry 4.0 conference.",
+    "Register free for INDTEC EXPO 2027 in Bengaluru, Coimbatore or Hosur. Get your trade visitor e-pass, skip the queue and access live machinery demos and the Industry 4.0 conference.",
   path: "/visitors/register",
 });
 
