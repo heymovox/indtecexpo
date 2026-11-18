@@ -204,10 +204,10 @@ export default async function HomePage() {
 
             {/* All three editions as cards */}
             <aside className="order-1 min-w-0 lg:order-2">
-              {/* Mobile only: the floor imagery auto-advances above the cards. */}
+              {/* Floor imagery auto-advances above the edition cards. */}
               <HeroMediaSlider
                 slides={heroSlides}
-                className="mb-4 lg:hidden"
+                className="mb-4"
               />
 
               <div className="flex items-center justify-between gap-3">
