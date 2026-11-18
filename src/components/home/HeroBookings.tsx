@@ -56,7 +56,7 @@ export function HeroBookings({ bookings }: { bookings: RecentBooking[] }) {
       </div>
 
       <div
-        className="flex items-center gap-4 px-5 py-6 sm:gap-5 sm:px-6"
+        className="flex flex-col gap-4 px-5 py-6 sm:flex-row sm:items-center sm:gap-5 sm:px-6"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
@@ -73,18 +73,28 @@ export function HeroBookings({ bookings }: { bookings: RecentBooking[] }) {
                 {booking.company}
               </span>
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-steel-400 sm:text-sm">
-              Booked a {booking.stall} stall in {booking.city}
-              <span className="mx-2 text-steel-600">·</span>
-              {booking.ago}
+            <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-steel-400 sm:text-sm">
+              <Icon
+                name="stall"
+                size={14}
+                className="mt-0.5 shrink-0 text-brand-400"
+              />
+              <span>
+                Booked a {booking.stall} stall in {booking.city}
+                <span className="mx-2 text-steel-600">·</span>
+                {booking.ago}
+              </span>
             </p>
           </div>
         </div>
 
-        <div className="shrink-0">
+        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
           <span className="inline-flex items-center gap-1.5 border border-success-500/45 bg-success-500/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-success-500 sm:text-[11px]">
             <Icon name="check-circle" size={14} />
             Booked successfully
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-steel-500">
+            Verified
           </span>
         </div>
       </div>
