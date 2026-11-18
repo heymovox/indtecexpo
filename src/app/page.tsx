@@ -10,7 +10,9 @@ import { Section, SectionHeading } from "@/components/ui/Section";
 import { VideoEmbed } from "@/components/ui/VideoEmbed";
 import { EventCard } from "@/components/events/EventCard";
 import { AutoSlideList } from "@/components/home/AutoSlideList";
+import { HeroBookings } from "@/components/home/HeroBookings";
 import { HeroMediaSlider } from "@/components/home/HeroMediaSlider";
+import { recentBookings } from "@/data/bookings";
 import { contactConfig, siteConfig } from "@/config/site";
 import { industries } from "@/data/industries";
 import {
@@ -95,6 +97,9 @@ export default async function HomePage() {
         <div className="hatch-surface absolute inset-x-0 bottom-0 h-1.5" />
 
         <div className="mx-auto w-full max-w-[1280px] px-5 py-16 sm:px-8 sm:py-20 lg:py-28">
+          {/* Recent bookings — social proof, loops through confirmed exhibitors */}
+          <HeroBookings bookings={recentBookings} />
+
           {/* On mobile the editions lead, so a visitor sees what/when/where
               before the brand statement. Desktop keeps copy left, cards right.
               `items-start` (not `items-end`) because the card column is much
