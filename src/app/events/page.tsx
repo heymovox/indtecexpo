@@ -48,7 +48,7 @@ export default async function EventsPage() {
     <>
       <PageHero
         eyebrow="2027 Calendar"
-        title="Three Editions. One Industrial Network."
+        title={`${events.length} ${events.length === 1 ? "Edition" : "Editions"}. One Industrial Network.`}
         description="INDTEC EXPO runs across South India's three most productive industrial belts — each edition positioned for a distinct buyer pool, each built for serious B2B outcomes."
         image="/images/hero/hero-industrial.svg"
       >

@@ -324,7 +324,7 @@ export default async function ExhibitorsPage() {
       </Section>
 
       <ExhibitorCTA
-        headline="Three Cities. One Exhibitor Relationship."
+        headline={`${events.length} ${events.length === 1 ? "City" : "Cities"}. One Exhibitor Relationship.`}
         supportingText="Book Bengaluru, Coimbatore and Hosur through a single enquiry and our team will structure availability, pricing and package benefits for the full season."
         secondaryLabel="Why Exhibit"
         secondaryHref="/exhibitors/why-exhibit"

@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { renderOgCard } from "@/lib/og-card";
 import { OG_CARD_BY_SLUG } from "@/lib/og-cards";
+import { getPublicEvents } from "@/data/events.server";
 
 /**
  * Social share image endpoint.
@@ -20,15 +21,27 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
 
-  const preset =
-    OG_CARD_BY_SLUG[params.get("card") ?? ""] ?? OG_CARD_BY_SLUG.brand;
+  const cardName = params.get("card") ?? "";
+  const preset = OG_CARD_BY_SLUG[cardName] ?? OG_CARD_BY_SLUG.brand;
+
+  // The events card headline follows the live edition count rather than the
+  // static "Three Cities, Three Editions" preset.
+  let presetTitle = preset.title;
+  if (cardName === "events") {
+    try {
+      const events = await getPublicEvents();
+      presetTitle = `${events.length} ${events.length === 1 ? "City" : "Cities"}, ${events.length} ${events.length === 1 ? "Edition" : "Editions"}`;
+    } catch {
+      /* fall back to the preset title if the database is unreachable */
+    }
+  }
 
   const chipsRaw = params.get("chips");
   const chips = chipsRaw
     ? chipsRaw.split(",").map((chip) => chip.trim()).filter(Boolean).slice(0, 4)
     : preset.chips;
 
-  const title = (params.get("title") ?? preset.title).slice(0, 90);
+  const title = (params.get("title") ?? presetTitle).slice(0, 90);
   const description = (params.get("description") ?? preset.description)?.slice(0, 240);
   const eyebrow = (params.get("eyebrow") ?? preset.eyebrow)?.slice(0, 40);
 

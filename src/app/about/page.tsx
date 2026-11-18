@@ -236,7 +236,7 @@ export default async function AboutPage() {
       <Section tone="light">
         <SectionHeading
           eyebrow="The Series"
-          title="Three Editions. Three Industrial Identities."
+          title={`${events.length} ${events.length === 1 ? "Edition" : "Editions"}. Three Industrial Identities.`}
           description="One calendar, purpose-built around how South Indian industry actually buys."
           action={
             <Button href="/events" variant="outline" withArrow>
