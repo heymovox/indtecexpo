@@ -4,8 +4,8 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Section } from "@/components/ui/Section";
 import { contactConfig } from "@/config/site";
 import { getPublicEvents } from "@/data/events.server";
+import { lowestStallPrice } from "@/data/floorPlans";
 import { buildMetadata } from "@/lib/seo";
-import type { StallOption } from "@/types/event";
 
 import { StallEnquiryForm } from "./StallEnquiryForm";
 
@@ -21,15 +21,6 @@ export const metadata = buildMetadata({
     "machine tools expo stall enquiry",
   ],
 });
-
-const lowestPrice = (options: StallOption[]): string => {
-  const value = (price: string) => {
-    const digits = price.replace(/[^\d]/g, "");
-    return digits ? Number(digits) : Number.MAX_SAFE_INTEGER;
-  };
-  const sorted = [...options].sort((a, b) => value(a.price) - value(b.price));
-  return sorted[0]?.price ?? "On request";
-};
 
 const nextSteps = [
   {
@@ -218,7 +209,7 @@ export default async function BookYourStallPage({
                       </span>
                     </div>
                     <span className="tabular shrink-0 text-sm font-semibold text-brand-700">
-                      {lowestPrice(event.stallOptions)}
+                      {lowestStallPrice()}
                     </span>
                   </li>
                 ))}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { lowestStallPrice } from "@/data/floorPlans";
 import { absoluteUrl } from "@/lib/utils";
 import type { ExpoEvent } from "@/types/event";
 
@@ -163,7 +164,7 @@ export function eventJsonLd(event: ExpoEvent) {
       "@type": "Offer",
       name: "Exhibitor Stall Booking",
       priceCurrency: "INR",
-      price: event.stallOptions[0]?.price ?? "0",
+      price: lowestStallPrice(),
       availability: "https://schema.org/InStock",
       url: absoluteUrl("/exhibitors/book-your-stall"),
       validFrom: new Date().toISOString(),

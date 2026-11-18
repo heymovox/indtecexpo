@@ -13,7 +13,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Badge, Section, SectionHeading } from "@/components/ui/Section";
 import { eventSlugs } from "@/data/events";
 import { getPublicEvent, getPublicEvents } from "@/data/events.server";
-import { getStallPlan } from "@/data/floorPlans";
+import { getStallPlan, lowestStallPrice } from "@/data/floorPlans";
 import {
   JsonLd,
   breadcrumbJsonLd,
@@ -210,7 +210,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                   From
                 </dt>
                 <dd className="display-sm tabular text-sm text-brand-700">
-                  {event.stallOptions[0]?.price ?? "On request"}
+                  {lowestStallPrice()}
                 </dd>
               </div>
             </dl>

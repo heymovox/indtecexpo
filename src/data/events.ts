@@ -1,4 +1,5 @@
 import type { ExpoEvent } from "@/types/event";
+import { STALL_PRICE_OPTIONS } from "@/data/floorPlans";
 
 /**
  * Headline figures for the expo series, shared by the home hero, the
@@ -85,29 +86,7 @@ export const events: ExpoEvent[] = [
       "Delegations from Karnataka, Telangana & Andhra Pradesh",
       "Conference sessions on Industry 4.0 and smart manufacturing",
     ],
-    stallOptions: [
-      {
-        id: "b-shell",
-        name: "Shell Space Scheme",
-        size: "Per sq m",
-        price: "₹10,000 / m²",
-        includes: ["Shell structure", "Carpet", "Fascia name panel", "Table & chairs", "Power point"],
-      },
-      {
-        id: "b-bare",
-        name: "Bare Space Scheme",
-        size: "Per sq m",
-        price: "₹9,000 / m²",
-        includes: ["Space only", "Common area maintenance", "Exhibitor passes"],
-      },
-      {
-        id: "b-custom",
-        name: "Custom / Island",
-        size: "On request",
-        price: "On request",
-        includes: ["Bespoke layout", "Corner & island options", "Priority allocation"],
-      },
-    ],
+    stallOptions: STALL_PRICE_OPTIONS,
     sponsorship: [
       { name: "Title Sponsor", code: "T", price: "₹20 lakh" },
       { name: "Co Sponsor", code: "C", price: "₹10 lakh" },
@@ -211,29 +190,7 @@ export const events: ExpoEvent[] = [
       "Auto component & pump sector buyer delegations",
       "Networking sessions with regional trade associations",
     ],
-    stallOptions: [
-      {
-        id: "c-shell",
-        name: "Shell Space Scheme",
-        size: "Per sq m",
-        price: "₹10,000 / m²",
-        includes: ["Shell structure", "Carpet", "Fascia name panel", "Table & chairs", "Power point"],
-      },
-      {
-        id: "c-bare",
-        name: "Bare Space Scheme",
-        size: "Per sq m",
-        price: "₹9,000 / m²",
-        includes: ["Space only", "Common area maintenance", "Exhibitor passes"],
-      },
-      {
-        id: "c-custom",
-        name: "Custom / Island",
-        size: "On request",
-        price: "On request",
-        includes: ["Bespoke layout", "Corner & island options", "Priority allocation"],
-      },
-    ],
+    stallOptions: STALL_PRICE_OPTIONS,
     sponsorship: [
       { name: "Title Sponsor", code: "T", price: "₹25 lakh" },
       { name: "Co Sponsor", code: "C", price: "₹15 lakh" },
@@ -336,29 +293,7 @@ export const events: ExpoEvent[] = [
       "Extended showcase window for live equipment",
       "Corridor industry delegation programme",
     ],
-    stallOptions: [
-      {
-        id: "h-shell",
-        name: "Shell Space Scheme",
-        size: "Per sq m",
-        price: "₹8,000 / m²",
-        includes: ["Shell structure", "Carpet", "Fascia name panel", "Table & chairs", "Power point"],
-      },
-      {
-        id: "h-bare",
-        name: "Bare Space Scheme",
-        size: "Per sq m",
-        price: "₹7,000 / m²",
-        includes: ["Space only", "Common area maintenance", "Exhibitor passes"],
-      },
-      {
-        id: "h-custom",
-        name: "Custom / Island",
-        size: "On request",
-        price: "On request",
-        includes: ["Bespoke layout", "Corner & island options", "Priority allocation"],
-      },
-    ],
+    stallOptions: STALL_PRICE_OPTIONS,
     sponsorship: [
       { name: "Title Sponsor", code: "T", price: "₹15 lakh" },
       { name: "Co Sponsor", code: "C", price: "₹10 lakh" },

@@ -10,6 +10,8 @@
  * reference them verbatim.
  */
 
+import type { StallOption } from "@/types/event";
+
 export interface StallTypeSpec {
   /** Organiser code prefix, e.g. "B" in "B42". */
   code: string;
@@ -363,6 +365,64 @@ export const SPONSORSHIP_STALLS: SponsorshipStall[] = [
   { name: "Title Sponsor", size: "6 m × 12 m", price: "₹25,00,000" },
   { name: "Co-Sponsor", size: "6 m × 9 m", price: "₹15,00,000" },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Canonical stall price list                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The one stall price list, shared by the floor-plan page and every other
+ * surface that quotes a stall (booking page, event cards, enquiry form, PDF
+ * and JSON-LD). Derived from REGULAR_STALL_SIZES and SPONSORSHIP_STALLS so
+ * the numbers cannot drift between pages.
+ */
+export const STALL_PRICE_OPTIONS: StallOption[] = [
+  ...REGULAR_STALL_SIZES.flatMap((size): StallOption[] => [
+    {
+      id: `fabricated-${size.label}`,
+      name: `Fabricated ${size.label}`,
+      size: `${size.label} · ${size.area} m²`,
+      price: formatRupees(size.fabricated),
+      includes: [
+        "Shell structure",
+        "Carpet",
+        "Fascia name panel",
+        "Table & chairs",
+        "Power point",
+      ],
+    },
+    {
+      id: `bare-${size.label}`,
+      name: `Bare ${size.label}`,
+      size: `${size.label} · ${size.area} m²`,
+      price: formatRupees(size.bare),
+      includes: [
+        "Space only",
+        "Common area maintenance",
+        "Exhibitor passes",
+      ],
+    },
+  ]),
+  ...SPONSORSHIP_STALLS.map((stall, index): StallOption => ({
+    id: `sponsorship-${index}`,
+    name: stall.name,
+    size: stall.size,
+    price: stall.price,
+    includes: ["Premium positioning", "Branding", "Delegate engagement"],
+  })),
+];
+
+/** Lowest published stall price — used by the "Stall Prices From" labels. */
+export function lowestStallPrice(): string {
+  const value = (price: string) => {
+    const digits = price.replace(/[^\d]/g, "");
+    return digits ? Number(digits) : Number.MAX_SAFE_INTEGER;
+  };
+  return STALL_PRICE_OPTIONS.reduce(
+    (min, option) => (value(option.price) < value(min) ? option.price : min),
+    STALL_PRICE_OPTIONS[0]?.price ?? "On request",
+  );
+}
 
 export function getStallPlan(slug: string): StallPlan | null {
   return stallPlans[slug] ?? null;
